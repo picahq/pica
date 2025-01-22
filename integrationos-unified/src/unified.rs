@@ -349,24 +349,27 @@ impl UnifiedDestination {
 
                                 tracing::debug!("Code for mapping crud request ready for unified destination. Code: {code}, Namespace: {namespace}");
 
-                                let payload = prepare_crud_mapping(params, &config)?;
+                                let payload = prepare_crud_mapping(params, &config, id.as_ref())?;
+
+                                tracing::debug!("Request crud prepared for unified destination. RequestCrud: {:?}", payload);
 
                                 let params: RequestCrud = jsruntime.run(&payload, &namespace).await?;
-                                let params: RequestCrud = params.extend_body(body)
-                                    .add_path_param(ID_KEY.to_string(), id.as_ref().map(|id| id.to_string()));
+                                let params: RequestCrud = params.extend_body(body);
 
                                 Ok(params)
                             }
                         }
                     })).await;
 
-                tracing::info!("Request crud prepared for unified destination. RequestCrud: {:?}", request_crud);
+                tracing::debug!("Request crud prepared for unified destination. RequestCrud: {:?}", request_crud);
 
                 let params: RequestCrud = request_crud.unwrap_or(Ok(default_params))?;
                 let secret: Value = extend_secret(secret, params.get_path_params());
 
                 let body: Option<Value> = insert_body_into_path_object(&config, params.get_body());
                 let params: RequestCrud = params.set_body(body);
+
+                tracing::debug!("Request crud prepared for unified destination. RequestCrud: {:?}", params);
 
                 let response: reqwest::Response = self.execute_model_definition_from_request(&config, &params, &secret).timed(|_, duration| {
                     metadata.latency(duration.as_millis() as i32);
@@ -953,6 +956,7 @@ fn insert_action_id(secret: Value, id: Option<&Arc<str>>) -> Value {
 fn prepare_crud_mapping(
     params: RequestCrud,
     config: &ConnectionModelDefinition,
+    id: Option<&Arc<str>>,
 ) -> Result<RequestCrud, IntegrationOSError> {
     // Remove passthroughForward query param and add user-defined + connection-specific query params
     let (params, removed) = params.remove_query_params(PASSTHROUGH_PARAMS);
@@ -992,5 +996,7 @@ fn prepare_crud_mapping(
         .transpose()?
         .unwrap_or_default();
 
-    Ok(params.extend_header(custom_headers))
+    Ok(params
+        .extend_header(custom_headers)
+        .add_path_param(ID_KEY.to_string(), id.as_ref().map(|id| id.to_string())))
 }

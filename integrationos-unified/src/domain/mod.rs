@@ -91,8 +91,15 @@ impl RequestCrud {
     }
 
     pub fn add_path_param(mut self, key: String, value: Option<String>) -> Self {
-        if let (Some(path_params), Some(value)) = (self.path_params.as_mut(), value) {
-            path_params.insert(key, value);
+        if let Some(value) = value {
+            match self.path_params {
+                Some(path_params) => {
+                    let mut path_params = path_params;
+                    path_params.insert(key, value);
+                    self.path_params = Some(path_params);
+                }
+                None => self.path_params = Some(HashMap::from([(key, value)])),
+            }
         }
         self
     }
