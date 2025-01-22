@@ -330,12 +330,12 @@ impl UnifiedDestination {
 
                 let body = params.get_body();
                 let body = match cms.mapping.as_ref().map(|m| m.from_common_model.as_str()) {
-                    Some(code) => {
+                    Some(code) if body.is_some() => {
                         let namespace = schema_namespace.clone() + "_mapFromCommonModel";
 
                         jsruntime.create("mapFromCommonModel", &namespace, code)?.run::<Option<&Value>, Option<Value>>(&body, &namespace).await?.map(|v| v.drop_nulls())
                     }
-                    None => body.cloned()
+                    _   => body.cloned()
                 };
 
                 let default_params = params.clone();
@@ -346,7 +346,8 @@ impl UnifiedDestination {
                             Some(code) => {
                                 let namespace = crud_namespace.clone() + "_mapFromCrudRequest";
                                 let jsruntime = jsruntime.create("mapCrudRequest", &namespace, &code)?;
-                                tracing::info!("Code for mapping crud request ready for unified destination. Code: {code}, Namespace: {namespace}");
+
+                                tracing::debug!("Code for mapping crud request ready for unified destination. Code: {code}, Namespace: {namespace}");
 
                                 let payload = prepare_crud_mapping(params, &config)?;
 
@@ -377,9 +378,9 @@ impl UnifiedDestination {
                 tracing::info!("Received response for unified destination. Status: {:?}", response.status());
 
                 let error_for_status = if response.status().is_client_error() || response.status().is_server_error() {
-                    Ok(())
+                    Err(InternalError::invalid_argument(&format!("Invalid response status: {}", response.status()), None))
                 } else {
-                    Err(InternalError::invalid_argument(&format!("Invalid response status: {}", status), None))
+                    Ok(())
                 };
 
                 let body: Result<Value, IntegrationOSError> = response.json().await.map_err(|e| {
@@ -406,13 +407,15 @@ impl UnifiedDestination {
                     Ok(_) => body.ok(),
                 };
 
-                tracing::info!("Final mapped body for unified destination ready. Destination: {:?}, MappedBody: {body:?}", key);
+                tracing::debug!("Final mapped body for unified destination ready. Destination: {:?}, MappedBody: {body:?}", key);
 
                 let passthrough: Option<Value> = if is_passthrough { body.clone() } else { None };
                 let pagination: Option<Value> = match &config.action_name {
                     CrudAction::GetMany => {
-                        match cms.mapping.as_ref().map(|m| m.from_common_model.as_str()) {
+                        match config.mapping.as_ref().and_then(|m| m.to_common_model.as_ref()) {
                             Some(code) => {
+                                tracing::debug!("Code for mapping crud request ready for unified destination. Code: {code}, Namespace: {crud_namespace}");
+
                                 let namespace = crud_namespace.clone() + "_mapToCrudRequest";
                                 let jsruntime: JSRuntimeImpl = jsruntime.create("mapCrudRequest", &namespace, code).inspect_err(|e| {
                                     error!("Failed to create request crud mapping script for connection model. ID: {}, Error: {}", config.id, e);

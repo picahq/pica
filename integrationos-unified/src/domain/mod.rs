@@ -149,6 +149,7 @@ impl ResponseCrud {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Builder)]
 #[builder(setter(into), build_fn(error = "IntegrationOSError"))]
+#[serde(rename_all = "camelCase")]
 pub struct UnifiedMetadata {
     timestamp: i64,
     platform_rate_limit_remaining: i32,
