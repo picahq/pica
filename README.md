@@ -26,6 +26,14 @@
 
 Build, deploy, and scale your AI agents with ease. With full access to [100+ APIs and tools](https://www.picaos.com/community/connectors).
 
+Pica makes it simple to build and manage AI agents with four key products:
+1. **OneTool**: Connect agents to over 100 APIs and tools with a single SDK.
+2. **AuthKit**: Securely manage authentication for tool integration.
+3. **Agent**: Create flexible agents that adapt to your needs (coming soon).
+4. **AgentFlow**: Enable agents to collaborate and manage tasks automatically (coming soon).
+
+Pica also provides full logging and action traceability, giving developers complete visibility into their agents’ decisions and activities.Our tools simplify building and running AI agents so developers can focus on results.
+
 ## Getting started
 
 ```bash
@@ -88,7 +96,7 @@ app.post("/api/ai", async (req, res) => {
     });
 
     res.setHeader("Content-Type", "application/json");
-    
+
     res.status(200).json({ text });
   } catch (error) {
     console.error("Error processing AI request:", error);
@@ -159,7 +167,7 @@ pica start
 
 ```Shell
 # To start the docker containers
-pica start 
+pica start
 Enter the IOS Crypto Secret (32 characters long): xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Do you want to seed? (Y/N) y
 ```
