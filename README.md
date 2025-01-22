@@ -31,6 +31,7 @@ Pica makes it simple to build and manage AI agents with four key products:
 2. **AuthKit**: Securely manage authentication for tool integration.
 3. **Agent**: Create flexible agents that adapt to your needs (coming soon).
 4. **AgentFlow**: Enable agents to collaborate and manage tasks automatically (coming soon).
+
 Pica also provides full logging and action traceability, giving developers complete visibility into their agents’ decisions and activities.Our tools simplify building and running AI agents so developers can focus on results.
 
 ## Getting started
