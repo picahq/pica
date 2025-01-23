@@ -64,7 +64,7 @@ pub struct CreateRequest {
     pub settings: Settings,
     pub paths: Paths,
     pub test_connection: Option<Id>,
-    pub test_delay_in_millis: Option<i64>,
+    pub test_delay_in_millis: Option<i16>,
     pub active: bool,
     #[serde(default)]
     pub markdown: Option<String>,

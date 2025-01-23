@@ -119,16 +119,20 @@ async fn test_connection(
         }
 
         if let Some(delay) = connection_config.test_delay_in_millis {
-            let delay = u64::try_from(delay).map_err(|e| {
-                error!("Error converting test_delay_in_millis to u64: {:?}", e);
+            if delay < 0 {
+                tracing::warn!("test_delay_in_millis is negative, skipping delay");
+            } else {
+                let delay = u16::try_from(delay).map_err(|e| {
+                    error!("Error converting test_delay_in_millis to u64: {:?}", e);
 
-                InternalError::serialize_error(
-                    "Unable to convert test_delay_in_millis to u64",
-                    None,
-                )
-            })?;
+                    InternalError::serialize_error(
+                        "Unable to convert test_delay_in_millis to u64",
+                        None,
+                    )
+                })?;
 
-            tokio::time::sleep(Duration::from_millis(delay)).await
+                tokio::time::sleep(Duration::from_millis(delay.into())).await
+            }
         }
 
         let res = state

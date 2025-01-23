@@ -28,7 +28,7 @@ pub struct ConnectionDefinition {
     pub hidden: bool,
     pub test_connection: Option<Id>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub test_delay_in_millis: Option<i64>,
+    pub test_delay_in_millis: Option<i16>,
     #[serde(flatten, default)]
     pub record_metadata: RecordMetadata,
 }
