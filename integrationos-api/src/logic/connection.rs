@@ -118,6 +118,23 @@ async fn test_connection(
             .await;
         }
 
+        if let Some(delay) = connection_config.test_delay_in_millis {
+            if delay < 0 {
+                tracing::warn!("test_delay_in_millis is negative, skipping delay");
+            } else {
+                let delay = u16::try_from(delay).map_err(|e| {
+                    error!("Error converting test_delay_in_millis to u64: {:?}", e);
+
+                    InternalError::serialize_error(
+                        "Unable to convert test_delay_in_millis to u64",
+                        None,
+                    )
+                })?;
+
+                tokio::time::sleep(Duration::from_millis(delay.into())).await
+            }
+        }
+
         let res = state
             .extractor_caller
             .execute_model_definition(
@@ -138,30 +155,8 @@ async fn test_connection(
 }
 
 impl PublicExt<Connection> for CreateConnectionPayload {
-    fn public(input: Connection) -> Value {
-        SanitizedConnection {
-            id: input.id,
-            platform_version: input.platform_version,
-            connection_definition_id: input.connection_definition_id,
-            r#type: input.r#type,
-            key: input.key,
-            group: input.group,
-            name: input.name,
-            environment: input.environment,
-            platform: input.platform,
-            secrets_service_id: input.secrets_service_id,
-            event_access_id: input.event_access_id,
-            identity: input.identity,
-            identity_type: input.identity_type,
-            settings: input.settings,
-            throughput: input.throughput,
-            ownership: input.ownership,
-            error: input.error,
-            has_error: input.has_error,
-            oauth: input.oauth,
-            record_metadata: input.record_metadata,
-        }
-        .to_value()
+    fn public(conn: Connection) -> Value {
+        Into::<SanitizedConnection>::into(conn).to_value()
     }
 }
 
@@ -303,7 +298,7 @@ pub async fn create_connection(
             error!("Error creating secret for connection: {:?}", e);
         })?;
 
-    let connection = Connection {
+    let conn = Connection {
         id: connection_id,
         platform_version: connection_config.clone().platform_version,
         connection_definition_id: payload.connection_definition_id,
@@ -333,34 +328,13 @@ pub async fn create_connection(
     state
         .app_stores
         .connection
-        .create_one(&connection)
+        .create_one(&conn)
         .await
         .inspect_err(|e| {
             error!("Error creating connection: {:?}", e);
         })?;
 
-    Ok(Json(SanitizedConnection {
-        id: connection.id,
-        platform_version: connection.platform_version,
-        connection_definition_id: connection.connection_definition_id,
-        r#type: connection.r#type,
-        key: connection.key,
-        group: connection.group,
-        name: connection.name,
-        environment: connection.environment,
-        platform: connection.platform,
-        secrets_service_id: connection.secrets_service_id,
-        event_access_id: connection.event_access_id,
-        identity: connection.identity,
-        identity_type: connection.identity_type,
-        settings: connection.settings,
-        throughput: connection.throughput,
-        ownership: connection.ownership,
-        has_error: connection.has_error,
-        error: connection.error,
-        oauth: connection.oauth,
-        record_metadata: connection.record_metadata,
-    }))
+    Ok(Json(conn.into()))
 }
 
 async fn generate_k8s_specs_and_secret(

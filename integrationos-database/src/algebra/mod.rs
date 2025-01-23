@@ -24,7 +24,7 @@ pub async fn on_error_callback(
             None,
         ))?;
 
-    let path = format!("{base_path}/v1/database-connection-lost/{connection_id}");
+    let path = format!("{base_path}/v1/event-callbacks/database-connection-lost/{connection_id}");
 
     let authorization = Claims::from_secret(jwt_secret.as_str())?;
     let payload = ConnectionLostReason {
