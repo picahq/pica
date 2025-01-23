@@ -1,28 +1,26 @@
-version: "3.8"
-
 services:
   migrate-before:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.11.0
+    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.29.1
     command: npm run run-migrations::before
     environment:
-      - MONGO_URI=mongodb://integrationos:${MONGO_PASSWORD}@mongo:27017/events-service?authSource=admin
+      - MONGO_URI=mongodb://pica:${MONGO_PASSWORD}@mongo:27017/events-service?authSource=admin
       - MONGO_DB_NAME=events-service
 
   migrate-after:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.11.0
+    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.29.1
     command: npm run run-migrations::after
     environment:
-      - MONGO_URI=mongodb://integrationos:${MONGO_PASSWORD}@mongo:27017/events-service?authSource=admin
+      - MONGO_URI=mongodb://pica:${MONGO_PASSWORD}@mongo:27017/events-service?authSource=admin
       - MONGO_DB_NAME=events-service
 
   seed-data:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/seed-data:1.11.0
+    image: us-docker.pkg.dev/integrationos/docker-oss/seed-data:1.29.1
     restart: "no"
     environment:
       - MONGO_HOST=mongo
       - MONGO_DATABASE=events-service
-      - MONGO_USERNAME=integrationos
+      - MONGO_USERNAME=pica
       - MONGO_PASSWORD=${MONGO_PASSWORD}
