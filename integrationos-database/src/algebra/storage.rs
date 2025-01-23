@@ -34,7 +34,16 @@ impl Storage for PostgresDatabaseConnection {
     }
 
     async fn probe(&self) -> Result<bool, IntegrationOSError> {
-        self.execute_raw("SELECT 1").await.map(|_| true)
+        let result = self.execute_raw("SELECT 1").await.map(|_| true);
+
+        if result == Ok(true) {
+            result
+        } else {
+            Err(ApplicationError::bad_request(
+                "Failed to probe database",
+                None,
+            ))
+        }
     }
 }
 

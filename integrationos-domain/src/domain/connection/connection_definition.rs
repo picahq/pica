@@ -1,5 +1,5 @@
 use super::{api_model_config::AuthMethod, ConnectionType};
-use crate::id::{prefix::IdPrefix, Id};
+use crate::id::Id;
 use crate::prelude::shared::{record_metadata::RecordMetadata, settings::Settings};
 use serde::{Deserialize, Serialize};
 use strum::{self, AsRefStr, Display};
@@ -27,6 +27,8 @@ pub struct ConnectionDefinition {
     pub settings: Settings,
     pub hidden: bool,
     pub test_connection: Option<Id>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub test_delay_in_millis: Option<u64>,
     #[serde(flatten, default)]
     pub record_metadata: RecordMetadata,
 }
@@ -83,66 +85,6 @@ pub struct ModelSorting {
 }
 
 impl ConnectionDefinition {
-    pub fn new(
-        name: String,
-        description: String,
-        platform: String,
-        platform_version: String,
-        category: String,
-        image: String,
-        tags: Vec<String>,
-    ) -> Self {
-        let key = format!("api::{}::{}", platform, platform_version);
-
-        Self {
-            id: Id::now(IdPrefix::ConnectionDefinition),
-            platform_version,
-            platform: platform.clone(),
-            r#type: ConnectionDefinitionType::Api,
-            status: ConnectionStatus::Beta,
-            name: name.clone(),
-            key,
-            frontend: Frontend {
-                spec: Spec {
-                    title: name.clone(),
-                    description: description.clone(),
-                    platform,
-                    category,
-                    image,
-                    tags,
-                    helper_link: None,
-                    markdown: None,
-                },
-                connection_form: ConnectionForm {
-                    name,
-                    description,
-                    form_data: vec![],
-                },
-            },
-            test_connection: None,
-            auth_secrets: vec![],
-            auth_method: None,
-            multi_env: false,
-            paths: Paths {
-                id: None,
-                event: None,
-                payload: None,
-                timestamp: None,
-                secret: None,
-                signature: None,
-                cursor: None,
-            },
-            settings: Settings {
-                parse_webhook_body: false,
-                show_secret: false,
-                allow_custom_events: false,
-                oauth: false,
-            },
-            hidden: true,
-            record_metadata: RecordMetadata::default(),
-        }
-    }
-
     pub fn to_connection_type(&self) -> super::ConnectionType {
         match self.r#type {
             ConnectionDefinitionType::Api => ConnectionType::Api {},

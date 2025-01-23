@@ -112,6 +112,33 @@ pub struct SanitizedConnection {
     pub record_metadata: RecordMetadata,
 }
 
+impl From<Connection> for SanitizedConnection {
+    fn from(conn: Connection) -> Self {
+        Self {
+            id: conn.id,
+            platform_version: conn.platform_version,
+            connection_definition_id: conn.connection_definition_id,
+            r#type: conn.r#type,
+            key: conn.key,
+            group: conn.group,
+            name: conn.name,
+            environment: conn.environment,
+            platform: conn.platform,
+            secrets_service_id: conn.secrets_service_id,
+            event_access_id: conn.event_access_id,
+            identity: conn.identity,
+            identity_type: conn.identity_type,
+            settings: conn.settings,
+            throughput: conn.throughput,
+            ownership: conn.ownership,
+            oauth: conn.oauth,
+            has_error: conn.has_error,
+            error: conn.error,
+            record_metadata: conn.record_metadata,
+        }
+    }
+}
+
 impl SanitizedConnection {
     pub fn to_value(&self) -> Value {
         serde_json::to_value(self).unwrap_or(Value::Null)

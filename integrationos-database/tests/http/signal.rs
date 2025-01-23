@@ -20,7 +20,7 @@ async fn test_kill_signal() -> Result<Unit, IntegrationOSError> {
         .create_async()
         .await;
 
-    let path = format!("/v1/database-connection-lost/{connection_id}");
+    let path = format!("/v1/event-callbacks/database-connection-lost/{connection_id}");
     let body = ConnectionLostReason {
         reason: "Deserialization error: Failed to deserialize secret: error decoding response body"
             .to_string(),

@@ -64,6 +64,7 @@ pub struct CreateRequest {
     pub settings: Settings,
     pub paths: Paths,
     pub test_connection: Option<Id>,
+    pub test_delay_in_millis: Option<u64>,
     pub active: bool,
     #[serde(default)]
     pub markdown: Option<String>,
@@ -358,6 +359,7 @@ impl RequestExt for CreateRequest {
             paths: self.paths.clone(),
             settings: self.settings.clone(),
             hidden: false,
+            test_delay_in_millis: self.test_delay_in_millis,
             record_metadata: RecordMetadata::default(),
         };
 
