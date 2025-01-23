@@ -275,6 +275,7 @@ fn test_json_connection_definition() {
             oauth: false,
         },
         hidden: true,
+        test_delay_in_millis: None,
         test_connection: Some(Id::test(IdPrefix::Connection)),
         record_metadata: RecordMetadata::test(),
     };

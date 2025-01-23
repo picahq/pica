@@ -1,4 +1,4 @@
-use super::{on_error_callback, storage::Storage};
+use super::storage::Storage;
 use crate::{
     domain::postgres::PostgresDatabaseConnection,
     server::{AppState, Server},
@@ -23,14 +23,7 @@ pub struct DatabaseInitializer;
 #[async_trait]
 impl Initializer for DatabaseInitializer {
     async fn init(config: &DatabasePodConfig) -> Result<Server, anyhow::Error> {
-        let server = start(config).await;
-
-        if let Err(e) = server {
-            on_error_callback(&e, config, None).await?;
-            return Err(e);
-        }
-
-        server
+        start(config).await
     }
 }
 

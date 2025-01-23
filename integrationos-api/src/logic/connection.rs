@@ -118,6 +118,10 @@ async fn test_connection(
             .await;
         }
 
+        if let Some(delay) = connection_config.test_delay_in_millis {
+            tokio::time::sleep(Duration::from_millis(delay)).await
+        }
+
         let res = state
             .extractor_caller
             .execute_model_definition(
