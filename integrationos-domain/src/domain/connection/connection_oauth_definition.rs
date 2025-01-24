@@ -3,7 +3,7 @@ use crate::{
     environment::Environment,
     id::Id,
     prelude::{ownership::Ownership, shared::record_metadata::RecordMetadata},
-    Feature, Hook,
+    Feature,
 };
 use bson::doc;
 use serde::{Deserialize, Serialize};
@@ -22,8 +22,6 @@ pub struct ConnectionOAuthDefinition {
     pub frontend: Frontend,
     #[serde(default, skip_serializing_if = "<&bool>::not")]
     pub is_full_template_enabled: bool,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub hooks: Option<Hook>,
     #[serde(flatten, default)]
     pub record_metadata: RecordMetadata,
 }

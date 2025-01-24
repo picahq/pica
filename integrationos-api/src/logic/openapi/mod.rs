@@ -120,31 +120,6 @@ pub async fn refresh_openapi(
     )))
 }
 
-pub async fn get_openapi_yaml(
-    state: State<Arc<AppState>>,
-) -> Result<Json<Vec<u8>>, IntegrationOSError> {
-    let spec = get_openapi(state).await;
-
-    match spec {
-        Ok(Json(spec)) => {
-            let try_yaml: serde_yaml::Value = serde_yaml::to_value(spec).map_err(|e| {
-                error!("Could not serialize openapi schema to yaml: {:?}", e);
-
-                InternalError::io_err("Could not serialize openapi schema to yaml", None)
-            })?;
-
-            let text = serde_yaml::to_string(&try_yaml).map_err(|e| {
-                error!("Could not serialize openapi schema to yaml: {:?}", e);
-
-                InternalError::io_err("Could not serialize openapi schema to yaml", None)
-            })?;
-
-            Ok(Json(text.into_bytes()))
-        }
-        Err(e) => Err(e),
-    }
-}
-
 pub async fn get_openapi(
     state: State<Arc<AppState>>,
 ) -> Result<Json<OpenApiSchema>, IntegrationOSError> {

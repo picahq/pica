@@ -5,8 +5,6 @@ members = [
     "integrationos-archiver", 
     "integrationos-cache",
     "integrationos-domain",
-    "integrationos-event",
-    "integrationos-gateway",
     "integrationos-database",
     "integrationos-unified",
     "integrationos-watchdog"

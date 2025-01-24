@@ -1,5 +1,3 @@
-pub mod cursor;
-
 use bson::doc;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};

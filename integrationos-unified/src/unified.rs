@@ -3,7 +3,7 @@ use crate::{
     algebra::jsruntime::JSRuntimeImpl,
     client::CallerClient,
     domain::{RequestCrud, ResponseCrud, UnifiedMetadata, UnifiedMetadataBuilder},
-    utility::{match_route, template_route},
+    helper::{match_route, template_route},
 };
 use crate::{
     BODY_KEY, COUNT_KEY, ID_KEY, LIMIT_KEY, META_KEY, MODIFY_TOKEN_KEY, PAGE_SIZE_KEY,

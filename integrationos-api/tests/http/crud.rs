@@ -1,5 +1,4 @@
 use crate::context::TestServer;
-use crate::worker::gateway::TestGateway;
 use fake::{Fake, Faker};
 use http::{Method, StatusCode};
 use integrationos_api::logic::{common_model, ReadResponse};
@@ -17,32 +16,6 @@ use integrationos_domain::{
 };
 use serde_json::{json, Value};
 use std::{collections::HashMap, ops::Deref};
-
-#[tokio::test]
-async fn test_get_events() {
-    let server = TestServer::new(None).await;
-
-    let gateway = TestGateway::new(&server.config).await;
-
-    let payload = json!({"foo":"bar"});
-
-    let event_response = gateway
-        .emit_event(&server.live_key, "name", &payload)
-        .await
-        .unwrap();
-    assert_eq!(event_response.code, StatusCode::OK);
-
-    let res = server
-        .send_request::<Value, Value>("v1/events", Method::GET, Some(&server.live_key), None)
-        .await
-        .unwrap();
-
-    assert_eq!(res.code, StatusCode::OK);
-    let res: ReadResponse<Value> = serde_json::from_value(res.data).unwrap();
-    let array = res.rows;
-    assert_eq!(array.len(), 1);
-    assert_eq!(array[0]["body"], payload.to_string());
-}
 
 #[tokio::test]
 async fn test_get_expanded_common_model() {

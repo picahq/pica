@@ -1,22 +1,16 @@
-pub mod duplicates;
 pub mod emitted_events;
 pub mod event_access;
-pub mod event_response;
 pub mod event_state;
-pub mod event_with_context;
 pub mod hashes;
 
-use chrono::{DateTime, SubsecRound, Utc};
-use http::HeaderMap;
-use serde::{Deserialize, Serialize};
-
-use crate::id::{prefix::IdPrefix, Id};
-
 use self::{
-    duplicates::Duplicates,
     event_state::EventState,
     hashes::{HashValue, Hashes},
 };
+use crate::id::{prefix::IdPrefix, Id};
+use chrono::{DateTime, SubsecRound, Utc};
+use http::HeaderMap;
+use serde::{Deserialize, Serialize};
 
 use super::{
     access_key::{encrypted_access_key::EncryptedAccessKey, AccessKey},
@@ -47,8 +41,6 @@ pub struct Event {
     pub ownership: Ownership,
     pub hashes: [HashValue; 3],
     pub payload_byte_length: usize,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub duplicates: Option<Duplicates>,
     #[serde(flatten, default)]
     pub record_metadata: RecordMetadata,
 }
@@ -75,8 +67,6 @@ pub struct PublicEvent {
     pub ownership: Ownership,
     pub hashes: [HashValue; 3],
     pub payload_byte_length: usize,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub duplicates: Option<Duplicates>,
     #[serde(flatten, default)]
     pub record_metadata: RecordMetadata,
 }
@@ -114,11 +104,6 @@ impl Event {
             key,
         };
         Self::new_with_timestamp_and_ids(fields)
-    }
-
-    pub fn add_duplicates(mut self, duplicates: Duplicates) -> Self {
-        self.duplicates = Some(duplicates);
-        self
     }
 
     fn new_with_timestamp_and_ids(fields: IntermediateEventFields<'_>) -> Self {
@@ -161,7 +146,6 @@ impl Event {
             ownership,
             hashes,
             payload_byte_length,
-            duplicates: None,
             record_metadata: Default::default(),
         }
     }
@@ -183,7 +167,6 @@ impl Event {
             ownership: self.ownership.clone(),
             hashes: self.hashes,
             payload_byte_length: self.payload_byte_length,
-            duplicates: self.duplicates.clone(),
             record_metadata: self.record_metadata.clone(),
         }
     }

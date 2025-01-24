@@ -1,8 +1,6 @@
-use std::sync::Arc;
-
-use serde::{Deserialize, Serialize};
-
 use crate::prelude::connection::connection_model_definition::CrudAction;
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[cfg_attr(feature = "dummy", derive(fake::Dummy))]

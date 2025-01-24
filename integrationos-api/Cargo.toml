@@ -49,6 +49,4 @@ validator.workspace = true
 
 [dev-dependencies]
 testcontainers-modules = { workspace = true, features = ["mongo", "redis"] }
-integrationos-event = { path = "../integrationos-event" }
-integrationos-gateway = { path = "../integrationos-gateway" }
 mockito.workspace = true

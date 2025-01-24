@@ -5,8 +5,7 @@ use crate::{
         connection_model_schema::{
             public_get_connection_model_schema, PublicGetConnectionModelSchema,
         },
-        event_access, events, metrics, oauth, passthrough, pipeline, secrets, transactions,
-        unified, vault_connection,
+        event_access, events, metrics, oauth, passthrough, secrets, unified, vault_connection,
     },
     middleware::{
         header_auth,
@@ -40,9 +39,7 @@ pub async fn get_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
         .nest("/metrics", metrics::get_router())
         .nest("/oauth", oauth::get_router())
         .nest("/passthrough", passthrough::get_router())
-        .nest("/pipelines", pipeline::get_router())
         .nest("/secrets", secrets::get_router())
-        .nest("/transactions", transactions::get_router())
         .nest("/unified", unified::get_router())
         .nest("/vault/connections", vault_connection::get_router())
         .route(

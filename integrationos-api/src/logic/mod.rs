@@ -35,14 +35,11 @@ pub mod metrics;
 pub mod oauth;
 pub mod openapi;
 pub mod passthrough;
-pub mod pipeline;
 pub mod platform;
 pub mod platform_page;
 pub mod schema_generator;
 pub mod secrets;
-pub mod transactions;
 pub mod unified;
-pub mod utility;
 pub mod vault_connection;
 
 const INTEGRATION_OS_PASSTHROUGH_HEADER: &str = "x-pica-passthrough";

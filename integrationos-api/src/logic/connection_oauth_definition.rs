@@ -128,7 +128,6 @@ impl RequestExt for CreateRequest {
                 separator: self.separator.clone(),
             },
             record_metadata: Default::default(),
-            hooks: Default::default(),
         })
     }
 

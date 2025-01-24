@@ -1,10 +1,11 @@
 use crate::{
+    helper,
     logic::{
         common_enum, common_model,
         connection_definition::{self, GetPublicConnectionDetailsRequest},
         connection_model_schema, connection_oauth_definition,
         event_access::create_event_access_for_new_user,
-        openapi, read, schema_generator, utility,
+        openapi, read, schema_generator,
     },
     middleware::jwt_auth::{self, JwtState},
     server::AppState,
@@ -67,10 +68,8 @@ pub fn get_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
                 jwt_auth::jwt_auth_middleware,
             )),
         )
-        .route("/generate-id/:prefix", get(utility::generate_id))
+        .route("/generate-id/:prefix", get(helper::generate_id))
         .route("/openapi", get(openapi::get_openapi))
-        .route("/openapi/yaml", get(openapi::get_openapi_yaml))
-        .route("/version", get(utility::get_version))
         .layer(from_fn(log_request_middleware))
         .layer(TraceLayer::new_for_http())
 }

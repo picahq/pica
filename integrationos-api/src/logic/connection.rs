@@ -34,7 +34,6 @@ use k8s_openapi::{
     apimachinery::pkg::util::intstr::IntOrString,
 };
 use mongodb::bson::doc;
-use mongodb::bson::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
@@ -649,36 +648,6 @@ pub async fn delete_connection(
         }
         _ => (),
     }
-
-    let partial_cursor_key = format!("{}::{}::{}", access.ownership.id, id, connection.args.key);
-
-    let mongo_regex = Regex {
-        pattern: format!("^{}::", partial_cursor_key.replace('.', "\\.")),
-        options: "i".to_string(),
-    };
-
-    // Delete cursors by adding "deleted/" to the key
-    state
-        .app_stores
-        .cursors
-        .update_many_with_aggregation_pipeline(
-            doc! {
-                "key": mongo_regex
-            },
-            &Vec::from([doc! {
-                "$set": {
-                    "key": {
-                        "$concat": ["deleted/", "$key"]
-                    }
-                }
-            }]),
-        )
-        .await
-        .map_err(|e| {
-            error!("Error deleting cursors for connection {:?}: {:?}", id, e);
-
-            e
-        })?;
 
     Ok(Json(ServerResponse::new(
         "connection",

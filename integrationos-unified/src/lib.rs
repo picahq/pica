@@ -1,8 +1,8 @@
 pub mod algebra;
 pub mod client;
 pub mod domain;
+pub mod helper;
 pub mod unified;
-pub mod utility;
 
 pub const ID_KEY: &str = "id";
 pub const BODY_KEY: &str = "body";

@@ -17,15 +17,12 @@ use integrationos_domain::{
     connection_model_definition::ConnectionModelDefinition,
     connection_model_schema::{ConnectionModelSchema, PublicConnectionModelSchema},
     connection_oauth_definition::{ConnectionOAuthDefinition, Settings},
-    cursor::Cursor,
     event_access::EventAccess,
     page::PlatformPage,
     secret::Secret,
     secrets::SecretServiceProvider,
-    stage::Stage,
     user::UserClient,
-    Connection, Event, GoogleKms, IOSKms, Pipeline, PlatformData, PublicConnection, SecretExt,
-    Store, Transaction,
+    Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
 };
 use integrationos_unified::unified::{UnifiedCacheTTLs, UnifiedDestination};
 use mongodb::{options::UpdateOptions, Client, Database};
@@ -41,7 +38,6 @@ pub struct AppStores {
     pub common_model: MongoStore<CommonModel>,
     pub connection: MongoStore<Connection>,
     pub connection_config: MongoStore<ConnectionDefinition>,
-    pub cursors: MongoStore<Cursor>,
     pub db: Database,
     pub event: MongoStore<Event>,
     pub event_access: MongoStore<EventAccess>,
@@ -49,7 +45,6 @@ pub struct AppStores {
     pub model_config: MongoStore<ConnectionModelDefinition>,
     pub model_schema: MongoStore<ConnectionModelSchema>,
     pub oauth_config: MongoStore<ConnectionOAuthDefinition>,
-    pub pipeline: MongoStore<Pipeline>,
     pub platform: MongoStore<PlatformData>,
     pub platform_page: MongoStore<PlatformPage>,
     pub public_connection: MongoStore<PublicConnection>,
@@ -57,8 +52,6 @@ pub struct AppStores {
     pub public_model_schema: MongoStore<PublicConnectionModelSchema>,
     pub secrets: MongoStore<Secret>,
     pub settings: MongoStore<Settings>,
-    pub stages: MongoStore<Stage>,
-    pub transactions: MongoStore<Transaction>,
 }
 
 #[derive(Clone)]
@@ -110,12 +103,8 @@ impl Server {
             MongoStore::new(&db, &Store::PublicConnectionDetails).await?;
         let settings = MongoStore::new(&db, &Store::Settings).await?;
         let connection_config = MongoStore::new(&db, &Store::ConnectionDefinitions).await?;
-        let pipeline = MongoStore::new(&db, &Store::Pipelines).await?;
         let event_access = MongoStore::new(&db, &Store::EventAccess).await?;
         let event = MongoStore::new(&db, &Store::Events).await?;
-        let transactions = MongoStore::new(&db, &Store::Transactions).await?;
-        let cursors = MongoStore::new(&db, &Store::Cursors).await?;
-        let stages = MongoStore::new(&db, &Store::Stages).await?;
         let clients = MongoStore::new(&db, &Store::Clients).await?;
         let secrets_store = MongoStore::<Secret>::new(&db, &Store::Secrets).await?;
 
@@ -162,12 +151,8 @@ impl Server {
             public_connection,
             public_connection_details,
             connection_config,
-            pipeline,
             event_access,
             event,
-            transactions,
-            cursors,
-            stages,
             clients,
         };
 
