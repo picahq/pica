@@ -6,13 +6,13 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+"
     paths:
       - .github/workflows/build-api.yaml
-      - "integrationos-api/**"
-      - "integrationos-cache/**"
-      - "integrationos-domain/**"
-      - "integrationos-unified/**"
+      - "core-api/**"
+      - "core-cache/**"
+      - "core-domain/**"
+      - "core-unified/**"
       - Cargo.lock
       - Dockerfile.common
-      - integrationos-api/Dockerfile
+      - core-api/Dockerfile
 
 env:
   docker_image_tag: ${{ github.ref == 'refs/heads/main' && github.sha || github.ref_name }}
@@ -32,7 +32,7 @@ jobs:
           image: "us-docker.pkg.dev/integrationos/docker-oss/api:${{ env.docker_image_tag }}"
           service_account: github-actions@integrationos.iam.gserviceaccount.com
           workload_identity_provider: projects/356173785332/locations/global/workloadIdentityPools/github-actions/providers/github-actions
-          file: integrationos-api/Dockerfile
+          file: core-api/Dockerfile
           context: .
           build-args: |
-            "EXECUTABLE=integrationos-api"
+            "EXECUTABLE=core-api"
