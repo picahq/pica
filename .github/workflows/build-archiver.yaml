@@ -6,11 +6,11 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+"
     paths:
       - .github/workflows/build-archiver.yaml
-      - "integrationos-domain/**"
-      - "integrationos-archiver/**"
+      - "core-domain/**"
+      - "core-archiver/**"
       - Cargo.lock
       - Dockerfile.common
-      - integrationos-archiver/Dockerfile
+      - core-archiver/Dockerfile
 
 env:
   docker_image_tag: ${{ github.ref == 'refs/heads/main' && github.sha || github.ref_name }}
@@ -31,7 +31,7 @@ jobs:
           image: "us-docker.pkg.dev/integrationos/docker-oss/archiver:${{ env.docker_image_tag }}"
           service_account: github-actions@integrationos.iam.gserviceaccount.com
           workload_identity_provider: projects/356173785332/locations/global/workloadIdentityPools/github-actions/providers/github-actions
-          file: integrationos-archiver/Dockerfile
+          file: core-archiver/Dockerfile
           context: .
           build-args: |
-            "EXECUTABLE=integrationos-archiver"
+            "EXECUTABLE=core-archiver"
