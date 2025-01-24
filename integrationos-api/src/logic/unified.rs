@@ -11,7 +11,7 @@ use convert_case::{Case, Casing};
 use http::{HeaderMap, HeaderName};
 use integrationos_domain::{
     connection_model_definition::CrudAction,
-    constant::{INTEGRATION_OS_PASSTHROUGH_HEADER, PASSWORD_LENGTH},
+    constant::{PICA_PASSTHROUGH_HEADER, PASSWORD_LENGTH},
     destination::Action,
     encrypted_access_key::EncryptedAccessKey,
     event_access::EventAccess,
@@ -289,7 +289,7 @@ pub async fn process_request(
         .iter()
         .map(|(key, value)| {
             (
-                HeaderName::try_from(format!("{INTEGRATION_OS_PASSTHROUGH_HEADER}-{key}")).unwrap(),
+                HeaderName::try_from(format!("{PICA_PASSTHROUGH_HEADER}-{key}")).unwrap(),
                 value.clone(),
             )
         })

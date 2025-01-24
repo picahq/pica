@@ -9,7 +9,7 @@ use axum::{
 use http::{header::CONTENT_LENGTH, HeaderMap, HeaderName, Method, Uri};
 use hyper::body::Bytes;
 use integrationos_domain::{
-    constant::INTEGRATION_OS_PASSTHROUGH_HEADER,
+    constant::PICA_PASSTHROUGH_HEADER,
     ApplicationError, InternalError,
     {
         destination::{Action, Destination},
@@ -94,7 +94,7 @@ pub async fn passthrough_request(
             }
             _ => {
                 if let Ok(header_name) =
-                    HeaderName::try_from(format!("{INTEGRATION_OS_PASSTHROUGH_HEADER}-{key}"))
+                    HeaderName::try_from(format!("{PICA_PASSTHROUGH_HEADER}-{key}"))
                 {
                     headers.insert(header_name, value.clone());
                 };

@@ -1,8 +1,8 @@
 use axum::extract::Query;
 use http::HeaderMap;
 use integrationos_domain::{
-    event_access::EventAccess, DELETED_STR, DUAL_ENVIRONMENT_HEADER, ENVIRONMENT_STR, LIMIT_STR,
-    OWNERSHIP_STR, SKIP_STR,
+    event_access::EventAccess, DELETED_FILTER, DUAL_ENVIRONMENT_HEADER, ENVIRONMENT_FILTER, LIMIT_FILTER,
+    OWNERSHIP_FILTER, SKIP_FILTER,
 };
 use mongodb::bson::{doc, Document};
 use std::{collections::BTreeMap, sync::Arc};
@@ -25,9 +25,9 @@ pub fn shape_mongo_filter(
 
     if let Some(q) = query {
         for (key, value) in q.0.iter() {
-            if key == LIMIT_STR {
+            if key == LIMIT_FILTER {
                 limit = value.parse().unwrap_or(20);
-            } else if key == SKIP_STR {
+            } else if key == SKIP_FILTER {
                 skip = value.parse().unwrap_or(0);
             } else {
                 match value.as_str() {
@@ -39,22 +39,22 @@ pub fn shape_mongo_filter(
         }
     }
 
-    filter.insert(DELETED_STR, false);
+    filter.insert(DELETED_FILTER, false);
 
     if event_access.is_some() {
         filter.insert(
-            OWNERSHIP_STR,
+            OWNERSHIP_FILTER,
             event_access.as_ref().unwrap().ownership.id.to_string(),
         );
         filter.insert(
-            ENVIRONMENT_STR,
+            ENVIRONMENT_FILTER,
             event_access.as_ref().unwrap().environment.to_string(),
         );
 
         if let Some(headers) = headers {
             if let Some(show_dual_envs) = headers.get(DUAL_ENVIRONMENT_HEADER) {
                 if show_dual_envs == "true" {
-                    filter.remove(ENVIRONMENT_STR);
+                    filter.remove(ENVIRONMENT_FILTER);
                 }
             }
         }
@@ -71,8 +71,8 @@ pub fn shape_mongo_filter(
 mod test {
     use super::shape_mongo_filter;
     use crate::helper::shape_mongo_filter::{
-        MongoQuery, DELETED_STR, DUAL_ENVIRONMENT_HEADER, ENVIRONMENT_STR, LIMIT_STR,
-        OWNERSHIP_STR, SKIP_STR,
+        MongoQuery, DELETED_FILTER, DUAL_ENVIRONMENT_HEADER, ENVIRONMENT_FILTER, LIMIT_FILTER,
+        OWNERSHIP_FILTER, SKIP_FILTER,
     };
     use axum::extract::Query;
     use http::HeaderMap;
@@ -91,11 +91,11 @@ mod test {
     #[test]
     fn test_shape_mongo_filter() {
         let params = BTreeMap::from([
-            (DELETED_STR.to_string(), "true".to_string()),
-            (OWNERSHIP_STR.to_string(), "foo".to_string()),
-            (ENVIRONMENT_STR.to_string(), "bar".to_string()),
-            (SKIP_STR.to_string(), "10".to_string()),
-            (LIMIT_STR.to_string(), "10".to_string()),
+            (DELETED_FILTER.to_string(), "true".to_string()),
+            (OWNERSHIP_FILTER.to_string(), "foo".to_string()),
+            (ENVIRONMENT_FILTER.to_string(), "bar".to_string()),
+            (SKIP_FILTER.to_string(), "10".to_string()),
+            (LIMIT_FILTER.to_string(), "10".to_string()),
         ]);
 
         let MongoQuery {
@@ -103,14 +103,14 @@ mod test {
             skip,
             limit,
         } = shape_mongo_filter(Some(Query(params.clone())), None, None);
-        assert_eq!(doc.get_str(OWNERSHIP_STR).unwrap(), "foo");
-        assert_eq!(doc.get_str(ENVIRONMENT_STR).unwrap(), "bar");
-        assert!(!doc.get_bool(DELETED_STR).unwrap());
+        assert_eq!(doc.get_str(OWNERSHIP_FILTER).unwrap(), "foo");
+        assert_eq!(doc.get_str(ENVIRONMENT_FILTER).unwrap(), "bar");
+        assert!(!doc.get_bool(DELETED_FILTER).unwrap());
         assert_eq!(limit, 10);
         assert_eq!(skip, 10);
 
-        doc.insert(DELETED_STR, true);
-        assert!(doc.get_bool(DELETED_STR).unwrap());
+        doc.insert(DELETED_FILTER, true);
+        assert!(doc.get_bool(DELETED_FILTER).unwrap());
 
         let event_access = Arc::new(EventAccess {
             id: Id::now(IdPrefix::EventAccess),
@@ -130,14 +130,14 @@ mod test {
 
         let MongoQuery { filter: doc, .. } =
             shape_mongo_filter(Some(Query(params)), Some(event_access), None);
-        assert_eq!(doc.get_str(OWNERSHIP_STR).unwrap(), "baz");
-        assert_eq!(doc.get_str(ENVIRONMENT_STR).unwrap(), "test");
+        assert_eq!(doc.get_str(OWNERSHIP_FILTER).unwrap(), "baz");
+        assert_eq!(doc.get_str(ENVIRONMENT_FILTER).unwrap(), "test");
     }
 
     #[test]
     fn requesting_dual_environments() {
         let params = BTreeMap::from([
-            (DELETED_STR.to_string(), "true".to_string()),
+            (DELETED_FILTER.to_string(), "true".to_string()),
             ("ownership.buildableId".to_string(), "foo".to_string()),
             ("environment".to_string(), "bar".to_string()),
         ]);
@@ -167,6 +167,6 @@ mod test {
             Some(headers),
         );
 
-        assert!(!doc.contains_key(ENVIRONMENT_STR));
+        assert!(!doc.contains_key(ENVIRONMENT_FILTER));
     }
 }

@@ -8,12 +8,12 @@ pub const PLATFORMS_KEY: &str = "platforms";
 pub const CREATED_AT_KEY: &str = "createdAt";
 
 // Mongo filter constants
-pub const DELETED_STR: &str = "deleted";
-pub const OWNERSHIP_STR: &str = "ownership.buildableId";
-pub const ENVIRONMENT_STR: &str = "environment";
+pub const DELETED_FILTER: &str = "deleted";
+pub const OWNERSHIP_FILTER: &str = "ownership.buildableId";
+pub const ENVIRONMENT_FILTER: &str = "environment";
 pub const DUAL_ENVIRONMENT_HEADER: &str = "x-pica-show-all-environments";
-pub const LIMIT_STR: &str = "limit";
-pub const SKIP_STR: &str = "skip";
+pub const LIMIT_FILTER: &str = "limit";
+pub const SKIP_FILTER: &str = "skip";
 
 // JWT constants
 pub const BEARER_PREFIX: &str = "Bearer ";
@@ -32,7 +32,7 @@ pub const JWT_SECRET_REF_KEY: &str = "jwt-secret";
 pub const JWT_SECRET_REF_NAME: &str = "event-secrets";
 
 // Header constants
-pub const INTEGRATION_OS_PASSTHROUGH_HEADER: &str = "x-pica-passthrough";
+pub const PICA_PASSTHROUGH_HEADER: &str = "x-pica-passthrough";
 
 // Encryption constants
 pub const HASH_LENGTH: usize = 32;
