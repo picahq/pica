@@ -641,11 +641,14 @@ pub async fn delete_connection(
     )
     .await?;
 
-    if let ConnectionType::DatabaseSql { .. } = connection.args.r#type {
-        let service_name = ServiceName::from_id(connection.args.id)?;
-        let namespace = state.config.namespace.clone();
-        state.k8s_client.delete_all(namespace, service_name).await?;
-    };
+    match connection.args.r#type {
+        ConnectionType::DatabaseSql { .. } if connection.args.record_metadata.active => {
+            let service_name = ServiceName::from_id(connection.args.id)?;
+            let namespace = state.config.namespace.clone();
+            state.k8s_client.delete_all(namespace, service_name).await?;
+        }
+        _ => (),
+    }
 
     let partial_cursor_key = format!("{}::{}::{}", access.ownership.id, id, connection.args.key);
 
