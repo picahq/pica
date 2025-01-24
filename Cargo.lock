@@ -687,6 +687,200 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "147be55d677052dabc6b22252d5dd0fd4c29c8c27aa4f2fbef0f94aa003b406f"
 
 [[package]]
+name = "core-api"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "bson",
+ "chrono",
+ "convert_case 0.6.0",
+ "core-cache",
+ "core-domain",
+ "core-unified",
+ "dotenvy",
+ "envconfig",
+ "fake",
+ "futures",
+ "futures-util",
+ "http 1.1.0",
+ "http-serde-ext-ios",
+ "hyper 0.14.31",
+ "indexmap 2.6.0",
+ "jsonwebtoken 8.3.0",
+ "k8s-openapi",
+ "kube",
+ "mockito",
+ "mongodb",
+ "num_cpus",
+ "openapiv3",
+ "rand",
+ "redis 0.27.5",
+ "regex",
+ "reqwest",
+ "schemars",
+ "segment",
+ "semver 1.0.23",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "strum",
+ "testcontainers-modules",
+ "thiserror 1.0.69",
+ "tokio",
+ "tower 0.4.13",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+ "validator",
+]
+
+[[package]]
+name = "core-archiver"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bson",
+ "chrono",
+ "core-domain",
+ "core-unified",
+ "dotenvy",
+ "envconfig",
+ "fake",
+ "futures",
+ "google-cloud-storage",
+ "http 1.1.0",
+ "mongodb",
+ "reqwest",
+ "reqwest-middleware",
+ "reqwest-retry",
+ "reqwest-tracing",
+ "serde",
+ "serde_json",
+ "strum",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "core-cache"
+version = "0.1.0"
+dependencies = [
+ "core-domain",
+ "deadpool-redis",
+ "fake",
+ "futures",
+ "http 1.1.0",
+ "moka",
+ "mongodb",
+ "redis 0.27.5",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "core-database"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "axum",
+ "chrono",
+ "core-cache",
+ "core-domain",
+ "core-unified",
+ "dotenvy",
+ "envconfig",
+ "futures",
+ "futures-util",
+ "http 1.1.0",
+ "http-serde-ext-ios",
+ "hyper 0.14.31",
+ "mockito",
+ "mongodb",
+ "num_cpus",
+ "rand",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "strum",
+ "testcontainers-modules",
+ "tokio",
+ "tower 0.4.13",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "core-domain"
+version = "9.0.0"
+dependencies = [
+ "aes",
+ "anyhow",
+ "async-recursion",
+ "async-trait",
+ "axum",
+ "base64 0.21.7",
+ "base64ct",
+ "bson",
+ "chacha20poly1305",
+ "chrono",
+ "ctr",
+ "derive_builder",
+ "downcast-rs",
+ "envconfig",
+ "fake",
+ "futures",
+ "google-cloud-kms",
+ "handlebars",
+ "hex",
+ "hmac",
+ "http 1.1.0",
+ "http-serde-ext-ios",
+ "indexmap 2.6.0",
+ "js-sandbox-ios",
+ "jsonpath_lib",
+ "jsonwebtoken 8.3.0",
+ "mongodb",
+ "napi",
+ "napi-derive",
+ "once_cell",
+ "openapiv3",
+ "opentelemetry",
+ "opentelemetry-otlp",
+ "opentelemetry_sdk",
+ "percent-encoding",
+ "pin-project",
+ "prost",
+ "rand",
+ "reqwest",
+ "schemars",
+ "secrecy 0.10.3",
+ "semver 1.0.23",
+ "serde",
+ "serde_json",
+ "sha1",
+ "sha2",
+ "sha3",
+ "strum",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "tracing-bunyan-formatter",
+ "tracing-log 0.2.0",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -711,6 +905,51 @@ name = "core-foundation-sys"
 version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
+
+[[package]]
+name = "core-unified"
+version = "0.1.0"
+dependencies = [
+ "bson",
+ "chrono",
+ "core-cache",
+ "core-domain",
+ "derive_builder",
+ "futures",
+ "handlebars",
+ "http 1.1.0",
+ "http-serde-ext-ios",
+ "indexmap 2.6.0",
+ "js-sandbox-ios",
+ "jsonpath_lib",
+ "mockito",
+ "mongodb",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "core-watchdog"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bson",
+ "chrono",
+ "core-cache",
+ "core-domain",
+ "dotenvy",
+ "envconfig",
+ "futures",
+ "mongodb",
+ "redis 0.27.5",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
 
 [[package]]
 name = "cpufeatures"
@@ -2303,245 +2542,6 @@ dependencies = [
  "js-sys",
  "wasm-bindgen",
  "web-sys",
-]
-
-[[package]]
-name = "core-api"
-version = "1.0.0"
-dependencies = [
- "anyhow",
- "axum",
- "bson",
- "chrono",
- "convert_case 0.6.0",
- "dotenvy",
- "envconfig",
- "fake",
- "futures",
- "futures-util",
- "http 1.1.0",
- "http-serde-ext-ios",
- "hyper 0.14.31",
- "indexmap 2.6.0",
- "core-cache",
- "core-domain",
- "core-unified",
- "jsonwebtoken 8.3.0",
- "k8s-openapi",
- "kube",
- "mockito",
- "mongodb",
- "num_cpus",
- "openapiv3",
- "rand",
- "redis 0.27.5",
- "regex",
- "reqwest",
- "schemars",
- "segment",
- "semver 1.0.23",
- "serde",
- "serde_json",
- "serde_yaml",
- "strum",
- "testcontainers-modules",
- "thiserror 1.0.69",
- "tokio",
- "tower 0.4.13",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "uuid",
- "validator",
-]
-
-[[package]]
-name = "core-archiver"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bson",
- "chrono",
- "dotenvy",
- "envconfig",
- "fake",
- "futures",
- "google-cloud-storage",
- "http 1.1.0",
- "core-domain",
- "core-unified",
- "mongodb",
- "reqwest",
- "reqwest-middleware",
- "reqwest-retry",
- "reqwest-tracing",
- "serde",
- "serde_json",
- "strum",
- "tempfile",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "core-cache"
-version = "0.1.0"
-dependencies = [
- "deadpool-redis",
- "fake",
- "futures",
- "http 1.1.0",
- "core-domain",
- "moka",
- "mongodb",
- "redis 0.27.5",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "core-database"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "axum",
- "chrono",
- "dotenvy",
- "envconfig",
- "futures",
- "futures-util",
- "http 1.1.0",
- "http-serde-ext-ios",
- "hyper 0.14.31",
- "core-cache",
- "core-domain",
- "core-unified",
- "mockito",
- "mongodb",
- "num_cpus",
- "rand",
- "reqwest",
- "serde",
- "serde_json",
- "sqlx",
- "strum",
- "testcontainers-modules",
- "tokio",
- "tower 0.4.13",
- "tower-http",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "core-domain"
-version = "9.0.0"
-dependencies = [
- "aes",
- "anyhow",
- "async-recursion",
- "async-trait",
- "axum",
- "base64 0.21.7",
- "base64ct",
- "bson",
- "chacha20poly1305",
- "chrono",
- "ctr",
- "derive_builder",
- "downcast-rs",
- "envconfig",
- "fake",
- "futures",
- "google-cloud-kms",
- "handlebars",
- "hex",
- "hmac",
- "http 1.1.0",
- "http-serde-ext-ios",
- "indexmap 2.6.0",
- "js-sandbox-ios",
- "jsonpath_lib",
- "jsonwebtoken 8.3.0",
- "mongodb",
- "napi",
- "napi-derive",
- "once_cell",
- "openapiv3",
- "opentelemetry",
- "opentelemetry-otlp",
- "opentelemetry_sdk",
- "percent-encoding",
- "pin-project",
- "prost",
- "rand",
- "reqwest",
- "schemars",
- "secrecy 0.10.3",
- "semver 1.0.23",
- "serde",
- "serde_json",
- "sha1",
- "sha2",
- "sha3",
- "strum",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "tracing-bunyan-formatter",
- "tracing-log 0.2.0",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
-name = "core-unified"
-version = "0.1.0"
-dependencies = [
- "bson",
- "chrono",
- "derive_builder",
- "futures",
- "handlebars",
- "http 1.1.0",
- "http-serde-ext-ios",
- "indexmap 2.6.0",
- "core-cache",
- "core-domain",
- "js-sandbox-ios",
- "jsonpath_lib",
- "mockito",
- "mongodb",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "core-watchdog"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bson",
- "chrono",
- "dotenvy",
- "envconfig",
- "futures",
- "core-cache",
- "core-domain",
- "mongodb",
- "redis 0.27.5",
- "serde_json",
- "tokio",
- "tracing",
 ]
 
 [[package]]

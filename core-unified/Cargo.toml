@@ -1,0 +1,35 @@
+[package]
+name = "core-unified"
+description = "Unified service library for Pica"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+jsonpath_lib.workspace = true
+bson.workspace = true
+chrono = { workspace = true, features = ["serde"] }
+derive_builder.workspace = true
+core-cache = { path = "../core-cache" }
+core-domain = { path = "../core-domain" }
+futures.workspace = true
+handlebars.workspace = true
+http.workspace = true
+http-serde-ext-ios.workspace = true
+js-sandbox-ios.workspace = true
+mongodb.workspace = true
+reqwest = { workspace = true, features = [
+    "json",
+    "rustls-tls",
+], default-features = false }
+serde = { workspace = true, features = ["derive", "rc"] }
+serde_json.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tracing.workspace = true
+uuid = { workspace = true, features = ["v4"] }
+indexmap = "2.6.0"
+
+[dev-dependencies]
+mockito = "1.6.1"
+
+[lib]
+path = "src/lib.rs"
