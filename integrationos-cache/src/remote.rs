@@ -1,4 +1,4 @@
-use integrationos_domain::{cache::CacheConfig, IntegrationOSError, InternalError};
+use core_domain::{cache::CacheConfig, IntegrationOSError, InternalError};
 use redis::aio::{ConnectionManager, ConnectionManagerConfig};
 use std::time::Duration;
 

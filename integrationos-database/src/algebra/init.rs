@@ -5,7 +5,7 @@ use crate::{
 };
 use axum::async_trait;
 use http::header::AUTHORIZATION;
-use integrationos_domain::{
+use core_domain::{
     database::{DatabaseConnectionType, DatabasePodConfig},
     database_secret::DatabaseConnectionSecret,
     Claims, InternalError, Secret,

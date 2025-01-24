@@ -11,7 +11,7 @@ use axum::{
 };
 use fake::Dummy;
 use futures::try_join;
-use integrationos_domain::{
+use core_domain::{
     algebra::MongoStore,
     connection_model_schema::{
         ConnectionModelSchema, Mappings, PublicConnectionModelSchema, SchemaPaths,

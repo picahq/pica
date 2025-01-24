@@ -1,5 +1,5 @@
 use super::EventMetadata;
-use integrationos_domain::{prefix::IdPrefix, Id};
+use core_domain::{prefix::IdPrefix, Id};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

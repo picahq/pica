@@ -1,4 +1,4 @@
-use integrationos_domain::{ApplicationError, IntegrationOSError};
+use core_domain::{ApplicationError, IntegrationOSError};
 use js_sandbox_ios::Script;
 use serde::de::DeserializeOwned;
 use serde::Serialize;

@@ -13,11 +13,11 @@ use futures::{
 };
 use handlebars::Handlebars;
 use http::{HeaderMap, HeaderName, HeaderValue, Response, StatusCode};
-use integrationos_cache::local::{
+use core_cache::local::{
     ConnectionCache, ConnectionModelDefinitionDestinationCache, ConnectionModelSchemaCache,
     LocalCacheExt, SecretCache,
 };
-use integrationos_domain::{
+use core_domain::{
     algebra::JsonExt,
     api_model_config::{ModelPaths, RequestModelPaths},
     connection_model_definition::{ConnectionModelDefinition, CrudAction, PlatformInfo},

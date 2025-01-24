@@ -6,7 +6,7 @@ pub use shape_mongo_filter::*;
 
 use axum::{extract::Path, Json};
 use http::StatusCode;
-use integrationos_domain::{prefix::IdPrefix, Id, IntegrationOSError};
+use core_domain::{prefix::IdPrefix, Id, IntegrationOSError};
 use serde::Serialize;
 
 #[derive(Serialize)]

@@ -5,7 +5,7 @@ use axum::{
     Router,
 };
 use chrono::Utc;
-use integrationos_domain::{
+use core_domain::{
     algebra::MongoStore,
     api_model_config::{ApiModelConfig, Compute, Function, Lang},
     connection_oauth_definition::{

@@ -6,7 +6,7 @@ use axum::{
     Extension, Json, Router,
 };
 use bson::Document;
-use integrationos_domain::{
+use core_domain::{
     constant::{DAILY_KEY, MONTHLY_KEY, PLATFORMS_KEY, TOTAL_KEY},
     event_access::EventAccess,
     ApplicationError, IntegrationOSError, InternalError, Store,

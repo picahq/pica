@@ -1,6 +1,6 @@
 use crate::config::WatchdogConfig;
-use integrationos_cache::remote::RedisCache;
-use integrationos_domain::{
+use core_cache::remote::RedisCache;
+use core_domain::{
     cache::CacheConfig, database::DatabaseConfig, IntegrationOSError, InternalError,
 };
 use redis::{AsyncCommands, RedisResult};

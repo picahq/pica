@@ -1,16 +1,16 @@
 use crate::context::TestServer;
 use fake::{Fake, Faker};
 use http::{Method, StatusCode};
-use integrationos_api::logic::{common_model, ReadResponse};
-use integrationos_api::logic::{
+use core_api::logic::{common_model, ReadResponse};
+use core_api::logic::{
     connection_definition, connection_model_definition, connection_model_schema,
 };
-use integrationos_domain::{
+use core_domain::{
     common_model::CommonModel, connection_definition::ConnectionDefinition,
     connection_model_definition::ConnectionModelDefinition,
     connection_model_schema::ConnectionModelSchema,
 };
-use integrationos_domain::{
+use core_domain::{
     common_model::{DataType, Expandable, Field},
     json_schema::JsonSchema,
 };

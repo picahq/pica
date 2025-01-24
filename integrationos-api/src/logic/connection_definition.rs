@@ -9,7 +9,7 @@ use axum::{
     Json, Router,
 };
 use fake::Dummy;
-use integrationos_domain::{
+use core_domain::{
     algebra::MongoStore,
     api_model_config::AuthMethod,
     connection_definition::{

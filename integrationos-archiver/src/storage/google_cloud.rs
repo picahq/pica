@@ -8,7 +8,7 @@ use google_cloud_storage::client::{Client as GClient, ClientConfig};
 use google_cloud_storage::http::objects::upload::{UploadObjectRequest, UploadType};
 use google_cloud_storage::http::objects::Object;
 use google_cloud_storage::http::resumable_upload_client::ChunkSize;
-use integrationos_domain::Unit;
+use core_domain::Unit;
 use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use reqwest_tracing::TracingMiddleware;

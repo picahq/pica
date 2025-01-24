@@ -13,7 +13,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use integrationos_domain::telemetry::log_request_middleware;
+use core_domain::telemetry::log_request_middleware;
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
 

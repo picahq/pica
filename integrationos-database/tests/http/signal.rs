@@ -1,6 +1,6 @@
 use crate::context::TestServer;
 use http::header::{ACCEPT, CONTENT_LENGTH, CONTENT_TYPE, HOST};
-use integrationos_domain::{
+use core_domain::{
     emitted_events::ConnectionLostReason, prefix::IdPrefix, Id, IntegrationOSError, Unit,
 };
 use mockito::Server as MockServer;

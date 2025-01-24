@@ -16,7 +16,7 @@ use axum::{
 use chrono::Utc;
 use envconfig::Envconfig;
 use http::HeaderMap;
-use integrationos_domain::{
+use core_domain::{
     algebra::MongoStore,
     connection_definition::{ConnectionDefinition, ConnectionDefinitionType},
     database::{DatabasePodConfig, PostgresConfig},
@@ -345,7 +345,7 @@ async fn generate_k8s_specs_and_secret(
     IntegrationOSError,
 > {
     Ok(match connection_config.to_connection_type() {
-        integrationos_domain::ConnectionType::DatabaseSql {} => {
+        core_domain::ConnectionType::DatabaseSql {} => {
             let service_name = ServiceName::from_id(*connection_id)?;
             let namespace = state.config.namespace.clone();
 

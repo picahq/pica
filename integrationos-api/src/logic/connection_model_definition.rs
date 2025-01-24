@@ -12,7 +12,7 @@ use axum::{
 use chrono::Utc;
 use fake::Dummy;
 use http::HeaderMap;
-use integrationos_domain::{
+use core_domain::{
     algebra::MongoStore,
     api_model_config::{
         ApiModelConfig, AuthMethod, ModelPaths, ResponseBody, SamplesInput, SchemasInput,

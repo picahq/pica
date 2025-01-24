@@ -1,6 +1,6 @@
 use convert_case::{Case, Casing};
 use indexmap::IndexMap;
-use integrationos_domain::{
+use core_domain::{
     common_model::CommonModel, connection_model_definition::CrudAction, constant::*,
 };
 use openapiv3::*;

@@ -1,7 +1,7 @@
 use derive_builder::Builder;
 use http::HeaderMap;
 use indexmap::IndexMap;
-use integrationos_domain::{
+use core_domain::{
     api_model_config::{ApiModelConfig, AuthMethod, OAuthLegacyHashAlgorithm},
     oauth_secret::OAuthLegacySecret,
     prelude::oauth_secret::OAuthSecret,
@@ -170,7 +170,7 @@ impl<'a> CallerClient<'a> {
 mod tests {
     use super::*;
     use http::StatusCode;
-    use integrationos_domain::{
+    use core_domain::{
         api_model_config::{SamplesInput, SchemasInput},
         connection_model_definition::{
             ConnectionModelDefinition, CrudAction, PlatformInfo, TestConnection,

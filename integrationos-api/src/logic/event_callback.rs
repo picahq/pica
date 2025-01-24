@@ -5,7 +5,7 @@ use axum::{
     Json, Router,
 };
 use bson::doc;
-use integrationos_domain::{
+use core_domain::{
     database_secret::DatabaseConnectionSecret, emitted_events::ConnectionLostReason,
     ApplicationError, Connection, Id, IntegrationOSError,
 };

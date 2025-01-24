@@ -8,8 +8,8 @@ use axum::{
     Extension,
 };
 use http::{HeaderName, Request};
-use integrationos_cache::remote::RedisCache;
-use integrationos_domain::{event_access::EventAccess, ApplicationError};
+use core_cache::remote::RedisCache;
+use core_domain::{event_access::EventAccess, ApplicationError};
 use redis::AsyncCommands;
 use std::sync::Arc;
 use tokio::sync::{

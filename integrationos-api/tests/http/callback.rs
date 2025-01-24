@@ -1,6 +1,6 @@
 use crate::context::TestServer;
 use http::{Method, StatusCode};
-use integrationos_domain::{
+use core_domain::{
     emitted_events::ConnectionLostReason, environment::Environment, prefix::IdPrefix, Connection,
     Id,
 };

@@ -22,7 +22,7 @@ use axum::{
     Router,
 };
 use http::HeaderName;
-use integrationos_domain::{
+use core_domain::{
     connection_model_schema::PublicConnectionModelSchema, telemetry::log_request_middleware,
 };
 use std::{iter::once, sync::Arc};

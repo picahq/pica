@@ -2306,7 +2306,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "integrationos-api"
+name = "core-api"
 version = "1.0.0"
 dependencies = [
  "anyhow",
@@ -2323,9 +2323,9 @@ dependencies = [
  "http-serde-ext-ios",
  "hyper 0.14.31",
  "indexmap 2.6.0",
- "integrationos-cache",
- "integrationos-domain",
- "integrationos-unified",
+ "core-cache",
+ "core-domain",
+ "core-unified",
  "jsonwebtoken 8.3.0",
  "k8s-openapi",
  "kube",
@@ -2356,7 +2356,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "integrationos-archiver"
+name = "core-archiver"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -2368,8 +2368,8 @@ dependencies = [
  "futures",
  "google-cloud-storage",
  "http 1.1.0",
- "integrationos-domain",
- "integrationos-unified",
+ "core-domain",
+ "core-unified",
  "mongodb",
  "reqwest",
  "reqwest-middleware",
@@ -2385,14 +2385,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "integrationos-cache"
+name = "core-cache"
 version = "0.1.0"
 dependencies = [
  "deadpool-redis",
  "fake",
  "futures",
  "http 1.1.0",
- "integrationos-domain",
+ "core-domain",
  "moka",
  "mongodb",
  "redis 0.27.5",
@@ -2403,7 +2403,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "integrationos-database"
+name = "core-database"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -2417,9 +2417,9 @@ dependencies = [
  "http 1.1.0",
  "http-serde-ext-ios",
  "hyper 0.14.31",
- "integrationos-cache",
- "integrationos-domain",
- "integrationos-unified",
+ "core-cache",
+ "core-domain",
+ "core-unified",
  "mockito",
  "mongodb",
  "num_cpus",
@@ -2438,7 +2438,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "integrationos-domain"
+name = "core-domain"
 version = "9.0.0"
 dependencies = [
  "aes",
@@ -2500,7 +2500,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "integrationos-unified"
+name = "core-unified"
 version = "0.1.0"
 dependencies = [
  "bson",
@@ -2511,8 +2511,8 @@ dependencies = [
  "http 1.1.0",
  "http-serde-ext-ios",
  "indexmap 2.6.0",
- "integrationos-cache",
- "integrationos-domain",
+ "core-cache",
+ "core-domain",
  "js-sandbox-ios",
  "jsonpath_lib",
  "mockito",
@@ -2526,7 +2526,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "integrationos-watchdog"
+name = "core-watchdog"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -2535,8 +2535,8 @@ dependencies = [
  "dotenvy",
  "envconfig",
  "futures",
- "integrationos-cache",
- "integrationos-domain",
+ "core-cache",
+ "core-domain",
  "mongodb",
  "redis 0.27.5",
  "serde_json",

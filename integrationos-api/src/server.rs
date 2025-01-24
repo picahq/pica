@@ -6,11 +6,11 @@ use crate::{
 };
 use anyhow::{anyhow, Context, Result};
 use axum::Router;
-use integrationos_cache::local::{
+use core_cache::local::{
     ConnectionDefinitionCache, ConnectionHeaderCache, ConnectionOAuthDefinitionCache,
     EventAccessCache,
 };
-use integrationos_domain::{
+use core_domain::{
     algebra::{DefaultTemplate, MongoStore},
     common_model::{CommonEnum, CommonModel},
     connection_definition::{ConnectionDefinition, PublicConnectionDetails},
@@ -24,7 +24,7 @@ use integrationos_domain::{
     user::UserClient,
     Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
 };
-use integrationos_unified::unified::{UnifiedCacheTTLs, UnifiedDestination};
+use core_unified::unified::{UnifiedCacheTTLs, UnifiedDestination};
 use mongodb::{options::UpdateOptions, Client, Database};
 use segment::{AutoBatcher, Batcher, HttpClient};
 use std::{sync::Arc, time::Duration};

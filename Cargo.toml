@@ -1,13 +1,13 @@
 [workspace]
 resolver = "2"
 members = [
-    "integrationos-api",
-    "integrationos-archiver", 
-    "integrationos-cache",
-    "integrationos-domain",
-    "integrationos-database",
-    "integrationos-unified",
-    "integrationos-watchdog"
+    "core-api",
+    "core-archiver", 
+    "core-cache",
+    "core-domain",
+    "core-database",
+    "core-unified",
+    "core-watchdog"
 ]
 
 [workspace.dependencies]

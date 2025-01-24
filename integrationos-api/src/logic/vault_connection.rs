@@ -7,7 +7,7 @@ use axum::{
     routing::{delete, get, patch, post},
     Router,
 };
-use integrationos_domain::{algebra::MongoStore, id::Id, ConnectionIdentityType, PublicConnection};
+use core_domain::{algebra::MongoStore, id::Id, ConnectionIdentityType, PublicConnection};
 use mongodb::bson::doc;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};

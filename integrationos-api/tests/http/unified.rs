@@ -5,12 +5,12 @@ use http::{
     header::{AUTHORIZATION, CONTENT_TYPE},
     Method, StatusCode,
 };
-use integrationos_api::logic::{
+use core_api::logic::{
     connection_model_definition::CreateRequest as CreateConnectionModelDefinitionRequest,
     connection_model_schema::CreateRequest as CreateConnectionModelSchemaRequest,
     metrics::MetricResponse,
 };
-use integrationos_domain::{
+use core_domain::{
     api_model_config::{AuthMethod, SamplesInput, SchemasInput},
     connection_model_definition::{ConnectionModelDefinition, CrudAction, CrudMapping},
     connection_model_schema::{ConnectionModelSchema, Mappings},

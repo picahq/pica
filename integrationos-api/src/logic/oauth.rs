@@ -8,7 +8,7 @@ use axum::{
 use chrono::{Duration, Utc};
 use fake::Dummy;
 use http::{HeaderMap, HeaderName, HeaderValue};
-use integrationos_domain::{
+use core_domain::{
     algebra::{MongoStore, TemplateExt},
     api_model_config::ContentType,
     connection_definition::ConnectionDefinition,

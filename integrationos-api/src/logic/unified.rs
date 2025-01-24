@@ -9,7 +9,7 @@ use axum::{
 use bson::doc;
 use convert_case::{Case, Casing};
 use http::{HeaderMap, HeaderName};
-use integrationos_domain::{
+use core_domain::{
     connection_model_definition::CrudAction,
     constant::{PICA_PASSTHROUGH_HEADER, PASSWORD_LENGTH},
     destination::Action,
@@ -17,7 +17,7 @@ use integrationos_domain::{
     event_access::EventAccess,
     AccessKey, ApplicationError, Event, InternalError, META,
 };
-use integrationos_unified::domain::RequestCrudBuilder;
+use core_unified::domain::RequestCrudBuilder;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{collections::HashMap, sync::Arc};

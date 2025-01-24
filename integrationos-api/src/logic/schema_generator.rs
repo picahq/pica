@@ -7,7 +7,7 @@ use axum::{
 };
 use bson::{doc, Document};
 use futures::StreamExt;
-use integrationos_domain::{
+use core_domain::{
     api_model_config::Lang,
     common_model::{CommonEnum, DataType, SchemaType, TypeGenerationStrategy},
     prefix::IdPrefix,

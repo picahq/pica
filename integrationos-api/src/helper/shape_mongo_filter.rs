@@ -1,6 +1,6 @@
 use axum::extract::Query;
 use http::HeaderMap;
-use integrationos_domain::{
+use core_domain::{
     event_access::EventAccess, DELETED_FILTER, DUAL_ENVIRONMENT_HEADER, ENVIRONMENT_FILTER, LIMIT_FILTER,
     OWNERSHIP_FILTER, SKIP_FILTER,
 };
@@ -76,7 +76,7 @@ mod test {
     };
     use axum::extract::Query;
     use http::HeaderMap;
-    use integrationos_domain::{
+    use core_domain::{
         id::{prefix::IdPrefix, Id},
         {
             connection_definition::{ConnectionDefinitionType, Paths},

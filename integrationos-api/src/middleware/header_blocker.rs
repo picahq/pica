@@ -2,7 +2,7 @@ use crate::server::AppState;
 use axum::response::IntoResponse;
 use futures_util::StreamExt;
 use http::{HeaderName, HeaderValue, Request};
-use integrationos_domain::{ApplicationError, Store};
+use core_domain::{ApplicationError, Store};
 use mongodb::options::FindOptions;
 use serde::Deserialize;
 use std::{

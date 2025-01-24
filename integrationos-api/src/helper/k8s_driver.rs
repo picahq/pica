@@ -1,5 +1,5 @@
 use axum::async_trait;
-use integrationos_domain::{Id, IntegrationOSError, InternalError, Unit};
+use core_domain::{Id, IntegrationOSError, InternalError, Unit};
 use k8s_openapi::{
     api::{
         apps::v1::{Deployment, DeploymentSpec},

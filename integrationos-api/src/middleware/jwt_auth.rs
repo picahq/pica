@@ -1,7 +1,7 @@
 use crate::server::AppState;
 use axum::{body::Body, extract::State, middleware::Next, response::Response};
 use http::Request;
-use integrationos_domain::{
+use core_domain::{
     constant::{DEFAULT_AUDIENCE, DEFAULT_ISSUER, FALLBACK_AUDIENCE, FALLBACK_ISSUER},
     ApplicationError, Claims, IntegrationOSError, BEARER_PREFIX,
 };

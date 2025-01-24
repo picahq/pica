@@ -1,8 +1,8 @@
 use bson::doc;
 use derive_builder::Builder;
 use http::{HeaderMap, HeaderName, HeaderValue};
-use integrationos_domain::Id;
-use integrationos_domain::IntegrationOSError;
+use core_domain::Id;
+use core_domain::IntegrationOSError;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;

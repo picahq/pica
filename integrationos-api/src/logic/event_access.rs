@@ -11,7 +11,7 @@ use axum::{
     Extension, Json, Router,
 };
 use fake::Dummy;
-use integrationos_domain::{
+use core_domain::{
     access_key_data::AccessKeyData,
     access_key_prefix::AccessKeyPrefix,
     algebra::MongoStore,

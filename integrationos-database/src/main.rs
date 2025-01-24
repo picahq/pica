@@ -1,11 +1,11 @@
 use anyhow::Result;
 use dotenvy::dotenv;
 use envconfig::Envconfig;
-use integrationos_database::algebra::{
+use core_database::algebra::{
     init::{DatabaseInitializer, Initializer},
     on_error_callback,
 };
-use integrationos_domain::{
+use core_domain::{
     database::DatabasePodConfig,
     telemetry::{get_subscriber, init_subscriber},
 };

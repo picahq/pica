@@ -8,7 +8,7 @@ use axum::{
 };
 use http::{header::CONTENT_LENGTH, HeaderMap, HeaderName, Method, Uri};
 use hyper::body::Bytes;
-use integrationos_domain::{
+use core_domain::{
     constant::PICA_PASSTHROUGH_HEADER,
     ApplicationError, InternalError,
     {

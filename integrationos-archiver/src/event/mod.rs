@@ -11,7 +11,7 @@ use completed::Completed;
 use dumped::Dumped;
 use failed::Failed;
 use finished::Finished;
-use integrationos_domain::Id;
+use core_domain::Id;
 use serde::{Deserialize, Serialize};
 use started::Started;
 use uploaded::Uploaded;

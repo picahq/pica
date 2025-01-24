@@ -1,7 +1,7 @@
 use crate::server::AppState;
 use axum::{body::Body, extract::State, middleware::Next, response::Response};
 use http::Request;
-use integrationos_domain::IntegrationOSError;
+use core_domain::IntegrationOSError;
 use std::sync::Arc;
 
 pub async fn header_passthrough_middleware(

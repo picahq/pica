@@ -7,7 +7,7 @@ use builder::{generate_openapi_schema, generate_path_item};
 use convert_case::{Case, Casing};
 use futures::{Stream, StreamExt, TryStreamExt};
 use indexmap::IndexMap;
-use integrationos_domain::{
+use core_domain::{
     algebra::{MongoStore, TimedExt},
     common_model::{CommonEnum, CommonModel},
     IntegrationOSError, InternalError,
@@ -282,7 +282,7 @@ async fn generate_references_data(
         .get_enum_references()
         .into_iter()
         .filter_map(|x| match x.datatype {
-            integrationos_domain::common_model::DataType::Enum { reference, .. } => {
+            core_domain::common_model::DataType::Enum { reference, .. } => {
                 Some(reference.to_case(Case::Pascal))
             }
             _ => None,
@@ -300,7 +300,7 @@ async fn generate_references_data(
             .get_enum_references()
             .into_iter()
             .filter_map(|x| match x.datatype {
-                integrationos_domain::common_model::DataType::Enum { reference, .. } => {
+                core_domain::common_model::DataType::Enum { reference, .. } => {
                     Some(reference.to_case(Case::Pascal))
                 }
                 _ => None,

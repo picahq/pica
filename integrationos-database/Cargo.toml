@@ -1,5 +1,5 @@
 [package]
-name = "integrationos-database"
+name = "core-database"
 version = "0.1.0"
 edition = "2021"
 
@@ -15,9 +15,9 @@ futures.workspace = true
 http-serde-ext-ios.workspace = true
 http.workspace = true
 hyper = "0.14.31"
-integrationos-cache = { path = "../integrationos-cache" }
-integrationos-domain = { path = "../integrationos-domain" }
-integrationos-unified = { path = "../integrationos-unified" }
+core-cache = { path = "../core-cache" }
+core-domain = { path = "../core-domain" }
+core-unified = { path = "../core-unified" }
 mongodb.workspace = true
 num_cpus.workspace = true
 rand.workspace = true

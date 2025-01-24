@@ -9,8 +9,8 @@ use axum::{
 };
 use bson::doc;
 use http::{HeaderMap, HeaderValue};
-use integrationos_cache::local::{ConnectionHeaderCache, LocalCacheExt};
-use integrationos_domain::{
+use core_cache::local::{ConnectionHeaderCache, LocalCacheExt};
+use core_domain::{
     algebra::MongoStore, event_access::EventAccess, ApplicationError, Connection,
     IntegrationOSError, InternalError, OAuth, Store, Unit,
 };

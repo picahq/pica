@@ -1,8 +1,8 @@
 use crate::server::AppState;
 use axum::{body::Body, extract::State, middleware::Next, response::Response};
 use http::Request;
-use integrationos_cache::local::LocalCacheExt;
-use integrationos_domain::{ApplicationError, IntegrationOSError, InternalError};
+use core_cache::local::LocalCacheExt;
+use core_domain::{ApplicationError, IntegrationOSError, InternalError};
 use mongodb::bson::doc;
 use std::sync::Arc;
 use tracing::error;

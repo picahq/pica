@@ -1,5 +1,5 @@
 use http::header::AUTHORIZATION;
-use integrationos_domain::{
+use core_domain::{
     database::DatabasePodConfig, emitted_events::ConnectionLostReason, ApplicationError, Claims,
     Id, IntegrationOSError, InternalError, Unit,
 };

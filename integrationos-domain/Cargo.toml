@@ -1,10 +1,10 @@
 [package]
-name = "integrationos-domain"
+name = "core-domain"
 description = "Shared library for IntegrationOS"
 license = "GPL-3.0"
 version = "9.0.0"
 edition = "2021"
-repository = "https://github.com/integration-os/integrationos-domain"
+repository = "https://github.com/integration-os/core-domain"
 
 [features]
 # This feature can be used for tests to provide dummy implementations

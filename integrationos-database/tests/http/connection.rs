@@ -1,6 +1,6 @@
 use crate::context::{TestServer, DOCKER, POSTGRES};
 use http::{Method, StatusCode};
-use integrationos_domain::{
+use core_domain::{
     database::PostgresConfig, database_secret::DatabaseConnectionSecret, prefix::IdPrefix, Id,
     IntegrationOSError, Secret, SecretVersion, Unit,
 };

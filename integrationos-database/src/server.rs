@@ -1,7 +1,7 @@
 use crate::{algebra::storage::Storage, router};
 use anyhow::Result as AnyhowResult;
 use axum::Router;
-use integrationos_domain::database::DatabasePodConfig;
+use core_domain::database::DatabasePodConfig;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 

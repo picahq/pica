@@ -4,11 +4,11 @@ use envconfig::Envconfig;
 use fake::{Fake, Faker};
 use http::StatusCode;
 use http::{header::AUTHORIZATION, Method};
-use integrationos_api::logic::{
+use core_api::logic::{
     connection::CreateConnectionPayload,
     connection_definition::CreateRequest as CreateConnectionDefinitionRequest,
 };
-use integrationos_api::{
+use core_api::{
     domain::config::ConnectionsConfig,
     logic::{
         connection_model_definition::CreateRequest as CreateConnectionModelDefinitionRequest,
@@ -16,7 +16,7 @@ use integrationos_api::{
     },
     server::Server,
 };
-use integrationos_domain::{
+use core_domain::{
     access_key_data::AccessKeyData,
     access_key_prefix::AccessKeyPrefix,
     algebra::MongoStore,
@@ -31,7 +31,7 @@ use integrationos_domain::{
     secret::Secret,
     AccessKey, Claims, IntegrationOSError, SanitizedConnection, Store,
 };
-use integrationos_domain::{SecretExt, SecretVersion, DEFAULT_AUDIENCE, DEFAULT_ISSUER};
+use core_domain::{SecretExt, SecretVersion, DEFAULT_AUDIENCE, DEFAULT_ISSUER};
 use jsonwebtoken::EncodingKey;
 use mockito::{Matcher, Server as MockServer, ServerGuard};
 use mongodb::Client;

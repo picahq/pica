@@ -15,7 +15,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use integrationos_domain::{
+use core_domain::{
     common_model::{CommonEnum, CommonModel},
     connection_definition::{ConnectionDefinition, PublicConnectionDetails},
     telemetry::log_request_middleware,

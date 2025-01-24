@@ -1,12 +1,12 @@
 use futures::Future;
 use http::HeaderValue;
-use integrationos_domain::connection_definition::ConnectionDefinition;
-use integrationos_domain::connection_model_definition::ConnectionModelDefinition;
-use integrationos_domain::connection_model_schema::ConnectionModelSchema;
-use integrationos_domain::connection_oauth_definition::ConnectionOAuthDefinition;
-use integrationos_domain::destination::Destination;
-use integrationos_domain::event_access::EventAccess;
-use integrationos_domain::{
+use core_domain::connection_definition::ConnectionDefinition;
+use core_domain::connection_model_definition::ConnectionModelDefinition;
+use core_domain::connection_model_schema::ConnectionModelSchema;
+use core_domain::connection_oauth_definition::ConnectionOAuthDefinition;
+use core_domain::destination::Destination;
+use core_domain::event_access::EventAccess;
+use core_domain::{
     ApplicationError, Connection, Id, IntegrationOSError, MongoStore, Secret, Unit,
 };
 use moka::future::Cache;

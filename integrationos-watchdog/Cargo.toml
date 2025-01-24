@@ -1,5 +1,5 @@
 [package]
-name = "integrationos-watchdog"
+name = "core-watchdog"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,8 +10,8 @@ chrono.workspace = true
 dotenvy.workspace = true
 envconfig.workspace = true
 futures.workspace = true
-integrationos-cache = { path = "../integrationos-cache" }
-integrationos-domain = { path = "../integrationos-domain" }
+core-cache = { path = "../core-cache" }
+core-domain = { path = "../core-domain" }
 serde_json.workspace = true
 mongodb.workspace = true
 redis.workspace = true

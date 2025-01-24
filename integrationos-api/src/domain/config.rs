@@ -1,6 +1,6 @@
 use envconfig::Envconfig;
-use integrationos_domain::{cache::CacheConfig, environment::Environment};
-use integrationos_domain::{database::DatabaseConfig, secrets::SecretsConfig};
+use core_domain::{cache::CacheConfig, environment::Environment};
+use core_domain::{database::DatabaseConfig, secrets::SecretsConfig};
 use std::{
     fmt::{Display, Formatter, Result},
     net::SocketAddr,

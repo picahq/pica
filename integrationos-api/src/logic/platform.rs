@@ -5,7 +5,7 @@ use axum::{
     Router,
 };
 use fake::Dummy;
-use integrationos_domain::{
+use core_domain::{
     algebra::MongoStore,
     id::{prefix::IdPrefix, Id},
     ownership::Owners,

@@ -10,7 +10,7 @@ use axum::{
 };
 use convert_case::{Case, Casing};
 use fake::Dummy;
-use integrationos_domain::{
+use core_domain::{
     algebra::MongoStore,
     event_access::EventAccess,
     hashed_secret::HashedSecret,

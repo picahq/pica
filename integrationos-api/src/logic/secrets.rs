@@ -5,7 +5,7 @@ use axum::{
     Extension, Json, Router,
 };
 use bson::doc;
-use integrationos_domain::{
+use core_domain::{
     event_access::EventAccess, secret::Secret, ApplicationError, Id, IntegrationOSError,
 };
 use serde::{Deserialize, Serialize};
