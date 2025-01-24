@@ -1,4 +1,4 @@
-use super::{get_connection, INTEGRATION_OS_PASSTHROUGH_HEADER};
+use super::get_connection;
 use crate::{domain::metrics::Metric, server::AppState};
 use axum::{
     extract::{Query, State},
@@ -9,6 +9,7 @@ use axum::{
 use http::{header::CONTENT_LENGTH, HeaderMap, HeaderName, Method, Uri};
 use hyper::body::Bytes;
 use integrationos_domain::{
+    constant::INTEGRATION_OS_PASSTHROUGH_HEADER,
     ApplicationError, InternalError,
     {
         destination::{Action, Destination},

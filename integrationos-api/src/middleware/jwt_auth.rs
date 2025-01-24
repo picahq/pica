@@ -2,14 +2,12 @@ use crate::server::AppState;
 use axum::{body::Body, extract::State, middleware::Next, response::Response};
 use http::Request;
 use integrationos_domain::{
-    ApplicationError, Claims, IntegrationOSError, DEFAULT_AUDIENCE, DEFAULT_ISSUER,
-    FALLBACK_AUDIENCE, FALLBACK_ISSUER,
+    constant::{DEFAULT_AUDIENCE, DEFAULT_ISSUER, FALLBACK_AUDIENCE, FALLBACK_ISSUER},
+    ApplicationError, Claims, IntegrationOSError, BEARER_PREFIX,
 };
 use jsonwebtoken::{DecodingKey, Validation};
 use std::sync::Arc;
 use tracing::info;
-
-const BEARER_PREFIX: &str = "Bearer ";
 
 #[derive(Clone)]
 pub struct JwtState {

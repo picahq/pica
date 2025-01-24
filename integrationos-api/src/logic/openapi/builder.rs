@@ -1,6 +1,8 @@
 use convert_case::{Case, Casing};
 use indexmap::IndexMap;
-use integrationos_domain::{common_model::CommonModel, connection_model_definition::CrudAction};
+use integrationos_domain::{
+    common_model::CommonModel, connection_model_definition::CrudAction, constant::*,
+};
 use openapiv3::*;
 use strum::IntoEnumIterator;
 use tracing::debug;
@@ -10,16 +12,6 @@ struct PathItemAction {
     item: PathItem,
     path: String,
 }
-
-// OPENAPI METADATA
-const URI: &str = "https://api.picaos.com/v1/unified";
-const OPENAPI_VERSION: &str = "3.0.3";
-const SPEC_VERSION: &str = "1.0.0";
-const TITLE: &str = "Common Models";
-const X_PICA_SECRET: &str = "X-PICA-SECRET";
-const X_PICA_CONNECTION_KEY: &str = "X-PICA-CONNECTION-KEY";
-const X_PICA_ENABLE_PASSTHROUGH: &str = "X-PICA-ENABLE-PASSTHROUGH";
-const X_PICA_PASSTHROUGH_FORWARD: &str = "X-PICA-PASSTHROUGH-FORWARD";
 
 pub fn generate_path_item(common_model: &CommonModel) -> IndexMap<String, ReferenceOr<PathItem>> {
     IndexMap::from_iter(
@@ -501,44 +493,6 @@ fn reference_schema(reference: &str) -> ReferenceOr<Box<Schema>> {
         reference: "#/components/schemas/".to_owned() + reference,
     }
 }
-
-// OPENAPI PROPERTY KEYS
-const META: &str = "meta";
-const STATUS: &str = "status";
-const STATUS_CODE: &str = "statusCode";
-const UNIFIED: &str = "unified";
-const PASSTHROUGH: &str = "passthrough";
-const CONNECTION_DEFINITION_KEY: &str = "connectionDefinitionKey";
-const CONNECTION_KEY: &str = "connectionKey";
-const TRANSACTION_KEY: &str = "transactionKey";
-const TXN: &str = "txn";
-const PLATFORM: &str = "platform";
-const PLATFORM_VERSION: &str = "platformVersion";
-const ACTION: &str = "action";
-const COMMON_MODEL: &str = "commonModel";
-const COMMON_MODEL_VERSION: &str = "commonModelVersion";
-const HASH: &str = "hash";
-const MODIFY_TOKEN: &str = "modifyToken";
-const HEARTBEATS: &str = "heartbeats";
-const TOTAL_TRANSACTIONS: &str = "totalTransactions";
-const CACHE: &str = "cache";
-const HIT: &str = "hit";
-const TTL: &str = "ttl";
-const KEY: &str = "key";
-const RATE_LIMIT_REMAINING: &str = "rateLimitRemaining";
-const PLATFORM_RATE_LIMIT_REMAINING: &str = "platformRateLimitRemaining";
-const LATENCY: &str = "latency";
-const TIMESTAMP: &str = "timestamp";
-const COUNT: &str = "count";
-const PAGINATION: &str = "pagination";
-const CURSOR: &str = "cursor";
-const NEXT_CURSOR: &str = "nextCursor";
-const PREV_CURSOR: &str = "previousCursor";
-const LIMIT: &str = "limit";
-const CREATED_AFTER: &str = "createdAfter";
-const CREATED_BEFORE: &str = "createdBefore";
-const UPDATED_AFTER: &str = "updatedAfter";
-const UPDATED_BEFORE: &str = "updatedBefore";
 
 fn properties(
     action: &CrudAction,

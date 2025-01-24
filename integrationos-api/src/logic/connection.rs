@@ -1,4 +1,4 @@
-use super::{delete, event_access::DEFAULT_NAMESPACE, read, PublicExt, RequestExt};
+use super::{delete, read, PublicExt, RequestExt};
 use crate::{
     helper::{DeploymentSpecParams, ServiceName, ServiceSpecParams},
     logic::event_access::{
@@ -27,7 +27,8 @@ use integrationos_domain::{
     record_metadata::RecordMetadata,
     settings::Settings,
     ApplicationError, Connection, ConnectionIdentityType, ConnectionType, IntegrationOSError,
-    InternalError, Throughput,
+    InternalError, Throughput, APP_LABEL, DATABASE_TYPE_LABEL, DEFAULT_NAMESPACE,
+    JWT_SECRET_REF_KEY, JWT_SECRET_REF_NAME,
 };
 use k8s_openapi::{
     api::core::v1::{ContainerPort, EnvVar, EnvVarSource, SecretKeySelector, ServicePort},
@@ -52,12 +53,6 @@ pub fn get_router() -> Router<Arc<AppState>> {
         .route("/:id", patch(update_connection))
         .route("/:id", axum_delete(delete_connection))
 }
-
-const APP_LABEL: &str = "app";
-const DATABASE_TYPE_LABEL: &str = "database-type";
-
-const JWT_SECRET_REF_KEY: &str = "jwt-secret";
-const JWT_SECRET_REF_NAME: &str = "event-secrets";
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]

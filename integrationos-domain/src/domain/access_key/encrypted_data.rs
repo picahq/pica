@@ -1,14 +1,11 @@
-use crate::{IntegrationOSError, InternalError};
+use crate::{
+    IntegrationOSError, InternalError, HASH_LENGTH, HASH_PREFIX, IV_LENGTH, PASSWORD_LENGTH,
+};
 use aes::cipher::{generic_array::GenericArray, KeyIvInit, StreamCipher};
 use sha2::{Digest, Sha256};
 
 type Aes256Ctr = ctr::Ctr64BE<aes::Aes256>;
-const HASH_LENGTH: usize = 32;
-pub const IV_LENGTH: usize = 16;
-pub const PASSWORD_LENGTH: usize = 32;
 type HashBuf = [u8; HASH_LENGTH];
-
-const HASH_PREFIX: &str = "\x19Event Signed Message:\n";
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct EncryptedData {

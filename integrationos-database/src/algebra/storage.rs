@@ -2,13 +2,11 @@ use crate::domain::postgres::serialize_pgvalueref;
 use crate::domain::postgres::PostgresDatabaseConnection;
 use async_trait::async_trait;
 use futures::{StreamExt, TryStreamExt};
-use integrationos_domain::{ApplicationError, IntegrationOSError};
+use integrationos_domain::{constant::MAX_LIMIT, ApplicationError, IntegrationOSError};
 use serde_json::Value;
 use sqlx::postgres::PgRow;
 use sqlx::{query, Column, PgPool, Row};
 use std::collections::HashMap;
-
-const MAX_LIMIT: usize = 100;
 
 #[async_trait]
 pub trait Storage: Send + Sync {

@@ -22,7 +22,7 @@ use integrationos_domain::{
     id::{prefix::IdPrefix, Id},
     ownership::Ownership,
     record_metadata::RecordMetadata,
-    AccessKey, ApplicationError, IntegrationOSError, InternalError,
+    AccessKey, ApplicationError, IntegrationOSError, InternalError, DEFAULT_NAMESPACE,
 };
 use mongodb::bson::doc;
 use rand::Rng;
@@ -31,8 +31,6 @@ use std::sync::Arc;
 use tracing::{error, warn};
 use uuid::Uuid;
 use validator::Validate;
-
-pub const DEFAULT_NAMESPACE: &str = "default";
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()

@@ -1,18 +1,16 @@
 use chrono::{DateTime, Datelike, Utc};
 use http::HeaderValue;
 use integrationos_domain::{
-    destination::Action, event_access::EventAccess, ownership::Ownership, Connection,
+    constant::{CREATED_AT_KEY, DAILY_KEY, MONTHLY_KEY, PLATFORMS_KEY, TOTAL_KEY},
+    destination::Action,
+    event_access::EventAccess,
+    ownership::Ownership,
+    Connection,
 };
 use segment::message::{Track, User};
 use serde::Deserialize;
 use serde_json::json;
 use std::sync::Arc;
-
-pub const TOTAL_KEY: &str = "total";
-pub const DAILY_KEY: &str = "daily";
-pub const MONTHLY_KEY: &str = "monthly";
-pub const PLATFORMS_KEY: &str = "platforms";
-pub const CREATED_AT_KEY: &str = "createdAt";
 
 #[derive(Debug, Clone, strum::Display, Deserialize)]
 #[serde(rename_all = "lowercase")]

@@ -1,14 +1,8 @@
-use super::IntegrationOSError;
+use super::{IntegrationOSError, DEFAULT_AUDIENCE, DEFAULT_ISSUER};
 use crate::InternalError;
 use chrono::Utc;
 use jsonwebtoken::{EncodingKey, Header};
 use serde::{Deserialize, Serialize};
-
-pub const DEFAULT_AUDIENCE: &str = "pica-users";
-pub const DEFAULT_ISSUER: &str = "pica";
-
-pub const FALLBACK_AUDIENCE: &str = "pica-users";
-pub const FALLBACK_ISSUER: &str = "pica";
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Default)]
 #[serde(rename_all = "camelCase")]

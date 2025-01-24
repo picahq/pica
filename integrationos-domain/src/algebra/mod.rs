@@ -1,5 +1,4 @@
 mod crypto;
-mod fetcher;
 mod hash;
 mod json;
 mod oauth;
@@ -11,7 +10,6 @@ mod template;
 mod timed;
 
 pub use crypto::*;
-pub use fetcher::*;
 pub use hash::*;
 pub use json::*;
 pub use oauth::*;

@@ -1,9 +1,5 @@
 use super::ReadResponse;
-use crate::{
-    domain::metrics::{DAILY_KEY, MONTHLY_KEY, PLATFORMS_KEY, TOTAL_KEY},
-    router::ServerResponse,
-    server::AppState,
-};
+use crate::{router::ServerResponse, server::AppState};
 use axum::{
     extract::{Path, Query, State},
     routing::get,
@@ -11,7 +7,9 @@ use axum::{
 };
 use bson::Document;
 use integrationos_domain::{
-    event_access::EventAccess, ApplicationError, IntegrationOSError, InternalError, Store,
+    constant::{DAILY_KEY, MONTHLY_KEY, PLATFORMS_KEY, TOTAL_KEY},
+    event_access::EventAccess,
+    ApplicationError, IntegrationOSError, InternalError, Store,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;

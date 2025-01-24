@@ -31,12 +31,11 @@ use self::{
     access_key_data::AccessKeyData, access_key_prefix::AccessKeyPrefix,
     encrypted_access_key::EncryptedAccessKey,
 };
+use super::{EVENT_VERSION, IV_LENGTH, PASSWORD_LENGTH};
 use crate::IntegrationOSError;
 use base64ct::{Base64UrlUnpadded, Encoding};
-use encrypted_data::{EncryptedData, IV_LENGTH, PASSWORD_LENGTH};
+use encrypted_data::EncryptedData;
 use std::str;
-
-const EVENT_VERSION: &str = "v1";
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AccessKey {

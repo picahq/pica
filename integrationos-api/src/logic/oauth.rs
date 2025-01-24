@@ -1,8 +1,5 @@
 use super::event_access::CreateEventAccessPayloadWithOwnership;
-use crate::{
-    logic::event_access::{get_client_throughput, DEFAULT_NAMESPACE},
-    server::AppState,
-};
+use crate::{logic::event_access::get_client_throughput, server::AppState};
 use axum::{
     extract::{Path, State},
     routing::post,
@@ -23,7 +20,7 @@ use integrationos_domain::{
     oauth_secret::OAuthSecret,
     ownership::Ownership,
     ApplicationError, Connection, ConnectionIdentityType, ErrorMeta, IntegrationOSError,
-    InternalError, OAuth, Throughput,
+    InternalError, OAuth, Throughput, DEFAULT_NAMESPACE,
 };
 use mongodb::bson::doc;
 use reqwest::Request;

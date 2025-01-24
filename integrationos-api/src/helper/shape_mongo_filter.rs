@@ -1,15 +1,11 @@
 use axum::extract::Query;
 use http::HeaderMap;
-use integrationos_domain::event_access::EventAccess;
+use integrationos_domain::{
+    event_access::EventAccess, DELETED_STR, DUAL_ENVIRONMENT_HEADER, ENVIRONMENT_STR, LIMIT_STR,
+    OWNERSHIP_STR, SKIP_STR,
+};
 use mongodb::bson::{doc, Document};
 use std::{collections::BTreeMap, sync::Arc};
-
-pub const DELETED_STR: &str = "deleted";
-const OWNERSHIP_STR: &str = "ownership.buildableId";
-const ENVIRONMENT_STR: &str = "environment";
-const DUAL_ENVIRONMENT_HEADER: &str = "x-pica-show-all-environments";
-const LIMIT_STR: &str = "limit";
-const SKIP_STR: &str = "skip";
 
 #[derive(Debug, Clone)]
 pub struct MongoQuery {

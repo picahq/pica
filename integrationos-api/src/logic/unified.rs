@@ -1,4 +1,4 @@
-use super::{get_connection, INTEGRATION_OS_PASSTHROUGH_HEADER};
+use super::get_connection;
 use crate::{domain::config::Headers, domain::metrics::Metric, server::AppState};
 use axum::{
     extract::{Path, Query, State},
@@ -10,9 +10,12 @@ use bson::doc;
 use convert_case::{Case, Casing};
 use http::{HeaderMap, HeaderName};
 use integrationos_domain::{
-    connection_model_definition::CrudAction, destination::Action,
-    encrypted_access_key::EncryptedAccessKey, encrypted_data::PASSWORD_LENGTH,
-    event_access::EventAccess, AccessKey, ApplicationError, Event, InternalError,
+    connection_model_definition::CrudAction,
+    constant::{INTEGRATION_OS_PASSTHROUGH_HEADER, PASSWORD_LENGTH},
+    destination::Action,
+    encrypted_access_key::EncryptedAccessKey,
+    event_access::EventAccess,
+    AccessKey, ApplicationError, Event, InternalError, META,
 };
 use integrationos_unified::domain::RequestCrudBuilder;
 use serde::{Deserialize, Serialize};
@@ -60,8 +63,6 @@ pub async fn get_request(
     )
     .await
 }
-
-const META: &str = "meta";
 
 pub async fn update_request(
     access: Extension<Arc<EventAccess>>,

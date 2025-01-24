@@ -1,6 +1,7 @@
 pub mod access_key;
 pub mod configuration;
 pub mod connection;
+pub mod constant;
 pub mod error;
 pub mod event;
 pub mod http;
@@ -17,6 +18,7 @@ pub mod user;
 pub use access_key::*;
 pub use configuration::*;
 pub use connection::*;
+pub use constant::*;
 pub use error::*;
 pub use event::*;
 pub use http::*;

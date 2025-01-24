@@ -1,3 +1,4 @@
+use crate::constant::*;
 use anyhow::{Context, Result};
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::prelude::*;
@@ -5,7 +6,7 @@ use core::str;
 use hmac::{Hmac, Mac};
 use http::Method;
 use indexmap::IndexMap;
-use percent_encoding::{AsciiSet, PercentEncode, NON_ALPHANUMERIC};
+use percent_encoding::PercentEncode;
 use rand::{thread_rng, RngCore};
 use reqwest::Url;
 use sha1::Sha1;
@@ -15,24 +16,6 @@ use std::{
     fmt,
     time::{SystemTime, UNIX_EPOCH},
 };
-
-const NONCE_LEN: usize = 12;
-const OAUTH_CALLBACK: &str = "oauth_callback";
-const OAUTH_VERIFIER: &str = "oauth_verifier";
-const OAUTH_CONSUMER_KEY: &str = "oauth_consumer_key";
-const OAUTH_NONCE: &str = "oauth_nonce";
-const OAUTH_SIGNATURE: &str = "oauth_signature";
-const OAUTH_SIGNATURE_METHOD: &str = "oauth_signature_method";
-const OAUTH_TIMESTAMP: &str = "oauth_timestamp";
-const OAUTH_TOKEN: &str = "oauth_token";
-const OAUTH_VERSION: &str = "oauth_version";
-const HMAC_LENGTH_ERROR: &str = "HMAC has no key length restrictions";
-
-const EXCLUDE: &AsciiSet = &NON_ALPHANUMERIC
-    .remove(b'-')
-    .remove(b'.')
-    .remove(b'_')
-    .remove(b'~');
 
 fn percent_encode<T: ?Sized + AsRef<[u8]>>(data: &T) -> PercentEncode<'_> {
     percent_encoding::percent_encode(data.as_ref(), EXCLUDE)
