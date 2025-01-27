@@ -28,6 +28,7 @@ async fn main() -> Result<()> {
 
     let client = WatchdogClient::new(watchdog_config, cache_config, database_config);
 
-    client.start().await??;
+    client.start().await?;
+
     Ok(())
 }
