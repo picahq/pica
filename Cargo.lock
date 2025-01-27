@@ -105,10 +105,89 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
 
 [[package]]
+name = "api"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "bson",
+ "cache",
+ "chrono",
+ "convert_case 0.6.0",
+ "dotenvy",
+ "entities",
+ "envconfig",
+ "fake",
+ "futures",
+ "futures-util",
+ "http 1.1.0",
+ "http-serde-ext-ios",
+ "hyper 0.14.31",
+ "indexmap 2.6.0",
+ "jsonwebtoken 8.3.0",
+ "k8s-openapi",
+ "kube",
+ "mockito",
+ "mongodb",
+ "num_cpus",
+ "openapiv3",
+ "rand",
+ "redis 0.27.5",
+ "regex",
+ "reqwest",
+ "schemars",
+ "segment",
+ "semver 1.0.23",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "strum",
+ "testcontainers-modules",
+ "thiserror 1.0.69",
+ "tokio",
+ "tower 0.4.13",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "unified",
+ "uuid",
+ "validator",
+]
+
+[[package]]
 name = "arc-swap"
 version = "1.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "69f7f8c3906b62b754cd5326047894316021dcfe5a194c8ea52bdd94934a3457"
+
+[[package]]
+name = "archiver"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bson",
+ "chrono",
+ "dotenvy",
+ "entities",
+ "envconfig",
+ "fake",
+ "futures",
+ "google-cloud-storage",
+ "http 1.1.0",
+ "mongodb",
+ "reqwest",
+ "reqwest-middleware",
+ "reqwest-retry",
+ "reqwest-tracing",
+ "serde",
+ "serde_json",
+ "strum",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "unified",
+]
 
 [[package]]
 name = "arrayvec"
@@ -288,28 +367,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.89",
-]
-
-[[package]]
-name = "axum-prometheus"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b683cbc43010e9a3d72c2f31ca464155ff4f95819e88a32924b0f47a43898978"
-dependencies = [
- "axum",
- "bytes",
- "futures",
- "futures-core",
- "http 1.1.0",
- "http-body 1.0.1",
- "matchit 0.7.3",
- "metrics 0.22.3",
- "metrics-exporter-prometheus 0.13.1",
- "once_cell",
- "pin-project",
- "tokio",
- "tower 0.4.13",
- "tower-http",
 ]
 
 [[package]]
@@ -556,6 +613,24 @@ name = "bytes"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ac0150caa2ae65ca5bd83f25c7de183dea78d4d366469f148435e2acfbad0da"
+
+[[package]]
+name = "cache"
+version = "0.1.0"
+dependencies = [
+ "deadpool-redis",
+ "entities",
+ "fake",
+ "futures",
+ "http 1.1.0",
+ "moka",
+ "mongodb",
+ "redis 0.27.5",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
 
 [[package]]
 name = "cc"
@@ -919,6 +994,41 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
+name = "database"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "axum",
+ "cache",
+ "chrono",
+ "dotenvy",
+ "entities",
+ "envconfig",
+ "futures",
+ "futures-util",
+ "http 1.1.0",
+ "http-serde-ext-ios",
+ "hyper 0.14.31",
+ "mockito",
+ "mongodb",
+ "num_cpus",
+ "rand",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "strum",
+ "testcontainers-modules",
+ "tokio",
+ "tower 0.4.13",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "unified",
+]
+
+[[package]]
 name = "deadpool"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1211,6 +1321,68 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75030f3c4f45dafd7586dd6780965a8c7e8e285a5ecb86713e63a79c5b2766f3"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "entities"
+version = "9.0.0"
+dependencies = [
+ "aes",
+ "anyhow",
+ "async-recursion",
+ "async-trait",
+ "axum",
+ "base64 0.21.7",
+ "base64ct",
+ "bson",
+ "chacha20poly1305",
+ "chrono",
+ "ctr",
+ "derive_builder",
+ "downcast-rs",
+ "envconfig",
+ "fake",
+ "futures",
+ "google-cloud-kms",
+ "handlebars",
+ "hex",
+ "hmac",
+ "http 1.1.0",
+ "http-serde-ext-ios",
+ "indexmap 2.6.0",
+ "js-sandbox-ios",
+ "jsonpath_lib",
+ "jsonwebtoken 8.3.0",
+ "mongodb",
+ "napi",
+ "napi-derive",
+ "once_cell",
+ "openapiv3",
+ "opentelemetry",
+ "opentelemetry-otlp",
+ "opentelemetry_sdk",
+ "percent-encoding",
+ "pin-project",
+ "prost",
+ "rand",
+ "reqwest",
+ "schemars",
+ "secrecy 0.10.3",
+ "semver 1.0.23",
+ "serde",
+ "serde_json",
+ "sha1",
+ "sha2",
+ "sha3",
+ "strum",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "tracing-bunyan-formatter",
+ "tracing-log 0.2.0",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]
@@ -1734,15 +1906,6 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33ff8ae62cd3a9102e5637afc8452c55acf3844001bd5374e0b0bd7b6616c038"
-dependencies = [
- "ahash 0.8.11",
-]
-
-[[package]]
-name = "hashbrown"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
@@ -1994,7 +2157,6 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2",
  "tokio",
  "tower-service",
  "tracing",
@@ -2335,307 +2497,6 @@ dependencies = [
  "js-sys",
  "wasm-bindgen",
  "web-sys",
-]
-
-[[package]]
-name = "integrationos-api"
-version = "1.0.0"
-dependencies = [
- "anyhow",
- "axum",
- "bson",
- "chrono",
- "convert_case 0.6.0",
- "dotenvy",
- "envconfig",
- "fake",
- "futures",
- "futures-util",
- "http 1.1.0",
- "http-serde-ext-ios",
- "hyper 0.14.31",
- "indexmap 2.6.0",
- "integrationos-cache",
- "integrationos-domain",
- "integrationos-event",
- "integrationos-gateway",
- "integrationos-unified",
- "jsonwebtoken 8.3.0",
- "k8s-openapi",
- "kube",
- "mockito",
- "mongodb",
- "num_cpus",
- "openapiv3",
- "rand",
- "redis 0.27.5",
- "regex",
- "reqwest",
- "schemars",
- "segment",
- "semver 1.0.23",
- "serde",
- "serde_json",
- "serde_yaml",
- "strum",
- "testcontainers-modules",
- "thiserror 1.0.69",
- "tokio",
- "tower 0.4.13",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "uuid",
- "validator",
-]
-
-[[package]]
-name = "integrationos-archiver"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bson",
- "chrono",
- "dotenvy",
- "envconfig",
- "fake",
- "futures",
- "google-cloud-storage",
- "http 1.1.0",
- "integrationos-domain",
- "integrationos-unified",
- "mongodb",
- "reqwest",
- "reqwest-middleware",
- "reqwest-retry",
- "reqwest-tracing",
- "serde",
- "serde_json",
- "strum",
- "tempfile",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "integrationos-cache"
-version = "0.1.0"
-dependencies = [
- "deadpool-redis",
- "fake",
- "futures",
- "http 1.1.0",
- "integrationos-domain",
- "moka",
- "mongodb",
- "redis 0.27.5",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "integrationos-database"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "axum",
- "chrono",
- "dotenvy",
- "envconfig",
- "futures",
- "futures-util",
- "http 1.1.0",
- "http-serde-ext-ios",
- "hyper 0.14.31",
- "integrationos-cache",
- "integrationos-domain",
- "integrationos-unified",
- "mockito",
- "mongodb",
- "num_cpus",
- "rand",
- "reqwest",
- "serde",
- "serde_json",
- "sqlx",
- "strum",
- "testcontainers-modules",
- "tokio",
- "tower 0.4.13",
- "tower-http",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "integrationos-domain"
-version = "9.0.0"
-dependencies = [
- "aes",
- "anyhow",
- "async-recursion",
- "async-trait",
- "axum",
- "base64 0.21.7",
- "base64ct",
- "bson",
- "chacha20poly1305",
- "chrono",
- "ctr",
- "derive_builder",
- "downcast-rs",
- "envconfig",
- "fake",
- "futures",
- "google-cloud-kms",
- "handlebars",
- "hex",
- "hmac",
- "http 1.1.0",
- "http-serde-ext-ios",
- "indexmap 2.6.0",
- "js-sandbox-ios",
- "jsonpath_lib",
- "jsonwebtoken 8.3.0",
- "mongodb",
- "napi",
- "napi-derive",
- "once_cell",
- "openapiv3",
- "opentelemetry",
- "opentelemetry-otlp",
- "opentelemetry_sdk",
- "percent-encoding",
- "pin-project",
- "prost",
- "rand",
- "reqwest",
- "schemars",
- "secrecy 0.10.3",
- "semver 1.0.23",
- "serde",
- "serde_json",
- "sha1",
- "sha2",
- "sha3",
- "strum",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "tracing-bunyan-formatter",
- "tracing-log 0.2.0",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
-name = "integrationos-event"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "bson",
- "chrono",
- "dotenvy",
- "envconfig",
- "fake",
- "futures",
- "handlebars",
- "http 1.1.0",
- "integrationos-cache",
- "integrationos-domain",
- "integrationos-unified",
- "js-sandbox-ios",
- "metrics 0.21.1",
- "metrics-exporter-prometheus 0.12.2",
- "mockito",
- "moka",
- "mongodb",
- "redis 0.27.5",
- "reqwest",
- "serde",
- "serde_json",
- "testcontainers-modules",
- "tokio",
- "tokio-condvar",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "integrationos-gateway"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "axum",
- "axum-prometheus",
- "dotenvy",
- "envconfig",
- "http 1.1.0",
- "http-body-util",
- "http-serde-ext-ios",
- "integrationos-cache",
- "integrationos-domain",
- "moka",
- "mongodb",
- "redis 0.27.5",
- "serde",
- "serde_json",
- "tokio",
- "tower 0.4.13",
- "tower-http",
- "tracing",
-]
-
-[[package]]
-name = "integrationos-unified"
-version = "0.1.0"
-dependencies = [
- "bson",
- "chrono",
- "derive_builder",
- "futures",
- "handlebars",
- "http 1.1.0",
- "http-serde-ext-ios",
- "indexmap 2.6.0",
- "integrationos-cache",
- "integrationos-domain",
- "js-sandbox-ios",
- "jsonpath_lib",
- "mockito",
- "mongodb",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "integrationos-watchdog"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bson",
- "chrono",
- "dotenvy",
- "envconfig",
- "futures",
- "integrationos-cache",
- "integrationos-domain",
- "mongodb",
- "redis 0.27.5",
- "serde_json",
- "tokio",
- "tracing",
 ]
 
 [[package]]
@@ -3023,15 +2884,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mach2"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19b955cdeb2a02b9117f121ce63aa52d08ade45de53e48fe6a38b39c10f6f709"
-dependencies = [
- "libc",
-]
-
-[[package]]
 name = "match_cfg"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3081,103 +2933,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "488016bfae457b036d996092f6cb448677611ce4449e970ceaf42695203f218a"
 dependencies = [
  "autocfg",
-]
-
-[[package]]
-name = "metrics"
-version = "0.21.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fde3af1a009ed76a778cb84fdef9e7dbbdf5775ae3e4cc1f434a6a307f6f76c5"
-dependencies = [
- "ahash 0.8.11",
- "metrics-macros",
- "portable-atomic",
-]
-
-[[package]]
-name = "metrics"
-version = "0.22.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2be3cbd384d4e955b231c895ce10685e3d8260c5ccffae898c96c723b0772835"
-dependencies = [
- "ahash 0.8.11",
- "portable-atomic",
-]
-
-[[package]]
-name = "metrics-exporter-prometheus"
-version = "0.12.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d4fa7ce7c4862db464a37b0b31d89bca874562f034bd7993895572783d02950"
-dependencies = [
- "base64 0.21.7",
- "hyper 0.14.31",
- "indexmap 1.9.3",
- "ipnet",
- "metrics 0.21.1",
- "metrics-util 0.15.1",
- "quanta 0.11.1",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "metrics-exporter-prometheus"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bf4e7146e30ad172c42c39b3246864bd2d3c6396780711a1baf749cfe423e21"
-dependencies = [
- "base64 0.21.7",
- "hyper 0.14.31",
- "indexmap 2.6.0",
- "ipnet",
- "metrics 0.22.3",
- "metrics-util 0.16.3",
- "quanta 0.12.3",
- "thiserror 1.0.69",
- "tokio",
-]
-
-[[package]]
-name = "metrics-macros"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38b4faf00617defe497754acde3024865bc143d44a86799b24e191ecff91354f"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.89",
-]
-
-[[package]]
-name = "metrics-util"
-version = "0.15.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4de2ed6e491ed114b40b732e4d1659a9d53992ebd87490c44a6ffe23739d973e"
-dependencies = [
- "crossbeam-epoch",
- "crossbeam-utils",
- "hashbrown 0.13.1",
- "metrics 0.21.1",
- "num_cpus",
- "quanta 0.11.1",
- "sketches-ddsketch",
-]
-
-[[package]]
-name = "metrics-util"
-version = "0.16.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b07a5eb561b8cbc16be2d216faf7757f9baf3bfb94dbb0fae3df8387a5bb47f"
-dependencies = [
- "crossbeam-epoch",
- "crossbeam-utils",
- "hashbrown 0.14.5",
- "metrics 0.22.3",
- "num_cpus",
- "quanta 0.12.3",
- "sketches-ddsketch",
 ]
 
 [[package]]
@@ -3271,7 +3026,7 @@ dependencies = [
  "futures-util",
  "once_cell",
  "parking_lot 0.12.3",
- "quanta 0.12.3",
+ "quanta",
  "rustc_version 0.4.1",
  "smallvec",
  "tagptr",
@@ -3883,12 +3638,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "portable-atomic"
-version = "1.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "280dc24453071f1b63954171985a0b0d30058d287960968b9b2aca264c8d4ee6"
-
-[[package]]
 name = "powerfmt"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4032,22 +3781,6 @@ dependencies = [
 
 [[package]]
 name = "quanta"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a17e662a7a8291a865152364c20c7abc5e60486ab2001e8ec10b24862de0b9ab"
-dependencies = [
- "crossbeam-utils",
- "libc",
- "mach2",
- "once_cell",
- "raw-cpuid 10.7.0",
- "wasi",
- "web-sys",
- "winapi",
-]
-
-[[package]]
-name = "quanta"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8e5167a477619228a0b284fac2674e3c388cba90631d7b7de620e6f1fcd08da5"
@@ -4055,7 +3788,7 @@ dependencies = [
  "crossbeam-utils",
  "libc",
  "once_cell",
- "raw-cpuid 11.2.0",
+ "raw-cpuid",
  "wasi",
  "web-sys",
  "winapi",
@@ -4162,15 +3895,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
-]
-
-[[package]]
-name = "raw-cpuid"
-version = "10.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c297679cb867470fa8c9f67dbba74a78d78e3e98d7cf2b08d6d71540f797332"
-dependencies = [
- "bitflags 1.3.2",
 ]
 
 [[package]]
@@ -5141,12 +4865,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sketches-ddsketch"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85636c14b73d81f541e525f585c0a2109e6744e1565b5c1668e31c70c10ed65c"
-
-[[package]]
 name = "slab"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5735,15 +5453,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tokio-condvar"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7233b09174540ef9bf9fc8326bcad6ccebc631e7c9a1e2e48d956a133056f9d"
-dependencies = [
- "tokio",
-]
-
-[[package]]
 name = "tokio-macros"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6136,6 +5845,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39ec24b3121d976906ece63c9daad25b85969647682eee313cb5779fdd69e14e"
 
 [[package]]
+name = "unified"
+version = "0.1.0"
+dependencies = [
+ "bson",
+ "cache",
+ "chrono",
+ "derive_builder",
+ "entities",
+ "futures",
+ "handlebars",
+ "http 1.1.0",
+ "http-serde-ext-ios",
+ "indexmap 2.6.0",
+ "js-sandbox-ios",
+ "jsonpath_lib",
+ "mockito",
+ "mongodb",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "universal-hash"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6415,6 +6150,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f270206a91783fd90625c8bb0d8fbd459d0b1d1bf209b656f713f01ae7c04b8"
 dependencies = [
  "thiserror 1.0.69",
+]
+
+[[package]]
+name = "watchdog"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bson",
+ "cache",
+ "chrono",
+ "dotenvy",
+ "entities",
+ "envconfig",
+ "futures",
+ "mongodb",
+ "redis 0.27.5",
+ "serde_json",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]

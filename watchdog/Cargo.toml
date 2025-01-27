@@ -1,0 +1,20 @@
+[package]
+name = "watchdog"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow.workspace = true
+bson.workspace = true
+chrono.workspace = true
+dotenvy.workspace = true
+envconfig.workspace = true
+futures.workspace = true
+cache = { path = "../cache" }
+entities = { path = "../entities" }
+serde_json.workspace = true
+mongodb.workspace = true
+redis.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
