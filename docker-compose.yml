@@ -55,47 +55,6 @@ services:
     volumes:
       - ${HOME}/.config/gcloud:/root/.config/gcloud:ro
 
-  event-core:
-    platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/event-core:1.29.1
-    environment:
-      - CONTEXT_COLLECTION_NAME=event-transactions
-      - CONTEXT_DATABASE_NAME=events-service
-      - CONTEXT_DATABASE_URL=mongodb://pica:${MONGO_PASSWORD}@mongo:27017
-      - CONTROL_DATABASE_NAME=events-service
-      - CONTROL_DATABASE_URL=mongodb://pica:${MONGO_PASSWORD}@mongo:27017
-      - EVENT_DATABASE_NAME=events-service
-      - EVENT_DATABASE_URL-mongodb://pica:${MONGO_PASSWORD}@mongo:27017
-      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
-      - GOOGLE_KMS_KEY_ID=${KMS_KEY_ID}
-      - GOOGLE_KMS_KEY_RING_ID=${KMS_KEY_RING_ID}
-      - GOOGLE_KMS_LOCATION_ID=${GCP_LOCATION_ID}
-      - GOOGLE_KMS_PROJECT_ID=${GCP_PROJECT_ID}
-      - IOS_CRYPTO_SECRET=${IOS_CRYPTO_SECRET}
-      - REDIS_URL=redis://redis:6379
-      - RUST_LOG=event_core=info
-      - SECRETS_SERVICE_PROVIDER=google-kms
-    volumes:
-      - ${HOME}/.config/gcloud:/root/.config/gcloud:ro
-
-  gateway:
-    platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/gateway:1.29.1
-    ports:
-      - 3002:3002
-    environment:
-      - CONTEXT_COLLECTION_NAME=event-transactions
-      - CONTEXT_DATABASE_NAME=events-service
-      - CONTEXT_DATABASE_URL=mongodb://pica:${MONGO_PASSWORD}@mongo:27017
-      - CONTROL_DATABASE_NAME=events-service
-      - CONTROL_DATABASE_URL=mongodb://pica:${MONGO_PASSWORD}@mongo:27017
-      - EVENT_DATABASE_NAME=events-service
-      - EVENT_DATABASE_URL=mongodb://pica:${MONGO_PASSWORD}@mongo:27017
-      - REDIS_URL=redis://redis:6379
-      - RUST_LOG=gateway=info,tower_http=info
-      - SECRET=${GATEWAY_SECRET}
-      - SERVER_ADDRESS=0.0.0.0:3002
-
   oauth-refresh:
     platform: linux/amd64
     image: us-docker.pkg.dev/integrationos/docker-oss/oauth-refresh:1.29.1
