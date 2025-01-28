@@ -31,6 +31,7 @@ pub mod connection_oauth_definition;
 pub mod event_access;
 pub mod event_callback;
 pub mod events;
+pub mod knowledge;
 pub mod metrics;
 pub mod oauth;
 pub mod openapi;

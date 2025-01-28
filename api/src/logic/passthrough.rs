@@ -53,6 +53,8 @@ pub async fn passthrough_request(
     )
     .await?;
 
+    tracing::info!("Executing {} request on {}", method, uri.path());
+
     let destination = Destination {
         platform: connection.platform.clone(),
         action: Action::Passthrough {

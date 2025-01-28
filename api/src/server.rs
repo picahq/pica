@@ -1,7 +1,10 @@
 use crate::{
     domain::{ConnectionsConfig, K8sMode, Metric},
     helper::{K8sDriver, K8sDriverImpl, K8sDriverLogger},
-    logic::{connection_oauth_definition::FrontendOauthConnectionDefinition, openapi::OpenAPIData},
+    logic::{
+        connection_oauth_definition::FrontendOauthConnectionDefinition, knowledge::Knowledge,
+        openapi::OpenAPIData,
+    },
     router,
 };
 use anyhow::{anyhow, Context, Result};
@@ -50,6 +53,7 @@ pub struct AppStores {
     pub public_connection: MongoStore<PublicConnection>,
     pub public_connection_details: MongoStore<PublicConnectionDetails>,
     pub public_model_schema: MongoStore<PublicConnectionModelSchema>,
+    pub knowledge: MongoStore<Knowledge>,
     pub secrets: MongoStore<Secret>,
     pub settings: MongoStore<Settings>,
 }
@@ -105,6 +109,7 @@ impl Server {
         let connection_config = MongoStore::new(&db, &Store::ConnectionDefinitions).await?;
         let event_access = MongoStore::new(&db, &Store::EventAccess).await?;
         let event = MongoStore::new(&db, &Store::Events).await?;
+        let knowledge = MongoStore::new(&db, &Store::ConnectionModelDefinitions).await?;
         let clients = MongoStore::new(&db, &Store::Clients).await?;
         let secrets_store = MongoStore::<Secret>::new(&db, &Store::Secrets).await?;
 
@@ -152,6 +157,7 @@ impl Server {
             public_connection_details,
             connection_config,
             event_access,
+            knowledge,
             event,
             clients,
         };
