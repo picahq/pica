@@ -18,11 +18,6 @@ This command will monitor changes in the project and execute the archiver servic
 
 ## Running the Tests
 
-To run the tests for the archiver, use:
-
 ```bash
 cargo nextest run --all-features
 ```
-
-This will execute all tests in the project, ensuring that the archiving process works as expected across all features.
-
