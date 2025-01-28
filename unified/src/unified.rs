@@ -713,8 +713,11 @@ fn build_unified_response(
             tracing::info!("No response body to map for this action. ID: {}", config.id);
         }
 
+        let mut builder = Response::builder();
+
         // Insert passthrough data if needed
         if is_passthrough {
+            builder = builder.header(ACTION_KEY.to_string(), config.title.to_string());
             if let Some(passthrough) = passthrough {
                 if let Value::Object(ref mut resp) = response {
                     resp.insert(PASSTHROUGH_KEY.to_string(), passthrough);
@@ -746,8 +749,6 @@ fn build_unified_response(
         if let Value::Object(ref mut resp) = response {
             resp.insert(META_KEY.to_string(), metadata_value.as_value().clone());
         }
-
-        let mut builder = Response::builder();
 
         if status.is_success() {
             builder = builder

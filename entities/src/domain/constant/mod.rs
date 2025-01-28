@@ -101,6 +101,7 @@ pub const PAGE_SIZE_KEY: &str = "pageSize";
 pub const PAGINATION_KEY: &str = "pagination";
 pub const STATUS_HEADER_KEY: &str = "response-status";
 pub const META_KEY: &str = "meta";
+pub const ACTION_KEY: &str = "action";
 
 // Database constants
 pub const MAX_LIMIT: usize = 100;
