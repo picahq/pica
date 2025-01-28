@@ -237,6 +237,7 @@ mod tests {
             is_default_crud_mapping: None,
             mapping: None,
             supported: true,
+            knowledge: None,
         };
 
         let client = Client::new();
@@ -312,6 +313,7 @@ mod tests {
             is_default_crud_mapping: None,
             mapping: None,
             supported: true,
+            knowledge: None,
         };
 
         let client = Client::new();

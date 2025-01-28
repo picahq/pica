@@ -521,6 +521,7 @@ impl TestServer {
             }),
             supported: Some(true),
             active: Some(true),
+            knowledge: None,
         };
 
         let res = self

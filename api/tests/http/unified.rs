@@ -585,6 +585,7 @@ async fn create_connection_model_definition(
         mapping: Some(mapping.clone()),
         supported: Some(true),
         active: Some(true),
+        knowledge: None,
     };
 
     let create_model_definition_response = server
