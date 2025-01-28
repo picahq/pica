@@ -170,6 +170,18 @@ where
     read_common::<T, U>(headers, access, query, State(state), true).await
 }
 
+pub async fn read_without_key<T, U>(
+    headers: HeaderMap,
+    query: Option<Query<BTreeMap<String, String>>>,
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<ServerResponse<ReadResponse<Value>>>, PicaError>
+where
+    T: RequestExt<Output = U> + PublicExt<U> + 'static,
+    U: Serialize + DeserializeOwned + Unpin + Sync + Send + Debug + 'static,
+{
+    read_common::<T, U>(headers, None, query, State(state), true).await
+}
+
 pub async fn read_without_count<T, U>(
     headers: HeaderMap,
     access: Option<Extension<Arc<EventAccess>>>,
