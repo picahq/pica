@@ -1,4 +1,4 @@
-use super::{read, HookExt, PublicExt, RequestExt};
+use super::{read_without_key, HookExt, PublicExt, RequestExt};
 use crate::server::{AppState, AppStores};
 use axum::{routing::get, Router};
 use entities::{Id, MongoStore};
@@ -8,8 +8,8 @@ use std::sync::Arc;
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", get(read::<ReadRequest, Knowledge>))
-        .route("/:id", get(read::<ReadRequest, Knowledge>))
+        .route("/", get(read_without_key::<ReadRequest, Knowledge>))
+        .route("/:id", get(read_without_key::<ReadRequest, Knowledge>))
 }
 
 struct ReadRequest;
