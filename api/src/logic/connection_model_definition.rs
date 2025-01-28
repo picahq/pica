@@ -307,6 +307,7 @@ pub struct CreateRequest {
     pub paths: Option<ModelPaths>,
     pub supported: Option<bool>,
     pub active: Option<bool>,
+    pub knowledge: Option<String>,
 }
 
 impl HookExt<ConnectionModelDefinition> for CreateRequest {}
@@ -359,6 +360,7 @@ impl RequestExt for CreateRequest {
             mapping: self.mapping.clone(),
             record_metadata: Default::default(),
             supported: self.supported.unwrap_or(false),
+            knowledge: self.knowledge.clone(),
         };
         record.record_metadata.version = self.version.clone();
         Some(record)

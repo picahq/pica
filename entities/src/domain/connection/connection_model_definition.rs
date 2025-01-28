@@ -47,11 +47,14 @@ pub struct ConnectionModelDefinition {
     pub is_default_crud_mapping: Option<bool>,
     pub mapping: Option<CrudMapping>,
 
-    #[serde(flatten, default)]
-    pub record_metadata: RecordMetadata,
-
     #[serde(default)]
     pub supported: bool,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub knowledge: Option<String>,
+
+    #[serde(flatten, default)]
+    pub record_metadata: RecordMetadata,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
