@@ -14,6 +14,7 @@ pub const ENVIRONMENT_FILTER: &str = "environment";
 pub const DUAL_ENVIRONMENT_HEADER: &str = "x-pica-show-all-environments";
 pub const LIMIT_FILTER: &str = "limit";
 pub const SKIP_FILTER: &str = "skip";
+pub const QUERY_BY_ID_PASSTHROUGH: &str = "x-pica-action-id";
 
 // JWT constants
 pub const BEARER_PREFIX: &str = "Bearer ";

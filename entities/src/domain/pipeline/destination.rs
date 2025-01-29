@@ -10,6 +10,8 @@ pub enum Action {
         method: http::Method,
         #[cfg_attr(feature = "dummy", dummy(expr = "String::new().into()"))]
         path: Arc<str>,
+        #[cfg_attr(feature = "dummy", dummy(default))]
+        id: Option<Arc<str>>,
     },
     Unified {
         #[cfg_attr(feature = "dummy", dummy(expr = "String::new().into()"))]
