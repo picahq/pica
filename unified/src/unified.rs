@@ -128,41 +128,60 @@ impl UnifiedDestination {
         destination: &Destination,
     ) -> Result<Option<ConnectionModelDefinition>, PicaError> {
         match &destination.action {
-            Action::Passthrough { method, path } => {
-                let connection_model_definitions = self
-                    .connection_model_definitions_store
-                    .get_many(
-                        Some(doc! {
-                            "connectionPlatform": destination.platform.as_ref(),
-                            "action": method.as_str(),
-                            "supported": true
-                        }),
-                        None,
-                        None,
-                        None,
-                        None,
-                    )
-                    .await?;
+            Action::Passthrough { method, path, id } => match id {
+                Some(id) => {
+                    let connection_model_definitions = self
+                        .connection_model_definitions_store
+                        .get_many(
+                            Some(doc! {
+                                "_id": id.to_string(),
+                            }),
+                            None,
+                            None,
+                            None,
+                            None,
+                        )
+                        .await?;
 
-                let routes = connection_model_definitions
-                    .iter()
-                    .map(|c| match c.platform_info {
-                        PlatformInfo::Api(ref c) => c.path.as_ref(),
-                    });
+                    Ok(connection_model_definitions.first().cloned())
+                }
+                None => {
+                    let connection_model_definitions = self
+                        .connection_model_definitions_store
+                        .get_many(
+                            Some(doc! {
+                                "connectionPlatform": destination.platform.as_ref(),
+                                "action": method.as_str(),
+                                "supported": true
+                            }),
+                            None,
+                            None,
+                            None,
+                            None,
+                        )
+                        .await?;
 
-                let matched_route = match_route(path, routes.clone()).map(|r| r.to_string());
+                    let routes =
+                        connection_model_definitions
+                            .iter()
+                            .map(|c| match c.platform_info {
+                                PlatformInfo::Api(ref c) => c.path.as_ref(),
+                            });
 
-                let mut connection_model_definitions = connection_model_definitions
-                    .clone()
-                    .into_iter()
-                    .filter(|c| match c.platform_info {
-                        PlatformInfo::Api(ref c) => matched_route
-                            .as_ref()
-                            .is_some_and(|mr| c.path.as_str() == mr),
-                    });
+                    let matched_route = match_route(path, routes.clone()).map(|r| r.to_string());
 
-                if let Some(connection_model_definition) = connection_model_definitions.next() {
-                    if connection_model_definitions.next().is_some() {
+                    let connection_model_definitions: Vec<ConnectionModelDefinition> =
+                        connection_model_definitions
+                            .clone()
+                            .into_iter()
+                            .filter(|c| match c.platform_info {
+                                PlatformInfo::Api(ref c) => matched_route
+                                    .as_ref()
+                                    .is_some_and(|mr| c.path.as_str() == mr),
+                            })
+                            .collect();
+
+                    if connection_model_definitions.len() > 1 {
                         error!("Multiple connection model definitions found for this path. Destination: {:?}, Routes: {:?}", destination, routes);
 
                         return Err(InternalError::invalid_argument(
@@ -171,11 +190,9 @@ impl UnifiedDestination {
                         ));
                     }
 
-                    Ok(Some(connection_model_definition))
-                } else {
-                    Ok(None)
+                    Ok(connection_model_definitions.first().cloned())
                 }
-            }
+            },
             Action::Unified { name, action, .. } => Ok(self
                 .connection_model_definitions_store
                 .collection
@@ -503,7 +520,7 @@ impl UnifiedDestination {
 
                 build_unified_response(config, metadata, is_passthrough)(body, pagination,  passthrough, params, status, headers)
             }
-            Action::Passthrough { method, path } => Err(InternalError::invalid_argument(
+            Action::Passthrough { method, path, .. } => Err(InternalError::invalid_argument(
                 &format!("Passthrough action is not supported for destination {}, in method {method} and path {path}", key.connection_key),
                 None,
             )),
@@ -577,7 +594,7 @@ impl UnifiedDestination {
 
         // Template the route for passthrough actions
         let templated_config = match &destination.action {
-            Action::Passthrough { method: _, path } => {
+            Action::Passthrough { path, .. } => {
                 let mut config_clone = (*config).clone();
                 let PlatformInfo::Api(ref mut c) = config_clone.platform_info;
                 let template = template_route(c.path.clone(), path.to_string());

@@ -8,11 +8,9 @@ use axum::{
 };
 use entities::{
     constant::PICA_PASSTHROUGH_HEADER,
-    ApplicationError, InternalError,
-    {
-        destination::{Action, Destination},
-        event_access::EventAccess,
-    },
+    destination::{Action, Destination},
+    event_access::EventAccess,
+    ApplicationError, InternalError, QUERY_BY_ID_PASSTHROUGH,
 };
 use http::{header::CONTENT_LENGTH, HeaderMap, HeaderName, Method, Uri};
 use hyper::body::Bytes;
@@ -53,6 +51,10 @@ pub async fn passthrough_request(
     )
     .await?;
 
+    let id = headers
+        .get(QUERY_BY_ID_PASSTHROUGH)
+        .and_then(|h| h.to_str().ok());
+
     tracing::info!("Executing {} request on {}", method, uri.path());
 
     let destination = Destination {
@@ -60,6 +62,7 @@ pub async fn passthrough_request(
         action: Action::Passthrough {
             path: uri.path().into(),
             method,
+            id: id.map(|i| i.into()),
         },
         connection_key: connection.key.clone(),
     };
