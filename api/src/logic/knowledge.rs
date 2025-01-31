@@ -21,6 +21,7 @@ pub struct Knowledge {
     pub id: Id,
     pub connection_platform: String,
     pub title: String,
+    pub path: String,
     pub knowledge: Option<String>,
 }
 
