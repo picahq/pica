@@ -1,4 +1,5 @@
 use super::get_connection;
+
 use crate::{domain::metrics::Metric, server::AppState};
 use axum::{
     extract::{Query, State},
