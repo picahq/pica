@@ -53,6 +53,9 @@ pub struct ConnectionModelDefinition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub knowledge: Option<String>,
 
+    #[serde(default)]
+    pub featured: bool,
+
     #[serde(flatten, default)]
     pub record_metadata: RecordMetadata,
 }
