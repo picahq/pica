@@ -382,7 +382,7 @@ async fn get_connection(
     Ok(Arc::new(connection))
 }
 
-pub async fn read_common<T, U>(
+async fn read_common<T, U>(
     headers: HeaderMap,
     access: Option<Extension<Arc<EventAccess>>>,
     query: Option<Query<BTreeMap<String, String>>>,

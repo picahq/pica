@@ -7,9 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 pub fn get_router() -> Router<Arc<AppState>> {
-    Router::new()
-        .route("/", get(read_without_key::<ReadRequest, Knowledge>))
-        .route("/:id", get(read_without_key::<ReadRequest, Knowledge>))
+    Router::new().route("/", get(read_without_key::<ReadRequest, Knowledge>))
 }
 
 struct ReadRequest;
