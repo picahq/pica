@@ -20,6 +20,8 @@ pub struct Knowledge {
     pub connection_platform: String,
     pub title: String,
     pub knowledge: Option<String>,
+    #[serde(default)]
+    pub featured: bool,
 }
 
 impl HookExt<Knowledge> for ReadRequest {}
