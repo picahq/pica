@@ -121,7 +121,6 @@ where
     T: RequestExt<Output = U> + HookExt<U> + PublicExt<U> + 'static,
     U: Serialize + DeserializeOwned + Unpin + Sync + Send + Debug + 'static,
 {
-    tracing::info!("EventAccess: {:?}", access);
     let output = access
         .map(|e| payload.access(e.0))
         .unwrap_or_else(|| payload.from())
