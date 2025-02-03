@@ -74,7 +74,6 @@ fn test_json_connection_model_definition() {
         record_metadata: RecordMetadata::test(),
         supported: false,
         knowledge: None,
-        tags: None,
     };
 
     assert!(

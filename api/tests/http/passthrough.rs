@@ -74,7 +74,6 @@ async fn test_passthrough_api() {
         supported: Some(true),
         active: Some(true),
         knowledge: None,
-        tags: None,
     };
 
     let create_model_definition_response = server

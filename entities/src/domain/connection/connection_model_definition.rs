@@ -53,17 +53,8 @@ pub struct ConnectionModelDefinition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub knowledge: Option<String>,
 
-    #[serde(default)]
-    pub tags: Option<Tags>,
-
     #[serde(flatten, default)]
     pub record_metadata: RecordMetadata,
-}
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(feature = "dummy", derive(fake::Dummy))]
-pub struct Tags {
-    featured: bool,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]

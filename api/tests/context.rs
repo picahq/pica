@@ -522,7 +522,6 @@ impl TestServer {
             supported: Some(true),
             active: Some(true),
             knowledge: None,
-            tags: None,
         };
 
         let res = self

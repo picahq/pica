@@ -586,7 +586,6 @@ async fn create_connection_model_definition(
         supported: Some(true),
         active: Some(true),
         knowledge: None,
-        tags: None,
     };
 
     let create_model_definition_response = server

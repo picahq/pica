@@ -1,7 +1,7 @@
 use super::{read_without_key, HookExt, PublicExt, RequestExt};
 use crate::server::{AppState, AppStores};
 use axum::{routing::get, Router};
-use entities::{connection_model_definition::Tags, Id, MongoStore};
+use entities::{record_metadata::RecordMetadata, Id, MongoStore};
 use fake::Dummy;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -20,8 +20,8 @@ pub struct Knowledge {
     pub connection_platform: String,
     pub title: String,
     pub knowledge: Option<String>,
-    #[serde(default)]
-    pub tags: Option<Tags>,
+    #[serde(flatten)]
+    pub metadata: RecordMetadata,
 }
 
 impl HookExt<Knowledge> for ReadRequest {}
