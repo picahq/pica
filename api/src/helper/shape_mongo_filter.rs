@@ -1,7 +1,7 @@
 use axum::extract::Query;
 use entities::{
-    event_access::EventAccess, DELETED_FILTER, DUAL_ENVIRONMENT_HEADER, ENVIRONMENT_FILTER,
-    LIMIT_FILTER, OWNERSHIP_FILTER, SKIP_FILTER,
+    event_access::EventAccess, CONTAINS_FILTER, DELETED_FILTER, DUAL_ENVIRONMENT_HEADER,
+    ENVIRONMENT_FILTER, LIMIT_FILTER, OWNERSHIP_FILTER, SKIP_FILTER,
 };
 use http::HeaderMap;
 use mongodb::bson::{doc, Document};
@@ -19,7 +19,11 @@ pub fn shape_mongo_filter(
     event_access: Option<Arc<EventAccess>>,
     headers: Option<HeaderMap>,
 ) -> MongoQuery {
-    let mut filter = doc! {};
+    let mut filter = doc! {
+        // "tags" : {
+        //     "$in" : ["featured"]
+        // }
+    };
     let mut skip = 0;
     let mut limit = 20;
 
@@ -27,6 +31,16 @@ pub fn shape_mongo_filter(
         for (key, value) in q.0.iter() {
             if key == LIMIT_FILTER {
                 limit = value.parse().unwrap_or(20);
+            } else if key == CONTAINS_FILTER {
+                let values = string_to_vec(value);
+                let splitted = values.split_first();
+
+                let target = splitted.map(|a| a.0);
+                let rest = splitted.map(|a| a.1);
+
+                if let (Some(target), Some(rest)) = (target, rest) {
+                    filter.insert(target, doc! { CONTAINS_FILTER: rest.to_vec() });
+                }
             } else if key == SKIP_FILTER {
                 skip = value.parse().unwrap_or(0);
             } else {
@@ -65,6 +79,10 @@ pub fn shape_mongo_filter(
         limit,
         skip,
     }
+}
+
+fn string_to_vec(s: &str) -> Vec<String> {
+    s.split(',').map(|s| s.to_string()).collect::<Vec<String>>()
 }
 
 #[cfg(test)]

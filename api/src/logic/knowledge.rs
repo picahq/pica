@@ -1,10 +1,20 @@
-use super::{read_without_key, HookExt, PublicExt, RequestExt};
-use crate::server::{AppState, AppStores};
-use axum::{routing::get, Router};
-use entities::{record_metadata::RecordMetadata, Id, MongoStore};
+use super::{read_without_key, HookExt, PublicExt, ReadResponse, RequestExt};
+use crate::{
+    router::ServerResponse,
+    server::{AppState, AppStores},
+};
+use axum::{
+    extract::{Query, State},
+    routing::get,
+    Json, Router,
+};
+use bson::doc;
+use entities::{record_metadata::RecordMetadata, Id, MongoStore, PicaError};
 use fake::Dummy;
+use http::HeaderMap;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use serde_json::Value;
+use std::{collections::BTreeMap, sync::Arc};
 
 pub fn get_router() -> Router<Arc<AppState>> {
     Router::new().route("/", get(read_without_key::<ReadRequest, Knowledge>))
