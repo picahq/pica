@@ -238,7 +238,7 @@ mod tests {
             mapping: None,
             supported: true,
             knowledge: None,
-            featured: false,
+            tags: None,
         };
 
         let client = Client::new();
@@ -315,7 +315,7 @@ mod tests {
             mapping: None,
             supported: true,
             knowledge: None,
-            featured: false,
+            tags: None,
         };
 
         let client = Client::new();
