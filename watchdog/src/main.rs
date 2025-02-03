@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
 
     info!("Starting watchdog with config: {watchdog_config}{cache_config}{database_config}");
 
-    let client = WatchdogClient::new(watchdog_config, cache_config, database_config);
+    let client = WatchdogClient::new(watchdog_config, cache_config, database_config).await?;
 
     client.start().await?;
 

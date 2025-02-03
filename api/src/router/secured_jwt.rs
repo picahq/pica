@@ -3,7 +3,7 @@ use crate::{
         common_enum, common_model, connection_definition,
         connection_model_definition::{self},
         connection_model_schema, connection_oauth_definition, event_callback, openapi, platform,
-        platform_page, secrets, tasks,
+        platform_page, secrets,
     },
     middleware::jwt_auth::{self, JwtState},
     server::AppState,
@@ -35,7 +35,6 @@ pub async fn get_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
             "/connection-oauth-definitions",
             connection_oauth_definition::get_router(),
         )
-        .nest("/tasks", tasks::get_router())
         .nest("/common-enums", common_enum::get_router())
         .nest("/common-models", common_model::get_router())
         .nest("/event-callbacks", event_callback::get_router())

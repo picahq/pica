@@ -2,6 +2,7 @@ pub mod emitted_events;
 pub mod event_access;
 pub mod event_state;
 pub mod hashes;
+pub mod task;
 
 use self::{
     event_state::EventState,

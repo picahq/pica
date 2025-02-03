@@ -6166,6 +6166,7 @@ dependencies = [
  "futures",
  "mongodb",
  "redis 0.27.5",
+ "reqwest",
  "serde_json",
  "tokio",
  "tracing",

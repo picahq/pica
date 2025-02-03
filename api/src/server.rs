@@ -3,7 +3,7 @@ use crate::{
     helper::{K8sDriver, K8sDriverImpl, K8sDriverLogger},
     logic::{
         connection_oauth_definition::FrontendOauthConnectionDefinition, knowledge::Knowledge,
-        openapi::OpenAPIData, tasks::Task,
+        openapi::OpenAPIData,
     },
     router,
 };
@@ -24,6 +24,7 @@ use entities::{
     page::PlatformPage,
     secret::Secret,
     secrets::SecretServiceProvider,
+    task::Task,
     user::UserClient,
     Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
 };
@@ -84,8 +85,8 @@ pub struct Server {
 
 impl Server {
     pub async fn init(config: ConnectionsConfig) -> Result<Self> {
-        let client = Client::with_uri_str(&config.db_config.control_db_url).await?;
-        let db = client.database(&config.db_config.control_db_name);
+        let client = Client::with_uri_str(&config.db_config.event_db_url).await?;
+        let db = client.database(&config.db_config.event_db_name);
 
         let http_client = reqwest::ClientBuilder::new()
             .timeout(Duration::from_secs(config.http_client_timeout_secs))
