@@ -1,5 +1,6 @@
 mod client;
 mod config;
+mod tasks;
 
 use crate::client::WatchdogClient;
 use anyhow::{Context, Result};

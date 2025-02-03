@@ -1,4 +1,5 @@
 use crate::context::TestServer;
+use api::logic::tasks::{self, Task};
 use api::logic::{common_model, ReadResponse};
 use api::logic::{connection_definition, connection_model_definition, connection_model_schema};
 use entities::{
@@ -245,6 +246,14 @@ crud!(
     ConnectionModelSchema,
     connection_model_schema,
     "v1/connection-model-schemas"
+);
+
+crud!(
+    #[tokio::test],
+    test_task_crud,
+    Task,
+    tasks,
+    "v1/tasks"
 );
 
 #[tokio::test]
