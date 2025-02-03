@@ -34,7 +34,7 @@ pub enum IdPrefix {
     Transaction,
     UnitTest,
     EarlyAccess,
-    Task
+    Task,
 }
 
 impl Display for IdPrefix {

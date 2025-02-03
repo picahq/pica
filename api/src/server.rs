@@ -162,7 +162,7 @@ impl Server {
             knowledge,
             event,
             clients,
-            tasks
+            tasks,
         };
 
         let event_access_cache =

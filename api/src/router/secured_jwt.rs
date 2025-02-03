@@ -35,7 +35,7 @@ pub async fn get_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
             "/connection-oauth-definitions",
             connection_oauth_definition::get_router(),
         )
-        .nest("tasks", tasks::get_router())
+        .nest("/tasks", tasks::get_router())
         .nest("/common-enums", common_enum::get_router())
         .nest("/common-models", common_model::get_router())
         .nest("/event-callbacks", event_callback::get_router())
