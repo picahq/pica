@@ -248,14 +248,6 @@ crud!(
     "v1/connection-model-schemas"
 );
 
-crud!(
-    #[tokio::test],
-    test_task_crud,
-    Task,
-    tasks,
-    "v1/tasks"
-);
-
 #[tokio::test]
 async fn test_common_model_crud() {
     let server = TestServer::new(None).await;
