@@ -3,7 +3,7 @@ use crate::{
     helper::{K8sDriver, K8sDriverImpl, K8sDriverLogger},
     logic::{
         connection_oauth_definition::FrontendOauthConnectionDefinition, knowledge::Knowledge,
-        openapi::OpenAPIData,
+        openapi::OpenAPIData, tasks::Task,
     },
     router,
 };
@@ -56,6 +56,7 @@ pub struct AppStores {
     pub knowledge: MongoStore<Knowledge>,
     pub secrets: MongoStore<Secret>,
     pub settings: MongoStore<Settings>,
+    pub tasks: MongoStore<Task>,
 }
 
 #[derive(Clone)]
@@ -112,6 +113,7 @@ impl Server {
         let knowledge = MongoStore::new(&db, &Store::ConnectionModelDefinitions).await?;
         let clients = MongoStore::new(&db, &Store::Clients).await?;
         let secrets_store = MongoStore::<Secret>::new(&db, &Store::Secrets).await?;
+        let tasks = MongoStore::new(&db, &Store::Tasks).await?;
 
         let secrets_client: Arc<dyn SecretExt + Sync + Send> = match config.secrets_config.provider
         {
@@ -160,6 +162,7 @@ impl Server {
             knowledge,
             event,
             clients,
+            tasks
         };
 
         let event_access_cache =

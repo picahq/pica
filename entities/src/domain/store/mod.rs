@@ -83,6 +83,8 @@ generate_stores!(
     "secrets",
     Settings,
     "settings",
+    Tasks,
+    "tasks",
     EmbedTokens,
     "embed-tokens",
     Sessions,
