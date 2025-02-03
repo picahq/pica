@@ -40,6 +40,7 @@ pub mod platform;
 pub mod platform_page;
 pub mod schema_generator;
 pub mod secrets;
+pub mod tasks;
 pub mod unified;
 pub mod vault_connection;
 
