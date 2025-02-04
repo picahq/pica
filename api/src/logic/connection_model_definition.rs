@@ -402,7 +402,8 @@ impl RequestExt for CreateRequest {
         });
         record.mapping.clone_from(&self.mapping);
         record.extractor_config.clone_from(&self.extractor_config);
-        record.record_metadata.version = self.version.clone();
+        record.knowledge.clone_from(&self.knowledge);
+        record.record_metadata.version.clone_from(&self.version);
 
         if let Some(supported) = self.supported {
             record.supported = supported;
