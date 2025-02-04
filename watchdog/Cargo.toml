@@ -12,6 +12,7 @@ envconfig.workspace = true
 futures.workspace = true
 cache = { path = "../cache" }
 entities = { path = "../entities" }
+reqwest.workspace = true
 serde_json.workspace = true
 mongodb.workspace = true
 redis.workspace = true

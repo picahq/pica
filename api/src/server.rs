@@ -24,6 +24,7 @@ use entities::{
     page::PlatformPage,
     secret::Secret,
     secrets::SecretServiceProvider,
+    task::Task,
     user::UserClient,
     Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
 };
@@ -56,6 +57,7 @@ pub struct AppStores {
     pub knowledge: MongoStore<Knowledge>,
     pub secrets: MongoStore<Secret>,
     pub settings: MongoStore<Settings>,
+    pub tasks: MongoStore<Task>,
 }
 
 #[derive(Clone)]
@@ -83,8 +85,8 @@ pub struct Server {
 
 impl Server {
     pub async fn init(config: ConnectionsConfig) -> Result<Self> {
-        let client = Client::with_uri_str(&config.db_config.control_db_url).await?;
-        let db = client.database(&config.db_config.control_db_name);
+        let client = Client::with_uri_str(&config.db_config.event_db_url).await?;
+        let db = client.database(&config.db_config.event_db_name);
 
         let http_client = reqwest::ClientBuilder::new()
             .timeout(Duration::from_secs(config.http_client_timeout_secs))
@@ -112,6 +114,7 @@ impl Server {
         let knowledge = MongoStore::new(&db, &Store::ConnectionModelDefinitions).await?;
         let clients = MongoStore::new(&db, &Store::Clients).await?;
         let secrets_store = MongoStore::<Secret>::new(&db, &Store::Secrets).await?;
+        let tasks = MongoStore::new(&db, &Store::Tasks).await?;
 
         let secrets_client: Arc<dyn SecretExt + Sync + Send> = match config.secrets_config.provider
         {
@@ -160,6 +163,7 @@ impl Server {
             knowledge,
             event,
             clients,
+            tasks,
         };
 
         let event_access_cache =
