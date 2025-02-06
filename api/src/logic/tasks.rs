@@ -31,6 +31,7 @@ pub struct CreateRequest {
     pub start_time: i64,
     pub endpoint: String,
     pub payload: Value,
+    #[serde(rename = "await")]
     pub r#await: bool,
 }
 
