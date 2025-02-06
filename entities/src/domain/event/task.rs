@@ -14,6 +14,7 @@ pub struct Task {
     pub endpoint: String,
     #[serde(with = "http_serde_ext_ios::status_code::option")]
     pub status: Option<StatusCode>,
+    pub r#await: bool,
     #[serde(flatten)]
     pub metadata: RecordMetadata,
 }

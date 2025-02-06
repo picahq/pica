@@ -129,9 +129,9 @@ impl TestServer {
         // Get available port for server to listen
         let port = TcpListener::bind("127.0.0.1:0")
             .await
-            .unwrap()
+            .expect("Could not bind to port")
             .local_addr()
-            .unwrap()
+            .expect("Could not get local address")
             .port();
 
         // Random database name
@@ -159,7 +159,7 @@ impl TestServer {
                 "ios-kms".to_string(),
             ),
         ]))
-        .unwrap();
+        .expect("Could not create envconfig");
 
         let secrets_client = Arc::new(MockSecretsClient);
 
@@ -178,10 +178,14 @@ impl TestServer {
         let iv = rand::thread_rng().gen::<[u8; 16]>();
         let live_encrypted_key = live_access_key
             .encode(
-                &config.event_access_password.as_bytes().try_into().unwrap(),
+                &config
+                    .event_access_password
+                    .as_bytes()
+                    .try_into()
+                    .expect("Could not convert to bytes"),
                 &iv,
             )
-            .unwrap();
+            .expect("Could not encode access key");
 
         let prefix = AccessKeyPrefix {
             environment: Environment::Test,
@@ -191,7 +195,11 @@ impl TestServer {
         let test_access_key = AccessKey { prefix, data };
         let test_encrypted_key = test_access_key
             .encode(
-                &config.event_access_password.as_bytes().try_into().unwrap(),
+                &config
+                    .event_access_password
+                    .as_bytes()
+                    .try_into()
+                    .expect("Could not convert to array"),
                 &iv,
             )
             .unwrap();
