@@ -6164,12 +6164,16 @@ dependencies = [
  "entities",
  "envconfig",
  "futures",
+ "mockito",
  "mongodb",
  "redis 0.27.5",
  "reqwest",
  "serde_json",
+ "testcontainers-modules",
  "tokio",
  "tracing",
+ "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]

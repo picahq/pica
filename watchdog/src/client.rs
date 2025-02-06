@@ -1,4 +1,4 @@
-use crate::config::WatchdogConfig;
+use crate::config::{self, WatchdogConfig};
 use bson::doc;
 use cache::remote::RedisCache;
 use chrono::Utc;
@@ -39,9 +39,7 @@ impl WatchdogClient {
         cache: CacheConfig,
         database: DatabaseConfig,
     ) -> Result<Self, PicaError> {
-        let http_client = reqwest::ClientBuilder::new()
-            .timeout(Duration::from_secs(watchdog.http_client_timeout_secs))
-            .build()?;
+        let http_client = reqwest::ClientBuilder::new().build()?;
         let client = mongodb::Client::with_uri_str(&database.event_db_url).await?;
         let db = client.database(&database.event_db_name);
 
@@ -105,11 +103,12 @@ impl WatchdogClient {
 
             let client = self.client.clone();
             let tasks_store = self.tasks.clone();
+            let timeout = self.watchdog.http_client_timeout_secs;
 
             tokio::spawn(async move {
                 let mut tasks = tasks
                     .into_iter()
-                    .map(|task| execute(task, client.clone(), tasks_store.clone()))
+                    .map(|task| execute(task, client.clone(), tasks_store.clone(), timeout))
                     .collect::<FuturesUnordered<_>>();
 
                 while let Some(result) = tasks.next().await {
@@ -136,12 +135,28 @@ async fn execute(
     task: Task,
     http_client: reqwest::Client,
     tasks_store: MongoStore<Task>,
+    timeout: u64,
 ) -> Result<Id, PicaError> {
-    let request = http_client
+    let timeout = if task.r#await {
+        Duration::from_secs(300)
+    } else {
+        Duration::from_secs(timeout)
+    };
+
+    let response = http_client
         .post(task.endpoint)
+        .timeout(timeout)
         .json(&task.payload)
         .send()
         .await?;
+
+    let status = response.status();
+    let mut stream = response.bytes_stream();
+
+    while let Some(item) = stream.next().await {
+        tracing::debug!("Response from API {:?}", item);
+        tracing::info!("Response length from API {:?}", item.map(|b| b.len()));
+    }
 
     tasks_store
         .collection
@@ -150,8 +165,8 @@ async fn execute(
                 "_id": task.id.to_string() // Filter by task ID
             },
             doc! {
-                "$set": { // Use the $set operator correctly
-                    "status": request.status().to_string(),
+                "$set": {
+                    "status": status.to_string(),
                     "endTime": Utc::now().timestamp_millis(),
                     "active": false
                 }

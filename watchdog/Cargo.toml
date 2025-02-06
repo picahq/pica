@@ -12,10 +12,15 @@ envconfig.workspace = true
 futures.workspace = true
 cache = { path = "../cache" }
 entities = { path = "../entities" }
-reqwest.workspace = true
+reqwest = { workspace = true, features = ["stream"] }
 serde_json.workspace = true
 mongodb.workspace = true
 redis.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 
+[dev-dependencies]
+testcontainers-modules = { workspace = true, features = ["mongo", "redis"] }
+mockito.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true

@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Envconfig, Clone)] // Intentionally no Debug so secret is not printed
 pub struct WatchdogConfig {
-    #[envconfig(from = "RATE_LIMITER_REFRESH_INTERVAL", default = "60")]
+    #[envconfig(from = "RATE_LIMITER_REFRESH_INTERVAL", default = "10")]
     pub rate_limiter_refresh_interval: u64,
     #[envconfig(from = "HTTP_CLIENT_TIMEOUT_SECS", default = "10")]
     pub http_client_timeout_secs: u64,

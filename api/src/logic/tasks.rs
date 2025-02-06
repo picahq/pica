@@ -31,6 +31,7 @@ pub struct CreateRequest {
     pub start_time: i64,
     pub endpoint: String,
     pub payload: Value,
+    pub r#await: bool,
 }
 
 impl RequestExt for CreateRequest {
@@ -44,6 +45,7 @@ impl RequestExt for CreateRequest {
             payload: self.payload.clone(),
             endpoint: self.endpoint.clone(),
             status: None,
+            r#await: self.r#await,
             metadata: RecordMetadata::default(),
         })
     }
