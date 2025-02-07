@@ -102,7 +102,6 @@ impl WatchdogClient {
                 )
                 .await?;
 
-
             tracing::info!("Executing {} tasks", tasks.len());
 
             self.tasks
