@@ -1,4 +1,4 @@
-use crate::config::{self, WatchdogConfig};
+use crate::config::WatchdogConfig;
 use bson::doc;
 use cache::remote::RedisCache;
 use chrono::Utc;
@@ -91,13 +91,32 @@ impl WatchdogClient {
                 .get_many(
                     Some(doc! {
                     "active": true,
+                    "workerId": 0,
                     "startTime": {
-                        "$lte": Utc::now().timestamp_millis()
+                        "$lte": Utc::now().timestamp_millis(),
                     }}),
                     None,
                     None,
                     Some(self.watchdog.max_amount_of_tasks_to_process),
                     None,
+                )
+                .await?;
+
+            tracing::info!("Executing {} tasks", tasks.len());
+
+            self.tasks
+                .update_many(
+                    doc! {
+                        "_id": {
+                            "$in": tasks.iter().map(|t| t.id.to_string()).collect::<Vec<_>>()
+                        }
+                    },
+                    doc! {
+                        "$set": {
+                            "workerId": 1,
+                            "active": false
+                        }
+                    },
                 )
                 .await?;
 
@@ -120,8 +139,6 @@ impl WatchdogClient {
                     }
                 }
             });
-
-            tracing::info!("Executing next batch of tasks");
 
             tokio::time::sleep(Duration::from_secs(
                 self.watchdog.rate_limiter_refresh_interval,
@@ -152,11 +169,22 @@ async fn execute(
 
     let status = response.status();
     let mut stream = response.bytes_stream();
+    let mut log_trail = vec![];
 
     while let Some(item) = stream.next().await {
         tracing::debug!("Response from API {:?}", item);
-        tracing::info!("Response length from API {:?}", item.map(|b| b.len()));
+        log_trail.push(item);
     }
+
+    let log_trail = log_trail
+        .into_iter()
+        .filter_map(|x| x.ok())
+        .collect::<Vec<_>>();
+
+    let bson_log_trail = bson::to_bson(&log_trail).map_err(|e| {
+        error!("Could not convert log trail to BSON: {e}");
+        InternalError::io_err(e.to_string().as_str(), None)
+    })?;
 
     tasks_store
         .collection
@@ -168,7 +196,7 @@ async fn execute(
                 "$set": {
                     "status": status.to_string(),
                     "endTime": Utc::now().timestamp_millis(),
-                    "active": false
+                    "logTrail": bson_log_trail,
                 }
             },
         )
