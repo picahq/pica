@@ -42,11 +42,13 @@ impl RequestExt for CreateRequest {
         Some(Task {
             id: Id::now(IdPrefix::Task),
             start_time: Utc::now().timestamp_millis(),
+            worker_id: 0,
             end_time: None,
             payload: self.payload.clone(),
             endpoint: self.endpoint.clone(),
             status: None,
             r#await: self.r#await,
+            log_trail: vec![],
             metadata: RecordMetadata::default(),
         })
     }
