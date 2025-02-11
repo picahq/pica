@@ -1,7 +1,7 @@
 use axum::extract::Query;
 use entities::{
     event_access::EventAccess, CONTAINS_FILTER, DELETED_FILTER, DUAL_ENVIRONMENT_HEADER,
-    ENVIRONMENT_FILTER, LIMIT_FILTER, OWNERSHIP_FILTER, SKIP_FILTER,
+    ENVIRONMENT_FILTER, LIMIT_FILTER, OPTIONS_FILTER, OWNERSHIP_FILTER, REGEX_FILTER, SKIP_FILTER,
 };
 use http::HeaderMap;
 use mongodb::bson::{doc, Document};
@@ -19,11 +19,7 @@ pub fn shape_mongo_filter(
     event_access: Option<Arc<EventAccess>>,
     headers: Option<HeaderMap>,
 ) -> MongoQuery {
-    let mut filter = doc! {
-        // "tags" : {
-        //     "$in" : ["featured"]
-        // }
-    };
+    let mut filter = doc! {};
     let mut skip = 0;
     let mut limit = 20;
 
@@ -43,6 +39,19 @@ pub fn shape_mongo_filter(
                 }
             } else if key == SKIP_FILTER {
                 skip = value.parse().unwrap_or(0);
+            } else if key == REGEX_FILTER {
+                let values = string_to_vec(value);
+
+                let splitted = values.split_first();
+                let target = splitted.map(|a| a.0);
+                let rest = splitted.and_then(|a| a.1.first());
+
+                if let (Some(target), Some(element)) = (target, rest) {
+                    filter.insert(
+                        target,
+                        doc! { REGEX_FILTER: element.to_string(), OPTIONS_FILTER: "i".to_string() },
+                    );
+                }
             } else {
                 match value.as_str() {
                     "true" => filter.insert(key, true),
@@ -73,6 +82,8 @@ pub fn shape_mongo_filter(
             }
         }
     }
+
+    println!("{:#?}", filter);
 
     MongoQuery {
         filter,

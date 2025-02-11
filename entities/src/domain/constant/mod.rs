@@ -14,6 +14,8 @@ pub const ENVIRONMENT_FILTER: &str = "environment";
 pub const DUAL_ENVIRONMENT_HEADER: &str = "x-pica-show-all-environments";
 pub const LIMIT_FILTER: &str = "limit";
 pub const CONTAINS_FILTER: &str = "$in";
+pub const REGEX_FILTER: &str = "$regex";
+pub const OPTIONS_FILTER: &str = "$options";
 pub const SKIP_FILTER: &str = "skip";
 pub const QUERY_BY_ID_PASSTHROUGH: &str = "x-pica-action-id";
 
