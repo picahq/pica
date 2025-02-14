@@ -127,13 +127,15 @@ pub async fn passthrough_request(
             }
         });
 
-    let cloned_state = state.clone();
-
     let connection_platform = connection.platform.to_string();
     let connection_platform_version = connection.platform_version.to_string();
     let connection_key = connection.key.to_string();
     let request_headers = headers.clone();
     let request_status_code = model_execution_result.status();
+
+    let database_c = state.app_stores.db.clone();
+    let event_access_pass_c = state.config.event_access_password.clone();
+    let event_tx_c = state.event_tx.clone();
 
     tokio::spawn(async move {
         let connection_secret_header: Option<String> =
@@ -153,9 +155,7 @@ pub async fn passthrough_request(
             .build();
 
         if let (Some(Some(cmd)), Some(encrypted_access_key)) = (
-            cloned_state
-                .app_stores
-                .db
+            database_c
                 .collection::<SparseCMD>(&Store::ConnectionModelDefinitions.to_string())
                 .find_one(doc! {
                     "connectionPlatform": connection_platform.clone(),
@@ -185,12 +185,8 @@ pub async fn passthrough_request(
                     .ok()
                     .map(|m| m.as_value());
 
-                let password: Option<[u8; PASSWORD_LENGTH]> = cloned_state
-                    .config
-                    .event_access_password
-                    .as_bytes()
-                    .try_into()
-                    .ok();
+                let password: Option<[u8; PASSWORD_LENGTH]> =
+                    event_access_pass_c.as_bytes().try_into().ok();
 
                 match password {
                     Some(password) => {
@@ -224,7 +220,7 @@ pub async fn passthrough_request(
                                 body,
                             );
 
-                            if let Err(e) = cloned_state.event_tx.send(event).await {
+                            if let Err(e) = event_tx_c.send(event).await {
                                 error!("Could not send event to receiver: {e}");
                             }
                         } else {
