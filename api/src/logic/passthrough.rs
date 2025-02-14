@@ -169,6 +169,8 @@ pub async fn passthrough_request(
 
         if let (Some(cmd), Some(encrypted_access_key)) = (cmd, connection_secret_header) {
             if let Ok(encrypted_access_key) = EncryptedAccessKey::parse(&encrypted_access_key) {
+                let path = uri.path().trim_end_matches('/');
+
                 let metadata = UnifiedMetadataBuilder::default()
                     .timestamp(Utc::now().timestamp_millis())
                     .platform_rate_limit_remaining(0)
@@ -180,8 +182,8 @@ pub async fn passthrough_request(
                     .connection_key(connection_key)
                     .action(cmd.title)
                     .host(host)
-                    .path(uri.path().to_string())
-                    .status_code(request_status_code.to_string())
+                    .path(path.to_string())
+                    .status_code(request_status_code)
                     .build()
                     .ok()
                     .map(|m| m.as_value());
