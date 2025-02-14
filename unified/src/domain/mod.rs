@@ -2,6 +2,7 @@ use bson::doc;
 use derive_builder::Builder;
 use entities::Id;
 use entities::PicaError;
+use http::StatusCode;
 use http::{HeaderMap, HeaderName, HeaderValue};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -173,6 +174,11 @@ pub struct UnifiedMetadata {
     #[builder(default)]
     common_model: Option<String>,
     common_model_version: String,
+    #[builder(default)]
+    #[serde(with = "http_serde_ext_ios::status_code::option")]
+    status_code: Option<StatusCode>,
+    #[builder(default)]
+    path: Option<String>,
     connection_key: String,
     #[builder(setter(strip_option), default)]
     latency: Option<i32>,
