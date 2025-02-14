@@ -32,6 +32,7 @@ pub fn get_router() -> Router<Arc<AppState>> {
         get(passthrough_request)
             .post(passthrough_request)
             .patch(passthrough_request)
+            .put(passthrough_request)
             .delete(passthrough_request),
     )
 }
