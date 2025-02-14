@@ -143,6 +143,7 @@ pub async fn passthrough_request(
 
         let options = FindOneOptions::builder()
             .projection(doc! {
+                "connectionPlatform": 1,
                 "connectionDefinitionId": 1,
                 "platformVersion": 1,
                 "key": 1,
@@ -154,19 +155,19 @@ pub async fn passthrough_request(
             })
             .build();
 
-        if let (Some(Some(cmd)), Some(encrypted_access_key)) = (
-            database_c
-                .collection::<SparseCMD>(&Store::ConnectionModelDefinitions.to_string())
-                .find_one(doc! {
-                    "connectionPlatform": connection_platform.clone(),
-                    "path": uri.path().to_string(),
-                    "action": method.to_string().to_uppercase()
-                })
-                .with_options(options)
-                .await
-                .ok(),
-            connection_secret_header,
-        ) {
+        let cmd = database_c
+            .collection::<SparseCMD>(&Store::ConnectionModelDefinitions.to_string())
+            .find_one(doc! {
+                "connectionPlatform": connection_platform.clone(),
+                "path": uri.path().to_string(),
+                "action": method.to_string().to_uppercase()
+            })
+            .with_options(options)
+            .await
+            .ok()
+            .flatten();
+
+        if let (Some(cmd), Some(encrypted_access_key)) = (cmd, connection_secret_header) {
             if let Ok(encrypted_access_key) = EncryptedAccessKey::parse(&encrypted_access_key) {
                 let metadata = UnifiedMetadataBuilder::default()
                     .timestamp(Utc::now().timestamp_millis())
@@ -250,7 +251,7 @@ pub async fn passthrough_request(
     Ok((request_status_code, headers, bytes))
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SparseCMD {
     pub connection_platform: String,
