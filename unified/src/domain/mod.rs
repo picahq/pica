@@ -175,6 +175,8 @@ pub struct UnifiedMetadata {
     common_model_version: String,
     #[builder(default)]
     status_code: Option<String>,
+    #[builder(default)]
+    path: Option<String>,
     connection_key: String,
     #[builder(setter(strip_option), default)]
     latency: Option<i32>,

@@ -14,11 +14,13 @@ use entities::{
     encrypted_access_key::EncryptedAccessKey,
     event_access::EventAccess,
     prefix::IdPrefix,
-    AccessKey, ApplicationError, Event, Id, InternalError, META, PASSWORD_LENGTH,
+    AccessKey, ApplicationError, Event, Id, InternalError, Store, META, PASSWORD_LENGTH,
     QUERY_BY_ID_PASSTHROUGH,
 };
 use http::{header::CONTENT_LENGTH, HeaderMap, HeaderName, Method, Uri};
 use hyper::body::Bytes;
+use mongodb::options::FindOneOptions;
+use serde::Deserialize;
 use serde_json::json;
 use std::{collections::HashMap, sync::Arc};
 use tracing::error;
@@ -56,6 +58,9 @@ pub async fn passthrough_request(
             None,
         ));
     };
+
+    let host = headers.get("host");
+    let host = host.and_then(|h| h.to_str().map(|s| s.to_string()).ok());
 
     let connection_secret_header = connection_secret_header.clone();
 
@@ -134,22 +139,34 @@ pub async fn passthrough_request(
         let connection_secret_header: Option<String> =
             connection_secret_header.to_str().map(|a| a.to_owned()).ok();
 
-        // TODO: Make a projection of this to avoid sending the whole document across the wire
+        let options = FindOneOptions::builder()
+            .projection(doc! {
+                "connectionDefinitionId": 1,
+                "platformVersion": 1,
+                "key": 1,
+                "title": 1,
+                "name": 1,
+                "path": 1,
+                "action": 1,
+                "actionName": 1
+            })
+            .build();
+
         if let (Some(Some(cmd)), Some(encrypted_access_key)) = (
             cloned_state
                 .app_stores
-                .model_config
-                .collection
+                .db
+                .collection::<SparseCMD>(&Store::ConnectionModelDefinitions.to_string())
                 .find_one(doc! {
                     "connectionPlatform": connection_platform.clone(),
                     "path": uri.path().to_string(),
                     "action": method.to_string().to_uppercase()
                 })
+                .with_options(options)
                 .await
                 .ok(),
             connection_secret_header,
         ) {
-            // TODO: Pass the host as well
             if let Ok(encrypted_access_key) = EncryptedAccessKey::parse(&encrypted_access_key) {
                 let metadata = UnifiedMetadataBuilder::default()
                     .timestamp(Utc::now().timestamp_millis())
@@ -161,6 +178,8 @@ pub async fn passthrough_request(
                     .common_model_version("v1")
                     .connection_key(connection_key)
                     .action(cmd.title)
+                    .host(host)
+                    .path(uri.path().to_string())
                     .status_code(request_status_code.to_string())
                     .build()
                     .ok()
@@ -233,4 +252,19 @@ pub async fn passthrough_request(
     })?;
 
     Ok((request_status_code, headers, bytes))
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SparseCMD {
+    pub connection_platform: String,
+    pub connection_definition_id: Id,
+    pub platform_version: String,
+    pub key: String,
+    pub title: String,
+    pub name: String,
+    pub path: String,
+    #[serde(with = "http_serde_ext_ios::method")]
+    pub action: Method,
+    pub action_name: String,
 }
