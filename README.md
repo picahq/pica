@@ -24,105 +24,72 @@
 
 ---
 
-Build, deploy, and scale your AI agents with ease. With full access to [100+ APIs and tools](https://www.picaos.com/community/connectors).
+Effortlessly build, deploy, and scale AI agents—Pica provides everything you need to power autonomous [AI workflows](https://www.picaos.com/community/connectors).
 
-Pica makes it simple to build and manage AI agents with four key products:
-1. **OneTool**: Connect agents to over 100 APIs and tools with a single SDK.
-2. **AuthKit**: Securely manage authentication for tool integration.
-3. **Agent**: Create flexible agents that adapt to your needs (coming soon).
-4. **AgentFlow**: Enable agents to collaborate and manage tasks automatically (coming soon).
+## Why Pica?
 
-Pica also provides full logging and action traceability, giving developers complete visibility into their agents’ decisions and activities. Our tools simplify building and running AI agents so developers can focus on results.
+Pica simplifies AI agent development with our four core products:
+
+✅ OneTool – A single SDK to connect AI agents to 100+ APIs and tools. <br/>
+✅  AuthKit – Secure authentication for seamless tool integration. <br/>
+✅ Agent (Coming Soon) – Build adaptive AI agents tailored to your needs. <br/>
+✅ AgentFlow (Coming Soon) – Enable agents to collaborate and automate workflows. <br/>
+
+Pica also provides full logging and action traceability, giving developers complete visibility into their agents' decisions and activities.
 
 ## Getting started
+
+### Install
 
 ```bash
 npm install @picahq/ai
 ```
 
-## Setup
+### Setup
 
 1. Create a new [Pica account](https://app.picaos.com)
 2. Create a Connection via the [Dashboard](https://app.picaos.com/connections)
 3. Create an [API key](https://app.picaos.com/settings/api-keys)
 4. Set the API key as an environment variable: `PICA_SECRET_KEY=<your-api-key>`
 
-
-## Example use cases
-
-Pica provides various SDKs to connect with different LLMs. Below are samples for using the [Pica AI SDK](https://www.npmjs.com/package/@picahq/ai) designed for the [Vercel AI SDK](https://www.npmjs.com/package/ai):
-
-### Express
-
-1. **Install dependencies**
-
-```bash
-npm install express @ai-sdk/openai ai @picahq/ai dotenv
-```
-
-2. **Create the server**
+### Example Usage
 
 ```typescript
-import express from "express";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { Pica } from "@picahq/ai";
 import * as dotenv from "dotenv";
-
 dotenv.config();
 
-const app = express();
-const port = process.env.PORT || 3000;
+const pica = new Pica(process.env.PICA_SECRET_KEY!);
 
-app.use(express.json());
+async function runAgentTask(message: string): Promise<string> {
+  const system = await pica.generateSystemPrompt();
 
-app.post("/api/ai", async (req, res) => {
-  try {
-    const { message } = req.body;
+  const { text } = await generateText({
+    model: openai("gpt-4o"),
+    system,
+    prompt: message,
+    tools: { ...pica.oneTool },
+    maxSteps: 10,
+  });
 
-    // Initialize Pica
-    const pica = new Pica(process.env.PICA_SECRET_KEY);
+  return text;
+}
 
-    // Generate the system prompt
-    const systemPrompt = await pica.generateSystemPrompt();
-
-    // Create the stream
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: systemPrompt,
-      tools: { ...pica.oneTool },
-      prompt: message,
-      maxSteps: 5,
-    });
-
-    res.setHeader("Content-Type", "application/json");
-
-    res.status(200).json({ text });
-  } catch (error) {
-    console.error("Error processing AI request:", error);
-
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
-
-export default app;
+runAgentTask("Star the repo picahq/pica with github")
+  .then((text) => {
+    console.log(text);
+  })
+  .catch(console.error);
 ```
 
-3. **Test the server**
+[![Try with Replit Badge](https://replit.com/badge?caption=Try%20with%20Replit)](https://replit.com/@picahq/Pica-or-GitHub-Star-Demo)
 
-```bash
-curl --location 'http://localhost:3000/api/ai' \
---header 'Content-Type: application/json' \
---data '{
-    "message": "What connections do I have access to?"
-}'
-```
 
-### Next.js
+For more use cases, visit our [Use Cases Library](https://www.picaos.com/community/use-cases) or our [Awesome Pica Repository](https://github.com/picahq/awesome-pica).
+
+### Next.js Integration
 
 ⭐️ You can see a full Next.js demo [here](https://github.com/picahq/onetool-demo)
 
