@@ -31,7 +31,7 @@ Effortlessly build, deploy, and scale AI agents—Pica provides everything you n
 Pica simplifies AI agent development with our four core products:
 
 ✅ OneTool – A single SDK to connect AI agents to 100+ APIs and tools. <br/>
-✅  AuthKit – Secure authentication for seamless tool integration. <br/>
+✅ AuthKit – Secure authentication for seamless tool integration. <br/>
 ✅ Agent (Coming Soon) – Build adaptive AI agents tailored to your needs. <br/>
 ✅ AgentFlow (Coming Soon) – Enable agents to collaborate and automate workflows. <br/>
 
