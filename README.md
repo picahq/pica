@@ -54,6 +54,8 @@ npm install @picahq/ai
 
 ### Example Usage
 
+Below is an example demonstrating how to integrate the [Pica OneTool](https://www.npmjs.com/package/@picahq/ai) with the [Vercel AI SDK](https://www.npmjs.com/package/ai) for a GitHub use case:
+
 ```typescript
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
