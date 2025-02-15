@@ -83,8 +83,6 @@ pub fn shape_mongo_filter(
         }
     }
 
-    println!("{:#?}", filter);
-
     MongoQuery {
         filter,
         limit,
