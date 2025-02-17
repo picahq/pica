@@ -41,6 +41,7 @@
     "fromCommonModel": "from-common-model",
     "toCommonModel": "to-common-model"
   },
+  "supported": false,
   "createdAt": 0,
   "updatedAt": 0,
   "updated": false,
@@ -48,6 +49,5 @@
   "lastModifiedBy": "system",
   "deleted": false,
   "active": true,
-  "deprecated": false,
-  "supported": false
+  "deprecated": false
 }
