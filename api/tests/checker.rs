@@ -57,7 +57,21 @@ impl JsonChecker for JsonCheckerImpl {
         value: &T,
         r#type: CheckType,
     ) -> bool {
-        let type_name = std::any::type_name::<T>().to_string();
+        let type_name = std::any::type_name::<T>().to_string().replace("::", "_");
+
+        let serialized_json =
+            serde_json::to_string_pretty(value).expect("Failed to serialize value");
+        let serialized_bson = bson::to_vec(value).expect("Failed to serialize value");
+
+        if self.r#override {
+            let bson_file_path = self.location() + &format!("/{}.bson", type_name);
+            let json_file_path = self.location() + &format!("/{}.json", type_name);
+
+            std::fs::write(json_file_path, serialized_json).expect("Failed to write JSON file");
+            std::fs::write(bson_file_path, serialized_bson).expect("Failed to write BSON file");
+            panic!("Override flag is enabled, remember to disable and commit the changes");
+        }
+
         let file_path = match r#type {
             CheckType::Json => self.location() + &format!("/{}.json", type_name),
             CheckType::Bson => self.location() + &format!("/{}.bson", type_name),
@@ -65,15 +79,12 @@ impl JsonChecker for JsonCheckerImpl {
 
         match r#type {
             CheckType::Json => {
-                let serialized =
-                    serde_json::to_string_pretty(value).expect("Failed to serialize value");
-
-                let file = File::open(file_path.clone());
-
                 if self.r#override {
-                    std::fs::write(file_path, serialized).expect("Failed to write to file");
+                    std::fs::write(file_path, serialized_json).expect("Failed to write to file");
                     panic!("Override flag is enabled, remember to disable and commit the changes");
                 }
+
+                let file = File::open(file_path.clone());
 
                 if file.is_err() {
                     return false;
@@ -89,20 +100,13 @@ impl JsonChecker for JsonCheckerImpl {
                 let expected = serde_json::from_str::<T>(&contents)
                     .expect("Failed to deserialize expect value");
 
-                let actual = serde_json::from_str::<T>(&serialized)
+                let actual = serde_json::from_str::<T>(&serialized_json)
                     .expect("Failed to deserialize actual value");
 
                 expected == actual
             }
             CheckType::Bson => {
-                let serialized = bson::to_vec(value).expect("Failed to serialize value");
-
                 let file = File::open(file_path.clone());
-
-                if self.r#override {
-                    std::fs::write(file_path, serialized).expect("Failed to write to file");
-                    panic!("Override flag is enabled, remember to disable and commit the changes");
-                }
 
                 if file.is_err() {
                     return false;
@@ -118,8 +122,8 @@ impl JsonChecker for JsonCheckerImpl {
                 let expected =
                     bson::from_slice::<T>(&contents).expect("Failed to deserialize expect value");
 
-                let actual =
-                    bson::from_slice::<T>(&serialized).expect("Failed to deserialize actual value");
+                let actual = bson::from_slice::<T>(&serialized_bson)
+                    .expect("Failed to deserialize actual value");
 
                 expected == actual
             }

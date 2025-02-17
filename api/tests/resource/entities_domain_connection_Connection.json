@@ -39,6 +39,7 @@
       "expires_at": 100
     }
   },
+  "hasError": false,
   "createdAt": 0,
   "updatedAt": 0,
   "updated": false,
