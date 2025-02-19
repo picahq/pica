@@ -3,7 +3,6 @@ import axios from "axios";
 
 export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
 	try {
-		console.log(JSON.stringify(body, null, 4));
 		const {
 			OAUTH_CLIENT_ID: client_id,
 			OAUTH_CLIENT_SECRET: client_secret,
@@ -13,7 +12,7 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
 		const data = {
 			client_id,
 			client_secret,
-			code,
+			refresh_token,
 			grant_type: "refresh_token",
 		};
 
