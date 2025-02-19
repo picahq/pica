@@ -47,6 +47,6 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
 			meta: {},
 		};
 	} catch (error) {
-		throw new Error(`Error fetching access token for Attio: ${error}`);
+		throw new Error(`Error fetching access token for Notion: ${error}`);
 	}
 }; 
