@@ -48,8 +48,10 @@ pub struct ConnectionsConfig {
     pub metric_save_channel_size: usize,
     #[envconfig(from = "METRIC_SYSTEM_ID", default = "Pica-Internal-System")]
     pub metric_system_id: String,
-    #[envconfig(from = "SEGMENT_WRITE_KEY")]
-    pub segment_write_key: Option<String>,
+    #[envconfig(from = "POSTHOG_WRITE_KEY")]
+    pub posthog_write_key: Option<String>,
+    #[envconfig(from = "POSTHOG_ENDPOINT")]
+    pub posthog_endpoint: Option<String>,
     #[envconfig(nested = true)]
     pub secrets_config: SecretsConfig,
     #[envconfig(
@@ -139,7 +141,7 @@ impl Display for ConnectionsConfig {
         )?;
         writeln!(f, "OTLP_ENDPOINT: ***")?;
         writeln!(f, "METRIC_SYSTEM_ID: {}", self.metric_system_id)?;
-        writeln!(f, "SEGMENT_WRITE_KEY: ***")?;
+        writeln!(f, "POSTHOG_WRITE_KEY: ***")?;
         writeln!(f, "JWT_SECRET: ***")?;
         write!(f, "{}", self.secrets_config)?;
         writeln!(f, "API_VERSION: {}", self.api_version)?;

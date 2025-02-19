@@ -1,5 +1,8 @@
 use crate::{
-    domain::{ConnectionsConfig, K8sMode, Metric},
+    domain::{
+        track::{LoggerTracker, PosthogTracker, Track},
+        ConnectionsConfig, K8sMode, Metric,
+    },
     helper::{K8sDriver, K8sDriverImpl, K8sDriverLogger},
     logic::{
         connection_oauth_definition::FrontendOauthConnectionDefinition, knowledge::Knowledge,
@@ -29,7 +32,6 @@ use entities::{
     Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
 };
 use mongodb::{options::UpdateOptions, Client, Database};
-use segment::{AutoBatcher, Batcher, HttpClient};
 use std::{sync::Arc, time::Duration};
 use tokio::{net::TcpListener, sync::mpsc::Sender, time::timeout, try_join};
 use tracing::{error, info, trace, warn};
@@ -230,13 +232,16 @@ impl Server {
         });
 
         // Update metrics in separate thread
-        let client = HttpClient::default();
-        let batcher = Batcher::new(None);
         let template = DefaultTemplate::default();
-        let mut batcher = config
-            .segment_write_key
-            .as_ref()
-            .map(|k| AutoBatcher::new(client, batcher, k.to_string()));
+        let tracker: Arc<dyn Track<posthog_rs::Event>> = match (
+            config.posthog_write_key.as_ref(),
+            config.posthog_endpoint.as_ref(),
+        ) {
+            (Some(key), Some(endpoint)) => {
+                Arc::new(PosthogTracker::new(key.to_string(), endpoint.to_string()).await)
+            }
+            _ => Arc::new(LoggerTracker),
+        };
 
         let metrics = db.collection::<Metric>(&Store::Metrics.to_string());
         let (metric_tx, mut receiver) =
@@ -244,6 +249,7 @@ impl Server {
         let metric_system_id = config.metric_system_id.clone();
         tokio::spawn(async move {
             let options = UpdateOptions::builder().upsert(true).build();
+            let mut event_buffer = vec![];
 
             loop {
                 let res = timeout(
@@ -273,26 +279,17 @@ impl Server {
                         error!("Could not upsert metric: {e}");
                     }
 
-                    if let Some(ref mut batcher) = batcher {
-                        let msg = metric.segment_track();
-                        if let Err(e) = batcher.push(msg).await {
-                            warn!("Tracking msg is too large: {e}");
-                        }
-                    }
+                    event_buffer.push(metric);
                 } else if let Ok(None) = res {
                     break;
                 } else {
                     trace!("Event receiver timed out waiting for new event");
-                    if let Some(ref mut batcher) = batcher {
-                        if let Err(e) = batcher.flush().await {
-                            warn!("Tracking flush is too large: {e}");
-                        }
+                    if let Err(e) = tracker.track_many(&event_buffer, &[]).await {
+                        warn!("Could not track metrics: {e}");
+                    } else {
+                        trace!("Tracked {} metrics", event_buffer.len());
                     }
-                }
-            }
-            if let Some(ref mut batcher) = batcher {
-                if let Err(e) = batcher.flush().await {
-                    warn!("Tracking flush is too large: {e}");
+                    event_buffer.clear();
                 }
             }
         });
