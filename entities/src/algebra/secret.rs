@@ -8,7 +8,7 @@ use secrecy::ExposeSecret;
 use serde_json::Value;
 
 #[async_trait]
-pub trait SecretExt {
+pub trait SecretExt: Send + Sync {
     async fn get(&self, id: &str, buildable_id: &str) -> Result<Secret, PicaError>;
 
     async fn create(&self, secret: &Value, buildable_id: &str) -> Result<Secret, PicaError>;

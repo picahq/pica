@@ -1,6 +1,6 @@
 use crate::{
     domain::{
-        track::{LoggerTracker, PosthogTracker, Track},
+        track::{LoggerTracker, PosthogTracker, Track, TrackedMetric},
         ConnectionsConfig, K8sMode, Metric,
     },
     helper::{K8sDriver, K8sDriverImpl, K8sDriverLogger},
@@ -76,7 +76,8 @@ pub struct AppState {
     pub k8s_client: Arc<dyn K8sDriver>,
     pub metric_tx: Sender<Metric>,
     pub openapi_data: OpenAPIData,
-    pub secrets_client: Arc<dyn SecretExt + Sync + Send>,
+    pub secrets_client: Arc<dyn SecretExt>,
+    pub tracker_client: Arc<dyn Track<TrackedMetric>>,
     pub template: DefaultTemplate,
 }
 
@@ -126,6 +127,16 @@ impl Server {
             SecretServiceProvider::IosKms => {
                 Arc::new(IOSKms::new(&config.secrets_config, secrets_store).await?)
             }
+        };
+
+        let tracker_client: Arc<dyn Track<TrackedMetric>> = match (
+            config.posthog_write_key.as_ref(),
+            config.posthog_endpoint.as_ref(),
+        ) {
+            (Some(key), Some(endpoint)) => {
+                Arc::new(PosthogTracker::new(key.to_string(), endpoint.to_string()).await)
+            }
+            _ => Arc::new(LoggerTracker),
         };
 
         let extractor_caller = UnifiedDestination::new(
@@ -233,20 +244,12 @@ impl Server {
 
         // Update metrics in separate thread
         let template = DefaultTemplate::default();
-        let tracker: Arc<dyn Track<posthog_rs::Event>> = match (
-            config.posthog_write_key.as_ref(),
-            config.posthog_endpoint.as_ref(),
-        ) {
-            (Some(key), Some(endpoint)) => {
-                Arc::new(PosthogTracker::new(key.to_string(), endpoint.to_string()).await)
-            }
-            _ => Arc::new(LoggerTracker),
-        };
 
         let metrics = db.collection::<Metric>(&Store::Metrics.to_string());
         let (metric_tx, mut receiver) =
             tokio::sync::mpsc::channel::<Metric>(config.metric_save_channel_size);
         let metric_system_id = config.metric_system_id.clone();
+        let cloned_tracker_client = tracker_client.clone();
         tokio::spawn(async move {
             let options = UpdateOptions::builder().upsert(true).build();
             let mut event_buffer = vec![];
@@ -284,7 +287,10 @@ impl Server {
                     break;
                 } else {
                     trace!("Event receiver timed out waiting for new event");
-                    if let Err(e) = tracker.track_many(&event_buffer, &[]).await {
+                    if let Err(e) = cloned_tracker_client
+                        .track_many_metrics(&event_buffer)
+                        .await
+                    {
                         warn!("Could not track metrics: {e}");
                     } else {
                         trace!("Tracked {} metrics", event_buffer.len());
@@ -309,6 +315,7 @@ impl Server {
                 metric_tx,
                 openapi_data,
                 secrets_client,
+                tracker_client,
                 template,
             }),
         })

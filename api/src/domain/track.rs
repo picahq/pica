@@ -1,39 +1,46 @@
 use super::Metric;
 use axum::async_trait;
 use entities::{InternalError, PicaError, Unit};
-use posthog_rs::ClientOptionsBuilder;
+use posthog_rs::{ClientOptionsBuilder, Event};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use strum::AsRefStr;
 
 #[async_trait]
 pub trait Track<E>: Send + Sync {
-    async fn track(&self, metric: &Metric, event: Option<E>) -> Result<Unit, PicaError>;
+    async fn track_metric(&self, metric: &Metric) -> Result<Unit, PicaError>;
 
-    async fn track_many(&self, metrics: &[Metric], events: &[E]) -> Result<Unit, PicaError>;
+    async fn track_many_metrics(&self, metrics: &[Metric]) -> Result<Unit, PicaError>;
+
+    async fn track_event(&self, event: E) -> Result<Unit, PicaError>;
+
+    async fn track_many_events(&self, events: &[E]) -> Result<Unit, PicaError>;
 }
 
 pub struct LoggerTracker;
 
 #[async_trait]
-impl Track<posthog_rs::Event> for LoggerTracker {
-    async fn track(
-        &self,
-        metric: &Metric,
-        _: Option<posthog_rs::Event>,
-    ) -> Result<Unit, PicaError> {
+impl Track<TrackedMetric> for LoggerTracker {
+    async fn track_metric(&self, metric: &Metric) -> Result<Unit, PicaError> {
         let track = metric.track()?;
         tracing::info!("Tracking event: {track:?}");
 
         Ok(())
     }
 
-    async fn track_many(
-        &self,
-        metric: &[Metric],
-        _: &[posthog_rs::Event],
-    ) -> Result<Unit, PicaError> {
+    async fn track_many_metrics(&self, metric: &[Metric]) -> Result<Unit, PicaError> {
         metric.iter().for_each(|m| {
             tracing::info!("Tracking event: {m:?}");
         });
 
+        Ok(())
+    }
+
+    async fn track_event(&self, _: TrackedMetric) -> Result<Unit, PicaError> {
+        Ok(())
+    }
+
+    async fn track_many_events(&self, _: &[TrackedMetric]) -> Result<Unit, PicaError> {
         Ok(())
     }
 }
@@ -56,12 +63,8 @@ impl PosthogTracker {
 }
 
 #[async_trait]
-impl Track<posthog_rs::Event> for PosthogTracker {
-    async fn track(
-        &self,
-        metric: &Metric,
-        _: Option<posthog_rs::Event>,
-    ) -> Result<Unit, PicaError> {
+impl Track<TrackedMetric> for PosthogTracker {
+    async fn track_metric(&self, metric: &Metric) -> Result<Unit, PicaError> {
         let event = metric.track()?;
 
         self.client.capture(event).await.map_err(|e| {
@@ -72,11 +75,7 @@ impl Track<posthog_rs::Event> for PosthogTracker {
         Ok(())
     }
 
-    async fn track_many(
-        &self,
-        metric: &[Metric],
-        _: &[posthog_rs::Event],
-    ) -> Result<Unit, PicaError> {
+    async fn track_many_metrics(&self, metric: &[Metric]) -> Result<Unit, PicaError> {
         let events = metric
             .iter()
             .map(|m| m.track())
@@ -88,5 +87,164 @@ impl Track<posthog_rs::Event> for PosthogTracker {
         })?;
 
         Ok(())
+    }
+
+    async fn track_event(&self, event: TrackedMetric) -> Result<Unit, PicaError> {
+        self.client.capture(event.track()?).await.map_err(|e| {
+            tracing::error!("Could not track event: {e}");
+            InternalError::io_err("Could not track event", None)
+        })?;
+
+        Ok(())
+    }
+
+    async fn track_many_events(&self, events: &[TrackedMetric]) -> Result<Unit, PicaError> {
+        let events = events
+            .iter()
+            .map(|m| m.track())
+            .collect::<Result<Vec<_>, _>>()?;
+
+        self.client.capture_batch(events).await.map_err(|e| {
+            tracing::error!("Could not track event: {e}");
+            InternalError::io_err("Could not track event", None)
+        })?;
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, AsRefStr)]
+#[serde(untagged, rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
+enum Path {
+    T,
+    I,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", untagged)]
+enum TrackType {
+    Identify {
+        user_id: String,
+        traits: UserTraits,
+        context: Context,
+    },
+    Track {
+        event: String,
+        user_id: String,
+        properties: Properties,
+        context: Context,
+    },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Properties {
+    pub version: String,
+    pub properties: HashMap<String, String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserTraits {
+    name: String,
+    email: String,
+    username: String,
+    user_key: String,
+    buildable_id: String,
+    version: String,
+    #[serde(flatten, skip_serializing_if = "HashMap::is_empty")]
+    profile: HashMap<String, String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Context {
+    locale: String,
+    page: Page,
+    user_agent: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Page {
+    path: Path,
+    search: String,
+    title: String,
+    url: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TrackedMetric {
+    path: Path,
+    data: TrackType,
+}
+
+impl TrackedMetric {
+    pub fn event(&self) -> &str {
+        match &self.data {
+            TrackType::Track { event, .. } => event,
+            TrackType::Identify { .. } => "identify",
+        }
+    }
+
+    pub fn user_id(&self) -> &str {
+        match &self.data {
+            TrackType::Track { user_id, .. } => user_id,
+            TrackType::Identify { user_id, .. } => user_id,
+        }
+    }
+
+    pub fn track(&self) -> Result<Event, PicaError> {
+        match &self.data {
+            TrackType::Track {
+                properties,
+                user_id,
+                context,
+                event,
+            } => {
+                let mut hashmap = properties.properties.clone();
+                hashmap.insert("version".into(), properties.version.clone());
+                hashmap.insert("locale".into(), context.locale.clone());
+                hashmap.insert("user_agent".into(), context.user_agent.clone());
+                hashmap.insert("user_id".into(), user_id.clone());
+                hashmap.insert("path".into(), context.page.path.as_ref().to_string());
+                hashmap.insert("search".into(), context.page.search.clone());
+                hashmap.insert("title".into(), context.page.title.clone());
+                hashmap.insert("url".into(), context.page.url.clone());
+
+                let mut event = Event::new(event.clone(), user_id.clone());
+
+                for (key, value) in hashmap {
+                    event.insert_prop(key, value)?;
+                }
+
+                Ok(event)
+            }
+            TrackType::Identify {
+                traits,
+                user_id,
+                context,
+            } => {
+                let mut hashmap = traits.profile.clone();
+                hashmap.insert("version".into(), traits.version.clone());
+                hashmap.insert("locale".into(), context.locale.clone());
+                hashmap.insert("user_agent".into(), context.user_agent.clone());
+                hashmap.insert("user_id".into(), user_id.clone());
+                hashmap.insert("path".into(), context.page.path.as_ref().to_string());
+                hashmap.insert("search".into(), context.page.search.clone());
+                hashmap.insert("title".into(), context.page.title.clone());
+                hashmap.insert("url".into(), context.page.url.clone());
+
+                let mut event = Event::new("identify", user_id);
+
+                for (key, value) in hashmap {
+                    event.insert_prop(key, value)?;
+                }
+
+                Ok(event)
+            }
+        }
     }
 }
