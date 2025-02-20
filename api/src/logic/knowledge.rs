@@ -26,7 +26,6 @@ pub struct Knowledge {
     pub knowledge: Option<String>,
     #[serde(flatten)]
     pub platform_info: PlatformInfo,
-    pub base_url: Option<String>,
     #[serde(flatten)]
     pub metadata: RecordMetadata,
 }
