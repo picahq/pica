@@ -2,9 +2,7 @@ use super::{read_without_key, HookExt, PublicExt, RequestExt};
 use crate::server::{AppState, AppStores};
 use axum::{routing::get, Router};
 use bson::doc;
-use entities::{
-    connection_model_definition::PlatformInfo, record_metadata::RecordMetadata, Id, MongoStore,
-};
+use entities::{record_metadata::RecordMetadata, Id, MongoStore};
 use fake::Dummy;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -24,8 +22,7 @@ pub struct Knowledge {
     pub title: String,
     pub path: String,
     pub knowledge: Option<String>,
-    #[serde(flatten)]
-    pub platform_info: PlatformInfo,
+    pub base_url: String,
     #[serde(flatten)]
     pub metadata: RecordMetadata,
 }
