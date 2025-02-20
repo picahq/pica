@@ -113,28 +113,30 @@ impl Track<TrackedMetric> for PosthogTracker {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, AsRefStr)]
-#[serde(untagged, rename_all = "lowercase")]
-#[strum(serialize_all = "lowercase")]
-enum Path {
-    T,
-    I,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IdentifyData {
+    user_id: String,
+    traits: UserTraits,
+    context: Context,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", untagged)]
+#[serde(rename_all = "camelCase")]
+pub struct TrackData {
+    event: String,
+    user_id: String,
+    properties: Properties,
+    context: Context,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", tag = "path")]
 enum TrackType {
-    Identify {
-        user_id: String,
-        traits: UserTraits,
-        context: Context,
-    },
-    Track {
-        event: String,
-        user_id: String,
-        properties: Properties,
-        context: Context,
-    },
+    #[serde(rename = "i")]
+    Identify { data: IdentifyData },
+    #[serde(rename = "t")]
+    Track { data: TrackData },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -168,7 +170,7 @@ pub struct Context {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Page {
-    path: Path,
+    path: String,
     search: String,
     title: String,
     url: String,
@@ -177,39 +179,48 @@ pub struct Page {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TrackedMetric {
-    path: Path,
+    #[serde(flatten)]
     data: TrackType,
 }
 
 impl TrackedMetric {
     pub fn event(&self) -> &str {
         match &self.data {
-            TrackType::Track { event, .. } => event,
+            TrackType::Track {
+                data: TrackData { event, .. },
+            } => event,
             TrackType::Identify { .. } => "identify",
         }
     }
 
     pub fn user_id(&self) -> &str {
         match &self.data {
-            TrackType::Track { user_id, .. } => user_id,
-            TrackType::Identify { user_id, .. } => user_id,
+            TrackType::Track {
+                data: TrackData { user_id, .. },
+            } => user_id.as_str(),
+            TrackType::Identify {
+                data: IdentifyData { user_id, .. },
+            } => user_id.as_str(),
         }
     }
 
     pub fn track(&self) -> Result<Event, PicaError> {
         match &self.data {
             TrackType::Track {
-                properties,
-                user_id,
-                context,
-                event,
+                data:
+                    TrackData {
+                        properties,
+                        user_id,
+                        context,
+                        event,
+                    },
             } => {
                 let mut hashmap = properties.properties.clone();
                 hashmap.insert("version".into(), properties.version.clone());
                 hashmap.insert("locale".into(), context.locale.clone());
                 hashmap.insert("user_agent".into(), context.user_agent.clone());
                 hashmap.insert("user_id".into(), user_id.clone());
-                hashmap.insert("path".into(), context.page.path.as_ref().to_string());
+                hashmap.insert("path".into(), context.page.path.to_string());
                 hashmap.insert("search".into(), context.page.search.clone());
                 hashmap.insert("title".into(), context.page.title.clone());
                 hashmap.insert("url".into(), context.page.url.clone());
@@ -223,16 +234,19 @@ impl TrackedMetric {
                 Ok(event)
             }
             TrackType::Identify {
-                traits,
-                user_id,
-                context,
+                data:
+                    IdentifyData {
+                        user_id,
+                        traits,
+                        context,
+                    },
             } => {
                 let mut hashmap = traits.profile.clone();
                 hashmap.insert("version".into(), traits.version.clone());
                 hashmap.insert("locale".into(), context.locale.clone());
                 hashmap.insert("user_agent".into(), context.user_agent.clone());
                 hashmap.insert("user_id".into(), user_id.clone());
-                hashmap.insert("path".into(), context.page.path.as_ref().to_string());
+                hashmap.insert("path".into(), context.page.path.to_string());
                 hashmap.insert("search".into(), context.page.search.clone());
                 hashmap.insert("title".into(), context.page.title.clone());
                 hashmap.insert("url".into(), context.page.url.clone());
