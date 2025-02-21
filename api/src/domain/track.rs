@@ -143,6 +143,7 @@ enum TrackType {
 #[serde(rename_all = "camelCase")]
 pub struct Properties {
     pub version: String,
+    #[serde(default)]
     pub properties: HashMap<String, String>,
 }
 
