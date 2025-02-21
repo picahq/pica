@@ -245,10 +245,12 @@ impl TrackedMetric {
                 hashmap.insert("title".into(), Value::String(context.page.title.clone()));
                 hashmap.insert("url".into(), Value::String(context.page.url.clone()));
 
-                let mut event = Event::new("identify", user_id);
+                let mut event = Event::new("Identify", user_id);
 
                 for (key, value) in hashmap {
-                    event.insert_prop(key, value)?;
+                    event.insert_prop(key, value).inspect_err(|e| {
+                        tracing::error!("Could not insert prop: {e}");
+                    })?
                 }
 
                 Ok(event)
