@@ -3,6 +3,7 @@ use axum::async_trait;
 use entities::{InternalError, PicaError, Unit};
 use posthog_rs::{ClientOptionsBuilder, Event};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::HashMap;
 
 #[async_trait]
@@ -116,7 +117,7 @@ impl Track<TrackedMetric> for PosthogTracker {
 #[serde(rename_all = "camelCase")]
 pub struct IdentifyData {
     user_id: String,
-    traits: UserTraits,
+    traits: HashMap<String, Value>,
     context: Context,
 }
 
@@ -144,19 +145,6 @@ pub struct Properties {
     pub version: String,
     #[serde(default)]
     pub properties: HashMap<String, String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct UserTraits {
-    name: String,
-    email: String,
-    username: String,
-    user_key: String,
-    buildable_id: String,
-    version: String,
-    #[serde(flatten, skip_serializing_if = "HashMap::is_empty")]
-    profile: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -241,15 +229,21 @@ impl TrackedMetric {
                         context,
                     },
             } => {
-                let mut hashmap = traits.profile.clone();
-                hashmap.insert("version".into(), traits.version.clone());
-                hashmap.insert("locale".into(), context.locale.clone());
-                hashmap.insert("user_agent".into(), context.user_agent.clone());
-                hashmap.insert("user_id".into(), user_id.clone());
-                hashmap.insert("path".into(), context.page.path.to_string());
-                hashmap.insert("search".into(), context.page.search.clone());
-                hashmap.insert("title".into(), context.page.title.clone());
-                hashmap.insert("url".into(), context.page.url.clone());
+                let mut hashmap = traits.clone();
+                hashmap.insert(
+                    "version".into(),
+                    traits.get("version").cloned().unwrap_or(Value::Null),
+                );
+                hashmap.insert("locale".into(), Value::String(context.locale.clone()));
+                hashmap.insert(
+                    "user_agent".into(),
+                    Value::String(context.user_agent.clone()),
+                );
+                hashmap.insert("user_id".into(), Value::String(user_id.clone()));
+                hashmap.insert("path".into(), Value::String(context.page.path.to_string()));
+                hashmap.insert("search".into(), Value::String(context.page.search.clone()));
+                hashmap.insert("title".into(), Value::String(context.page.title.clone()));
+                hashmap.insert("url".into(), Value::String(context.page.url.clone()));
 
                 let mut event = Event::new("identify", user_id);
 
