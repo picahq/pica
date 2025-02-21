@@ -4,7 +4,6 @@ use entities::{InternalError, PicaError, Unit};
 use posthog_rs::{ClientOptionsBuilder, Event};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use strum::AsRefStr;
 
 #[async_trait]
 pub trait Track<E>: Send + Sync {
