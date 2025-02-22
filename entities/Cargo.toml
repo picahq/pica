@@ -53,6 +53,7 @@ napi-derive = "2.16.12"
 openapiv3.workspace = true
 percent-encoding = "2.3.1"
 pin-project = "1.1.7"
+posthog-rs.workspace = true
 prost = "0.13.4"
 rand.workspace = true
 reqwest = { workspace = true, features = ["json", "rustls-tls"] }

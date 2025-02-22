@@ -461,7 +461,6 @@ impl ErrorMeta for InternalError {
         }
     }
 
-    // TODO: Implement this
     fn meta(&self) -> Option<Box<Value>> {
         match self {
             InternalError::UnknownError { meta, .. } => meta.clone(),
@@ -953,6 +952,12 @@ pub enum PicaError {
 impl From<reqwest::Error> for PicaError {
     fn from(err: reqwest::Error) -> Self {
         InternalError::io_err(&err.to_string(), None)
+    }
+}
+
+impl From<posthog_rs::Error> for PicaError {
+    fn from(err: posthog_rs::Error) -> Self {
+        InternalError::unknown(&err.to_string(), None)
     }
 }
 

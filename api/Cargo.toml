@@ -32,7 +32,6 @@ redis.workspace = true
 reqwest.workspace = true
 regex = "1"
 schemars.workspace = true
-segment = "0.2.4"
 semver.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -46,6 +45,7 @@ tracing-subscriber.workspace = true
 tracing.workspace = true
 uuid.workspace = true
 validator.workspace = true
+posthog-rs.workspace = true
 
 [dev-dependencies]
 testcontainers-modules = { workspace = true, features = ["mongo", "redis"] }

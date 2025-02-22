@@ -4,12 +4,11 @@ use entities::{
     destination::Action,
     event_access::EventAccess,
     ownership::Ownership,
-    Connection,
+    Connection, PicaError,
 };
 use http::HeaderValue;
-use segment::message::{Track, User};
+use posthog_rs::Event;
 use serde::Deserialize;
-use serde_json::json;
 use std::sync::Arc;
 
 #[derive(Debug, Clone, strum::Display, Deserialize)]
@@ -108,70 +107,70 @@ impl Metric {
         }
     }
 
-    pub fn segment_track(&self) -> Track {
+    pub fn track(&self) -> Result<Event, PicaError> {
         use MetricType::*;
 
         match &self.metric_type {
-            Unified(conn) => Track {
-                user: User::UserId {
-                    user_id: self
-                        .ownership()
-                        .clone()
-                        .user_id
-                        .unwrap_or(self.ownership().id.to_string()),
-                },
-                event: self.metric_type.event_name().to_owned(),
-                properties: json!({
-                    "connectionDefinitionId": conn.id.to_string(),
-                    "environment": conn.environment,
-                    "key": &conn.key,
-                    "platform": self.platform(),
-                    "platformVersion": &conn.platform_version,
-                    "clientId": self.ownership().client_id,
-                    "version": &conn.record_metadata.version,
-                    "commonModel": self.action.as_ref().map(|a| a.name()),
-                    "action": self.action.as_ref().map(|a| a.action()),
-                }),
-                ..Default::default()
-            },
-            Passthrough(conn) => Track {
-                user: User::UserId {
-                    user_id: self
-                        .ownership()
-                        .clone()
-                        .user_id
-                        .unwrap_or(self.ownership().id.to_string()),
-                },
-                event: self.metric_type.event_name().to_owned(),
-                properties: json!({
-                    "connectionDefinitionId": conn.id.to_string(),
-                    "environment": conn.environment,
-                    "key": &conn.key,
-                    "platform": self.platform(),
-                    "platformVersion": &conn.platform_version,
-                    "clientId": self.ownership().client_id,
-                    "version": &conn.record_metadata.version
-                }),
-                ..Default::default()
-            },
-            RateLimited(event_access, key) => Track {
-                user: User::UserId {
-                    user_id: self
-                        .ownership()
-                        .clone()
-                        .user_id
-                        .unwrap_or(self.ownership().id.to_string()),
-                },
-                event: self.metric_type.event_name().to_owned(),
-                properties: json!({
-                    "environment": event_access.environment,
-                    "key": key.as_ref().map(|k| k.to_str().unwrap_or_default().to_string()),
-                    "platform": self.platform(),
-                    "clientId": self.ownership().client_id,
-                    "version": &event_access.record_metadata.version
-                }),
-                ..Default::default()
-            },
+            Unified(conn) => {
+                let event_name = self.metric_type.event_name();
+                let distinct_id = self
+                    .ownership()
+                    .clone()
+                    .user_id
+                    .unwrap_or(self.ownership().id.to_string());
+                let mut event = Event::new(event_name, &distinct_id);
+                event.insert_prop("connectionDefinitionId", conn.id.to_string())?;
+                event.insert_prop("environment", conn.environment)?;
+                event.insert_prop("key", &conn.key)?;
+                event.insert_prop("platform", self.platform())?;
+                event.insert_prop("platformVersion", &conn.platform_version)?;
+                event.insert_prop("clientId", self.ownership().client_id.clone())?;
+                event.insert_prop("version", &conn.record_metadata.version)?;
+                event.insert_prop("commonModel", self.action.as_ref().map(|a| a.name()))?;
+                event.insert_prop("action", self.action.as_ref().map(|a| a.action()))?;
+
+                Ok(event)
+            }
+            Passthrough(conn) => {
+                let event_name = self.metric_type.event_name();
+                let distinct_id = self
+                    .ownership()
+                    .clone()
+                    .user_id
+                    .unwrap_or(self.ownership().id.to_string());
+
+                let mut event = Event::new(event_name, &distinct_id);
+                event.insert_prop("connectionDefinitionId", conn.id.to_string())?;
+                event.insert_prop("environment", conn.environment)?;
+                event.insert_prop("key", &conn.key)?;
+                event.insert_prop("platform", self.platform())?;
+                event.insert_prop("platformVersion", &conn.platform_version)?;
+                event.insert_prop("clientId", self.ownership().client_id.clone())?;
+                event.insert_prop("version", &conn.record_metadata.version)?;
+
+                Ok(event)
+            }
+            RateLimited(event_access, key) => {
+                let event_name = self.metric_type.event_name();
+                let distinct_id = self
+                    .ownership()
+                    .clone()
+                    .user_id
+                    .unwrap_or(self.ownership().id.to_string());
+
+                let mut event = Event::new(event_name, &distinct_id);
+                event.insert_prop("environment", event_access.environment)?;
+                event.insert_prop(
+                    "key",
+                    key.as_ref()
+                        .map(|k| k.to_str().unwrap_or_default().to_string()),
+                )?;
+                event.insert_prop("platform", self.platform())?;
+                event.insert_prop("clientId", self.ownership().client_id.clone())?;
+                event.insert_prop("version", &event_access.record_metadata.version)?;
+
+                Ok(event)
+            }
         }
     }
 }
