@@ -38,9 +38,8 @@ pub struct EmbedTokenSlim {
 #[serde(rename_all = "camelCase")]
 pub struct EmbedLinkedTokenSlim {
     pub connected_platforms: Vec<ConnectedPlatformSlim>,
-    pub event_inc_token: String
+    pub event_inc_token: String,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

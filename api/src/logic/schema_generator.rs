@@ -221,13 +221,14 @@ async fn generate_types(
     let cm_store = state.app_stores.common_model.clone();
     let ce_store = state.app_stores.common_enum.clone();
 
-    let common_model = cm_store
-        .get_one_by_id(&id.to_string())
-        .await?
-        .ok_or(ApplicationError::not_found(
-            &format!("CommonModel with id {} not found", id),
-            None,
-        ))?;
+    let common_model =
+        cm_store
+            .get_one_by_id(&id.to_string())
+            .await?
+            .ok_or(ApplicationError::not_found(
+                &format!("CommonModel with id {} not found", id),
+                None,
+            ))?;
 
     let schema = common_model
         .generate_as_expanded(&lang, &cm_store, &ce_store, TypeGenerationStrategy::Unique)
@@ -250,13 +251,14 @@ pub async fn generate_schema(
     let cm_store = state.app_stores.common_model.clone();
     let ce_store = state.app_stores.common_enum.clone();
 
-    let common_model = cm_store
-        .get_one_by_id(&id.to_string())
-        .await?
-        .ok_or(ApplicationError::not_found(
-            &format!("CommonModel with id {} not found", id),
-            None,
-        ))?;
+    let common_model =
+        cm_store
+            .get_one_by_id(&id.to_string())
+            .await?
+            .ok_or(ApplicationError::not_found(
+                &format!("CommonModel with id {} not found", id),
+                None,
+            ))?;
 
     let schema = common_model
         .as_typescript_schema_expanded(&cm_store, &ce_store, r#type.unwrap_or(SchemaType::Lax))

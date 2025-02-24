@@ -8,8 +8,8 @@ use crate::{
 use bson::doc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tabled::Tabled;
 use std::ops::Not;
+use tabled::Tabled;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "dummy", derive(fake::Dummy))]
