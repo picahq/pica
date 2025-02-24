@@ -5,6 +5,8 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use super::connection_oauth_definition::ConnectedPlatformSlim;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EmbedToken {
@@ -23,6 +25,22 @@ pub struct EmbedToken {
     #[serde(flatten, default)]
     pub metadata: RecordMetadata,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EmbedTokenSlim {
+    #[serde(rename = "_id")]
+    pub id: Id,
+    pub link_settings: EmbedLinkedTokenSlim,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EmbedLinkedTokenSlim {
+    pub connected_platforms: Vec<ConnectedPlatformSlim>,
+    pub event_inc_token: String
+}
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

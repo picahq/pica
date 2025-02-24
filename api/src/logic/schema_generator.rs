@@ -59,8 +59,7 @@ async fn generate_specific_types(
             None,
             None,
         )
-        .await
-        .map_err(PicaError::from)?;
+        .await?;
 
     let mut output_types = String::new();
 
@@ -103,8 +102,7 @@ async fn generate_all_types(
             None,
             None,
         )
-        .await
-        .map_err(PicaError::from)?;
+        .await?;
 
     let common_enums = ce_store
         .get_many(
@@ -116,8 +114,7 @@ async fn generate_all_types(
             None,
             None,
         )
-        .await
-        .map_err(PicaError::from)?;
+        .await?;
 
     let mut output_types = String::new();
 
@@ -226,8 +223,7 @@ async fn generate_types(
 
     let common_model = cm_store
         .get_one_by_id(&id.to_string())
-        .await
-        .map_err(PicaError::from)?
+        .await?
         .ok_or(ApplicationError::not_found(
             &format!("CommonModel with id {} not found", id),
             None,
@@ -256,8 +252,7 @@ pub async fn generate_schema(
 
     let common_model = cm_store
         .get_one_by_id(&id.to_string())
-        .await
-        .map_err(PicaError::from)?
+        .await?
         .ok_or(ApplicationError::not_found(
             &format!("CommonModel with id {} not found", id),
             None,
