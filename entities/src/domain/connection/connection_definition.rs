@@ -3,33 +3,49 @@ use crate::id::Id;
 use crate::prelude::shared::{record_metadata::RecordMetadata, settings::Settings};
 use serde::{Deserialize, Serialize};
 use strum::{self, AsRefStr, Display};
+use tabled::Tabled;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Tabled)]
 #[cfg_attr(feature = "dummy", derive(fake::Dummy))]
 #[serde(rename_all = "camelCase")]
+#[tabled(rename_all = "PascalCase")]
 pub struct ConnectionDefinition {
     #[serde(rename = "_id")]
     pub id: Id,
+    #[tabled(skip)]
     pub platform_version: String,
     pub platform: String,
     #[serde(default)]
+    #[tabled(skip)]
     pub status: ConnectionStatus,
     #[serde(default)]
+    #[tabled(skip)]
     pub key: String,
+    #[tabled(skip)]
     pub r#type: ConnectionDefinitionType,
     pub name: String,
+    #[tabled(skip)]
     pub auth_secrets: Vec<AuthSecret>,
+    #[tabled(skip)]
     pub auth_method: Option<AuthMethod>,
     #[serde(default)]
+    #[tabled(skip)]
     pub multi_env: bool,
+    #[tabled(skip)]
     pub frontend: Frontend,
+    #[tabled(skip)]
     pub paths: Paths,
+    #[tabled(skip)]
     pub settings: Settings,
+    #[tabled(skip)]
     pub hidden: bool,
+    #[tabled(skip)]
     pub test_connection: Option<Id>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[tabled(skip)]
     pub test_delay_in_millis: Option<i16>,
     #[serde(flatten, default)]
+    #[tabled(skip)]
     pub record_metadata: RecordMetadata,
 }
 

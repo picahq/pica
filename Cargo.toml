@@ -4,6 +4,7 @@ members = [
     "api",
     "archiver", 
     "cache",
+    "cli",
     "entities",
     "database",
     "unified",
@@ -62,6 +63,7 @@ serde_yaml = "0.9.34"
 schemars = "0.8.21"
 sha2 = "0.10.8"
 strum = { version = "0.25", features = ["derive"] }
+tabled = "0.18.0"
 testcontainers-modules = "0.3"
 thiserror = "1.0.69"
 tokio = { version = "1.41.1", features = [

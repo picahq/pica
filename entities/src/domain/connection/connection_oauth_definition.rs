@@ -9,6 +9,7 @@ use bson::doc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::ops::Not;
+use tabled::Tabled;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "dummy", derive(fake::Dummy))]
@@ -122,22 +123,39 @@ impl Settings {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Tabled)]
 #[serde(rename_all = "camelCase")]
+#[tabled(rename_all = "PascalCase")]
+pub struct ConnectedPlatformSlim {
+    #[tabled(rename = "platform")]
+    pub r#type: String,
+    pub title: String,
+    pub connection_definition_id: Id,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Tabled)]
+#[serde(rename_all = "camelCase")]
+#[tabled(rename_all = "PascalCase")]
 pub struct ConnectedPlatform {
     #[serde(rename = "type")]
     pub r#type: String,
+    #[tabled(skip)]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub scopes: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub title: Option<String>,
+    #[serde(default)]
+    pub title: String,
     pub connection_definition_id: Id,
+    #[tabled(skip)]
     #[serde(default)]
     pub active: Option<bool>,
+    #[tabled(skip)]
     pub image: Option<String>,
+    #[tabled(skip)]
     pub secrets_service_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[tabled(skip)]
     pub secret: Option<ConnectedPlatformSecret>,
+    #[tabled(skip)]
     #[serde(default = "default_environment")]
     pub environment: Environment,
 }

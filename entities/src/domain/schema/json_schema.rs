@@ -759,6 +759,6 @@ mod tests {
 
         let schema = schema_for!(Response);
 
-        println!("{:#?}", serde_json::to_value(&schema).unwrap());
+        assert!(serde_json::to_value(&schema).is_ok());
     }
 }

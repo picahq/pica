@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{hash::Hash, sync::Arc};
 use strum::{AsRefStr, Display, EnumString};
+use tabled::Tabled;
 
 fn key_default() -> Arc<str> {
     String::new().into()
@@ -66,19 +67,24 @@ pub enum ConnectionIdentityType {
     Team,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Tabled)]
 #[serde(rename_all = "camelCase")]
+#[tabled(rename_all = "PascalCase")]
 pub struct PublicConnection {
     #[serde(rename = "_id")]
     pub id: Id,
     pub platform_version: String,
+    #[tabled(rename = "type")]
     pub r#type: ConnectionType,
     pub key: Arc<str>,
     pub environment: Environment,
     pub platform: Arc<str>,
+    #[tabled(skip)]
     pub identity: Option<String>,
+    #[tabled(skip)]
     pub identity_type: Option<ConnectionIdentityType>,
     #[serde(flatten, default)]
+    #[tabled(skip)]
     pub record_metadata: RecordMetadata,
 }
 
