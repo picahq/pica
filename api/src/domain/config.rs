@@ -17,7 +17,7 @@ pub struct ConnectionsConfig {
     pub cache_size: u64,
     #[envconfig(from = "ACCESS_KEY_CACHE_TTL_SECS", default = "1800")]
     pub access_key_cache_ttl_secs: u64,
-    #[envconfig(from = "ACCESS_KEY_WHITELIST_REFRESH_INTERVAL_SECS", default = "60")]
+    #[envconfig(from = "ACCESS_KEY_WHITELIST_REFRESH_INTERVAL_SECS", default = "10")]
     pub access_key_whitelist_refresh_interval_secs: u64,
     #[envconfig(from = "CONNECTION_CACHE_TTL_SECS", default = "120")]
     pub connection_cache_ttl_secs: u64,

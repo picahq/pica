@@ -155,6 +155,10 @@ impl Nonce {
 
         Ok(Nonce(nonce_str))
     }
+
+    pub fn nonce(&self) -> &str {
+        &self.0
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
