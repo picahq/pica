@@ -65,7 +65,7 @@ impl Server {
 
         let url = format!(
             "{}/public/v3/users/oauth/provider/github",
-            api_url.clone().unwrap_or(DEFAULT_BASE.to_string())
+            api_url.clone().unwrap_or(DEFAULT_API.to_string())
         );
 
         let router = Router::new().route(
