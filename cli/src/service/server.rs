@@ -9,7 +9,9 @@ use crate::{
 use axum::{Router, extract::Query, routing::get};
 use clap::error::ErrorKind;
 use entities::{InternalError, PicaError, Unit};
+use reqwest::Client;
 use serde::Deserialize;
+use serde_json::json;
 use std::{
     fs::{File, create_dir_all},
     io::Write,
@@ -20,8 +22,15 @@ use tokio::{net::TcpListener, sync::oneshot};
 
 #[derive(Debug, Deserialize, Default)]
 pub struct QueryParams {
-    sandbox: String,
+    code: String,
+}
+
+#[derive(Debug, Deserialize, Default)]
+pub struct OnboardingResponse {
+    #[serde(rename = "liveKey")]
     production: String,
+    #[serde(rename = "testKey")]
+    sandbox: String,
 }
 
 pub struct Server;
@@ -54,6 +63,11 @@ impl Server {
         let (shutdown_tx, shutdown_rx) = oneshot::channel::<Unit>();
         let shutdown_tx = Arc::new(Mutex::new(Some(shutdown_tx)));
 
+        let url = format!(
+            "{}/public/v3/users/oauth/provider/github",
+            api_url.clone().unwrap_or(DEFAULT_BASE.to_string())
+        );
+
         let router = Router::new().route(
             "/callback",
             get({
@@ -62,8 +76,7 @@ impl Server {
             }),
         );
 
-        // TODO: Make this a random port, and pass it to the GO_TO_URL for the user to login
-        let listener = TcpListener::bind("0.0.0.0:8080").await.map_err(|e| {
+        let listener = TcpListener::bind("0.0.0.0:8082").await.map_err(|e| {
             printer.stderr::<Pica>(
                 &format!("{e}"),
                 ErrorKind::Io,
@@ -73,8 +86,7 @@ impl Server {
             InternalError::io_err(&format!("{e}"), None)
         })?;
 
-        // FIX: Change this to the actual url
-        printer.stdout(&(GO_TO_URL.to_string() + "http://localhost:3000/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost:8080/callback"));
+        printer.stdout(&(GO_TO_URL.to_string() + &url));
 
         let server = axum::serve(listener, router);
         let server_handle = tokio::spawn(async move {
@@ -128,6 +140,23 @@ impl Server {
         base_url: Option<String>,
         api_url: Option<String>,
     ) -> Result<Unit, PicaError> {
+        let url = format!(
+            "{}/auth/github",
+            api_url.clone().unwrap_or(DEFAULT_API.to_string())
+        );
+
+        let response: OnboardingResponse = Client::new()
+            .post(url)
+            .json(&json!({
+                "code": params.code,
+                "isTerminal": true
+            }))
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?;
+
         let (_, path, _) = CliConfig::path();
 
         if let Some(parent) = path.parent() {
@@ -143,7 +172,7 @@ impl Server {
 
         let config = {
             let http = Http::new(Some(30000));
-            let keys = Keys::new(params.sandbox, params.production);
+            let keys = Keys::new(response.sandbox, response.production);
             let server = ConfigServer::new(
                 api_url.clone().unwrap_or(DEFAULT_API.to_string()),
                 base_url.clone().unwrap_or(DEFAULT_BASE.to_string()),
