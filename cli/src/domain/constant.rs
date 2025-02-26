@@ -16,8 +16,7 @@ pub const URL_PROVIDED_IS_INVALID: &str = "URL provided is invalid";
 pub const FORM_VALIDATION_FAILED: &str = "Form validation failed";
 
 // Suggestions
-pub const RUN_PICA_CONFIGURATION_SUG: &str =
-    "Run `pica configure` to createa a configuration file.";
+pub const RUN_PICA_CONFIGURATION_SUG: &str = "Run `pica login` to create a configuration file.";
 pub const CHECK_INTERNET_CONNECTION_SUG: &str = "Check your internet connection and try again";
 pub const CHECK_PARAMETERS_SUG: &str = "Check the parameters and try again";
 pub const CHECK_LIMIT_SUG: &str = "Try with a smaller limit";
@@ -30,6 +29,7 @@ pub const CHECK_AVAILABLE_CONN_DEFS_SUG: &str =
 
 // Instructions
 pub const GO_TO_URL: &str = "Go to the following url: ";
+pub const GO_TO_TERMINAL: &str = "Please continue in the terminal. Happy hacking!";
 
 // Metadata
 pub const ABOUT: &str = "Build performant, high-converting native integrations with a few lines of code. By unlocking more integrations, you can onboard more customers and expand app usage, overnight.";

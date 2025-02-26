@@ -1,12 +1,11 @@
 use crate::{
-    domain::Server as ConfigServer,
     domain::{
-        CHECK_PORT_FOR_SERVER_SUG, CliConfig, DEFAULT_API, DEFAULT_BASE, GO_TO_URL, Http, Keys,
-        RUN_PICA_CONNECTION_LIST_SUG,
+        CHECK_PORT_FOR_SERVER_SUG, CliConfig, DEFAULT_API, DEFAULT_BASE, GO_TO_TERMINAL, Http,
+        Keys, RUN_PICA_CONNECTION_LIST_SUG, Server as ConfigServer,
     },
-    service::{Pica, Printer},
+    service::{Pica, Printer, open_browser},
 };
-use axum::{Router, extract::Query, routing::get};
+use axum::{Router, extract::Query, response::Html, routing::get};
 use clap::error::ErrorKind;
 use entities::{InternalError, PicaError, Unit};
 use reqwest::Client;
@@ -63,10 +62,11 @@ impl Server {
         let (shutdown_tx, shutdown_rx) = oneshot::channel::<Unit>();
         let shutdown_tx = Arc::new(Mutex::new(Some(shutdown_tx)));
 
-        let url = format!(
-            "{}/public/v3/users/oauth/provider/github",
-            api_url.clone().unwrap_or(DEFAULT_API.to_string())
-        );
+        // let url = format!(
+        //     "{}/public/v3/users/oauth/provider/github",
+        //     api_url.clone().unwrap_or(DEFAULT_API.to_string())
+        // );
+        let url = "http://localhost:3001/public/v3/users/oauth/provider/github";
 
         let router = Router::new().route(
             "/callback",
@@ -86,7 +86,9 @@ impl Server {
             InternalError::io_err(&format!("{e}"), None)
         })?;
 
-        printer.stdout(&(GO_TO_URL.to_string() + &url));
+        open_browser(&printer, url.to_string());
+
+        // printer.stdout(&(GO_TO_URL.to_string() + &url));
 
         let server = axum::serve(listener, router);
         let server_handle = tokio::spawn(async move {
@@ -139,12 +141,13 @@ impl Server {
         printer: Printer,
         base_url: Option<String>,
         api_url: Option<String>,
-    ) -> Result<Unit, PicaError> {
-        let url = format!(
-            "{}/auth/github",
-            api_url.clone().unwrap_or(DEFAULT_API.to_string())
-        );
+    ) -> Result<Html<String>, PicaError> {
+        // let url = format!(
+        //     "{}/auth/github",
+        //     api_url.clone().unwrap_or(DEFAULT_API.to_string())
+        // );
 
+        let url = "http://localhost:3001/auth/github";
         let response: OnboardingResponse = Client::new()
             .post(url)
             .json(&json!({
@@ -196,6 +199,6 @@ impl Server {
 
         printer.stdout(RUN_PICA_CONNECTION_LIST_SUG);
 
-        Ok(())
+        Ok(Html(format!("<p>{}</p>", GO_TO_TERMINAL)))
     }
 }

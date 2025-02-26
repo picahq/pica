@@ -101,6 +101,10 @@ pub struct ModelSorting {
 }
 
 impl ConnectionDefinition {
+    pub fn is_oauth(&self) -> bool {
+        self.settings.oauth
+    }
+
     pub fn to_connection_type(&self) -> super::ConnectionType {
         match self.r#type {
             ConnectionDefinitionType::Api => ConnectionType::Api {},

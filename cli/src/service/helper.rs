@@ -1,5 +1,5 @@
 use super::{Pica, Printer};
-use crate::domain::{CHECK_INTERNET_CONNECTION_SUG, CHECK_PARAMETERS_SUG};
+use crate::domain::{CHECK_INTERNET_CONNECTION_SUG, CHECK_PARAMETERS_SUG, GO_TO_URL};
 use clap::error::ErrorKind;
 use entities::{InternalError, PicaError};
 use reqwest::{Error as ReqwestError, Response};
@@ -47,4 +47,28 @@ pub fn readline() -> Result<String, PicaError> {
         .map_err(|e| InternalError::io_err(&format!("{e}"), None))?;
 
     Ok(buffer)
+}
+
+pub fn open_browser(printer: &Printer, url: String) {
+    #[cfg(target_os = "macos")]
+    let result = std::process::Command::new("open")
+        .arg(url.as_str())
+        .spawn()
+        .and_then(|mut a| a.wait());
+
+    #[cfg(target_os = "windows")]
+    let result = std::process::Command::new("explorer")
+        .arg(url.as_str())
+        .spawn()
+        .and_then(|mut a| a.wait());
+
+    #[cfg(target_os = "linux")]
+    let result = std::process::Command::new("xdg-open")
+        .arg(url.as_str())
+        .spawn()
+        .and_then(|mut a| a.wait());
+
+    if result.is_err() {
+        printer.stdout(&(GO_TO_URL.to_string() + url.as_str()));
+    }
 }

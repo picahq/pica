@@ -127,7 +127,7 @@ impl Settings {
 #[serde(rename_all = "camelCase")]
 #[tabled(rename_all = "PascalCase")]
 pub struct ConnectedPlatformSlim {
-    #[tabled(rename = "platform")]
+    #[tabled(rename = "Platform")]
     pub r#type: String,
     pub title: String,
     pub connection_definition_id: Id,
