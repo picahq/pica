@@ -5,7 +5,7 @@ use crate::{
         connection_definition::{self, GetPublicConnectionDetailsRequest},
         connection_model_schema, connection_oauth_definition,
         event_access::create_event_access_for_new_user,
-        openapi, read, schema_generator,
+        openapi, read, schema_generator, tracker,
     },
     middleware::jwt_auth::{self, JwtState},
     server::AppState,
@@ -38,6 +38,7 @@ pub fn get_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
                 ),
         )
         .nest("/schemas", schema_generator::get_router())
+        .nest("/mark", tracker::get_router())
         .route(
             "/connection-data",
             get(read::<GetPublicConnectionDetailsRequest, PublicConnectionDetails>),
