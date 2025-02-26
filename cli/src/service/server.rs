@@ -62,11 +62,10 @@ impl Server {
         let (shutdown_tx, shutdown_rx) = oneshot::channel::<Unit>();
         let shutdown_tx = Arc::new(Mutex::new(Some(shutdown_tx)));
 
-        // let url = format!(
-        //     "{}/public/v3/users/oauth/provider/github",
-        //     api_url.clone().unwrap_or(DEFAULT_API.to_string())
-        // );
-        let url = "http://localhost:3001/public/v3/users/oauth/provider/github";
+        let url = format!(
+            "{}/public/v3/users/oauth/provider/github",
+            api_url.clone().unwrap_or(DEFAULT_API.to_string())
+        );
 
         let router = Router::new().route(
             "/callback",
@@ -142,12 +141,11 @@ impl Server {
         base_url: Option<String>,
         api_url: Option<String>,
     ) -> Result<Html<String>, PicaError> {
-        // let url = format!(
-        //     "{}/auth/github",
-        //     api_url.clone().unwrap_or(DEFAULT_API.to_string())
-        // );
+        let url = format!(
+            "{}/auth/github",
+            api_url.clone().unwrap_or(DEFAULT_API.to_string())
+        );
 
-        let url = "http://localhost:3001/auth/github";
         let response: OnboardingResponse = Client::new()
             .post(url)
             .json(&json!({
