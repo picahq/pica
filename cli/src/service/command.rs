@@ -1,10 +1,10 @@
-use super::{Server, handle_response, readline};
+use super::{Server, handle_response, open_browser, readline};
 use crate::{
     algebra::Handler,
     domain::{
         ABOUT, AppContext, CHECK_AVAILABLE_CONN_DEFS_SUG, CHECK_LIMIT_SUG,
         CONN_DEF_NOT_FOUND_MESSAGE_ERR, CONNECTION_NOT_FOUND_MESSAGE_ERR, CliConfig, DEFAULT_LIMIT,
-        FORM_VALIDATION_FAILED, GO_TO_URL, HEADER_SECRET_KEY, LIMIT_GREATER_THAN_EXPECTED,
+        FORM_VALIDATION_FAILED, HEADER_SECRET_KEY, LIMIT_GREATER_THAN_EXPECTED,
         RUN_LIST_COMMANDS_SUG, ReadResponse, Step, URL_PROVIDED_IS_INVALID,
     },
 };
@@ -16,9 +16,9 @@ use entities::{
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fmt::{Display, Formatter},
-    time::Duration,
+    hash::RandomState,
 };
 use tabled::{Table, settings::Style};
 use url::Url;
@@ -44,8 +44,8 @@ impl Pica {
 pub enum Command {
     /// Manage connections via the CLI.
     Connection(Connection),
-    /// Configure the CLI. It truncates the configuration file and creates a new one.
-    Configure {
+    /// Configures the CLI. It truncates the configuration file and creates a new one.
+    Login {
         /// Base url of the API
         #[arg(short, long)]
         base: Option<String>,
@@ -138,7 +138,7 @@ impl Display for Environment {
 impl Handler<AppContext, Command, Event> for Pica {
     async fn load(&self) -> Result<AppContext, PicaError> {
         match self.command() {
-            Command::Configure { base, api } => {
+            Command::Login { base, api } => {
                 Server::start(base.clone(), api.clone()).await?;
 
                 Ok(AppContext::new(CliConfig::load()))
@@ -149,7 +149,7 @@ impl Handler<AppContext, Command, Event> for Pica {
 
     async fn validate(&self, ctx: &AppContext) -> Result<Unit, PicaError> {
         match &self.command {
-            Command::Configure { base, api } => {
+            Command::Login { base, api } => {
                 if let Some(base) = base {
                     Url::parse(base).map_err(|e| {
                         ctx.printer().stderr::<Pica>(
@@ -196,38 +196,62 @@ impl Handler<AppContext, Command, Event> for Pica {
 
     async fn run(&self, ctx: &AppContext) -> Result<Unit, PicaError> {
         match &self.command {
-            Command::Configure { .. } => Ok(()),
+            Command::Login { .. } => Ok(()),
             Command::Connection(Connection { command }) => match command {
                 ConnectionCommand::Create { platform, web, env } => {
+                    let secret = match env {
+                        Environment::Sandbox => ctx.config().keys().sandbox(),
+                        Environment::Production => ctx.config().keys().production(),
+                    };
+                    let url = format!(
+                        "{}/public/v1/event-links/create-embed-token",
+                        ctx.config().server().api()
+                    );
+
+                    let embed_defs = handle_response::<EmbedTokenSlim>(
+                        ctx.http()
+                            .post(url)
+                            .json(&json!({}))
+                            .header(HEADER_SECRET_KEY, secret)
+                            .send()
+                            .await,
+                        ctx.printer(),
+                    )
+                    .await?;
+
+                    let platforms: HashSet<String, RandomState> = HashSet::from_iter(
+                        embed_defs
+                            .link_settings
+                            .connected_platforms
+                            .iter()
+                            .map(|c| c.r#type.clone()),
+                    );
+
                     match platform {
-                        Some(platform) => {
-                            if *web {
-                                // https://development.picaos.com/connections#create
+                        Some(platform) if platforms.contains(platform) => {
+                            let url = format!(
+                                "{}/v1/public/connection-definitions?platform={}",
+                                ctx.config().server().api(),
+                                platform
+                            );
+
+                            let conn_def = handle_response::<ReadResponse<ConnectionDefinition>>(
+                                ctx.http().get(url).send().await,
+                                ctx.printer(),
+                            )
+                            .await?;
+                            let conn_def = conn_def.rows().first();
+
+                            if *web || conn_def.is_some_and(|cd| cd.is_oauth()) {
                                 let url = format!(
-                                    "{}/connections#create={}",
+                                    "{}/connections#open={}",
                                     ctx.config().server().base(),
                                     platform
                                 );
 
-                                ctx.printer()
-                                    .stdout(&(GO_TO_URL.to_string() + url.as_str()));
-
-                                tokio::time::sleep(Duration::from_secs(1)).await;
+                                open_browser(ctx.printer(), url.to_string());
                             } else {
-                                let url = format!(
-                                    "{}/v1/public/connection-definitions?platform={}",
-                                    ctx.config().server().api(),
-                                    platform
-                                );
-
-                                match handle_response::<ReadResponse<ConnectionDefinition>>(
-                                    ctx.http().get(url).send().await,
-                                    ctx.printer(),
-                                )
-                                .await?
-                                .rows()
-                                .first()
-                                {
+                                match conn_def {
                                     Some(conn_def) => {
                                         let steps = Step::from(conn_def);
 
@@ -260,28 +284,6 @@ impl Handler<AppContext, Command, Event> for Pica {
                                                 }
                                             },
                                         )?;
-
-                                        let secret = match env {
-                                            Environment::Sandbox => ctx.config().keys().sandbox(),
-                                            Environment::Production => {
-                                                ctx.config().keys().production()
-                                            }
-                                        };
-                                        let url = format!(
-                                            "{}/public/v1/event-links/create-embed-token",
-                                            ctx.config().server().api()
-                                        );
-
-                                        let embed_defs = handle_response::<EmbedTokenSlim>(
-                                            ctx.http()
-                                                .post(url)
-                                                .json(&json!({}))
-                                                .header(HEADER_SECRET_KEY, secret)
-                                                .send()
-                                                .await,
-                                            ctx.printer(),
-                                        )
-                                        .await?;
 
                                         let link_token = embed_defs.link_settings.event_inc_token;
 
@@ -326,27 +328,7 @@ impl Handler<AppContext, Command, Event> for Pica {
                                 }
                             }
                         }
-                        None => {
-                            let secret = match env {
-                                Environment::Sandbox => ctx.config().keys().sandbox(),
-                                Environment::Production => ctx.config().keys().production(),
-                            };
-                            let url = format!(
-                                "{}/public/v1/event-links/create-embed-token",
-                                ctx.config().server().api()
-                            );
-
-                            let embed_defs = handle_response::<EmbedTokenSlim>(
-                                ctx.http()
-                                    .post(url)
-                                    .json(&json!({}))
-                                    .header(HEADER_SECRET_KEY, secret)
-                                    .send()
-                                    .await,
-                                ctx.printer(),
-                            )
-                            .await?;
-
+                        _ => {
                             ctx.printer().stdout(CHECK_AVAILABLE_CONN_DEFS_SUG);
 
                             ctx.printer().stdout(
