@@ -323,10 +323,16 @@ mod tests {
             "password": "password"
         });
 
+        let query_param = json!({
+            "type": "QueryParam",
+            "key": "token",
+            "value": "some_token"
+        });
+
         let deserialized_bearer_token: AuthMethod = serde_json::from_value(bearer_token).unwrap();
         let deserialized_api_key: AuthMethod = serde_json::from_value(api_key).unwrap();
         let deserialized_basic_auth: AuthMethod = serde_json::from_value(basic_auth).unwrap();
-
+        let deserialized_query_param: AuthMethod = serde_json::from_value(query_param).unwrap();
         assert_eq!(
             deserialized_bearer_token,
             AuthMethod::BearerToken {
@@ -345,6 +351,14 @@ mod tests {
             AuthMethod::BasicAuth {
                 username: "username".to_string(),
                 password: "password".to_string()
+            }
+        );
+
+        assert_eq!(
+            deserialized_query_param,
+            AuthMethod::QueryParam {
+                key: "token".to_string(),
+                value: "some_token".to_string()
             }
         );
     }
