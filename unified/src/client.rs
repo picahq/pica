@@ -72,6 +72,7 @@ impl<'a> CallerClient<'a> {
         request_builder = match &self.config.auth_method {
             AuthMethod::BearerToken { value } => request_builder.bearer_auth(value),
             AuthMethod::ApiKey { key, value } => request_builder.header(key, value),
+            AuthMethod::QueryParam { key, value } => request_builder.query(&[(key, value)]),
             AuthMethod::BasicAuth { username, password } => {
                 request_builder.basic_auth(username, Some(password))
             }
