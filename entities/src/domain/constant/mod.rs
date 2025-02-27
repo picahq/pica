@@ -54,6 +54,7 @@ pub const X_PICA_SECRET: &str = "X-PICA-SECRET";
 pub const X_PICA_CONNECTION_KEY: &str = "X-PICA-CONNECTION-KEY";
 pub const X_PICA_ENABLE_PASSTHROUGH: &str = "X-PICA-ENABLE-PASSTHROUGH";
 pub const X_PICA_PASSTHROUGH_FORWARD: &str = "X-PICA-PASSTHROUGH-FORWARD";
+pub const X_PICA_INCLUDE_TEMPLATED: &str = "X-PICA-INCLUDE-TEMPLATED";
 pub const META: &str = "meta";
 pub const STATUS: &str = "status";
 pub const STATUS_CODE: &str = "statusCode";

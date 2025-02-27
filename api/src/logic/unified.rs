@@ -274,6 +274,7 @@ pub async fn process_request(
                         None,
                     )
                 })?,
+            &state.template,
         )
         .await
         .inspect_err(|e| {

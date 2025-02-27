@@ -137,6 +137,7 @@ async fn test_connection(
                 &HashMap::new(),
                 &Arc::new(auth_form_data_value.clone()),
                 context,
+                &state.template
             )
             .await?;
 

@@ -11,6 +11,7 @@ use cache::local::{
     LocalCacheExt, SecretCache,
 };
 use chrono::Utc;
+use entities::TemplateExt;
 use entities::{
     algebra::JsonExt,
     api_model_config::{ModelPaths, RequestModelPaths},
@@ -30,7 +31,6 @@ use futures::{
     future::{join_all, OptionFuture},
     FutureExt,
 };
-use handlebars::Handlebars;
 use http::{HeaderMap, HeaderName, HeaderValue, Response, StatusCode};
 use mongodb::{
     options::{Collation, CollationStrength, FindOneOptions},
@@ -220,6 +220,7 @@ impl UnifiedDestination {
         config: &ConnectionModelDefinition,
         params: &RequestCrud,
         secret: &Value,
+        templator: &impl TemplateExt,
     ) -> Result<reqwest::Response, PicaError> {
         let context = match params.get_body() {
             None | Some(Value::Null) => None,
@@ -239,6 +240,7 @@ impl UnifiedDestination {
             params.get_query_params(),
             secret,
             context,
+            templator,
         )
         .await
     }
@@ -250,22 +252,13 @@ impl UnifiedDestination {
         query_params: &HashMap<String, String>,
         secret: &Value,
         context: Option<Vec<u8>>,
+        templator: &impl TemplateExt,
     ) -> Result<reqwest::Response, PicaError> {
-        let renderer = Handlebars::new();
-
-        let config_str = serde_json::to_string(&config)
-            .map_err(|e| InternalError::invalid_argument(&e.to_string(), None))?;
-
-        let config = renderer
-            .render_template(&config_str, secret)
-            .map_err(|e| InternalError::invalid_argument(&e.to_string(), None))?;
-
-        let config: ConnectionModelDefinition = serde_json::from_str(&config)
-            .map_err(|e| InternalError::invalid_argument(&e.to_string(), None))?;
+        let config = templator.render_as(config, Some(secret.clone()).as_ref())?;
 
         match config.platform_info {
             PlatformInfo::Api(ref c) => {
-                let api_caller = CallerClient::new(c, config.action, &self.http_client);
+                let api_caller = CallerClient::new(c, config.action.clone(), &self.http_client);
 
                 let response = api_caller
                     .make_request(context, Some(secret), Some(headers), Some(query_params))
@@ -282,6 +275,7 @@ impl UnifiedDestination {
         action: Action,
         environment: Environment,
         params: RequestCrud,
+        templator: &impl TemplateExt,
     ) -> Result<UnifiedResponse, PicaError> {
         let mut metadata = UnifiedMetadataBuilder::default();
         let metadata = metadata
@@ -295,7 +289,7 @@ impl UnifiedDestination {
             .common_model_version("v1")
             .connection_key(connection.key.to_string());
 
-        self.perform_unified_request(connection, action, environment, params, metadata)
+        self.perform_unified_request(connection, action, environment, params, metadata, templator)
             .await
             .map_err(|e| match metadata.build().ok() {
                 Some(metadata) => e.set_meta(&metadata.as_value()),
@@ -310,6 +304,7 @@ impl UnifiedDestination {
         environment: Environment,
         params: RequestCrud,
         metadata: &mut UnifiedMetadataBuilder,
+        templator: &impl TemplateExt,
     ) -> Result<UnifiedResponse, PicaError> {
         let key = Destination {
             platform: connection.platform.clone(),
@@ -384,7 +379,7 @@ impl UnifiedDestination {
 
                 tracing::debug!("Request crud prepared for unified destination. RequestCrud: {:?}", params);
 
-                let response: reqwest::Response = self.execute_model_definition_from_request(&config, &params, &secret).timed(|_, duration| {
+                let response: reqwest::Response = self.execute_model_definition_from_request(&config, &params, &secret, templator).timed(|_, duration| {
                     metadata.latency(duration.as_millis() as i32);
                 }).await?;
 
@@ -534,6 +529,7 @@ impl UnifiedDestination {
         headers: HeaderMap,
         query_params: HashMap<String, String>,
         context: Option<Vec<u8>>,
+        templator: &impl TemplateExt,
     ) -> Result<reqwest::Response, PicaError> {
         let connection = if let Some(connection) = connection {
             connection
@@ -549,6 +545,10 @@ impl UnifiedDestination {
                     .await?,
             )
         };
+
+        let wider_template = headers
+            .get(X_PICA_INCLUDE_TEMPLATED)
+            .map(|h| h.to_str().map(serde_json::from_str::<Value>));
 
         let config = match self.get_connection_model_definition(destination).await {
             Ok(Some(c)) => Ok(Arc::new(c)),
@@ -600,6 +600,13 @@ impl UnifiedDestination {
                 let template = template_route(c.path.clone(), path.to_string());
                 c.path = template;
                 config_clone.platform_info = PlatformInfo::Api(c.clone());
+
+                let config_clone = if let Some(Ok(Ok(template))) = wider_template {
+                    templator.render_as(&config_clone, Some(template).as_ref())?
+                } else {
+                    config_clone
+                };
+
                 Arc::new(config_clone)
             }
             _ => config.clone(),
@@ -611,6 +618,7 @@ impl UnifiedDestination {
             &query_params,
             &secret.as_value()?,
             context,
+            templator,
         )
         .await
     }
