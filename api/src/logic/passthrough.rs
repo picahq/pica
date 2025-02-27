@@ -102,6 +102,7 @@ pub async fn passthrough_request(
             headers.clone(),
             query_params,
             Some(body.to_vec()),
+            &state.template
         )
         .await
         .map_err(|e| {
