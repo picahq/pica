@@ -246,8 +246,10 @@ impl TrackedMetric {
                 i_hashmap.insert("url".into(), Value::String(context.page.url.clone()));
 
                 let mut f_hashmap = HashMap::<String, Value>::new();
-                f_hashmap.insert("$set".into(), serde_json::to_value(i_hashmap).unwrap_or_default());
-
+                f_hashmap.insert(
+                    "$set".into(),
+                    serde_json::to_value(i_hashmap).unwrap_or_default(),
+                );
 
                 let mut event = Event::new("$set", user_id);
 
