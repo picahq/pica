@@ -229,25 +229,31 @@ impl TrackedMetric {
                         context,
                     },
             } => {
-                let mut hashmap = traits.clone();
-                hashmap.insert(
+                let mut i_hashmap = traits.clone();
+                i_hashmap.insert(
                     "version".into(),
                     traits.get("version").cloned().unwrap_or(Value::Null),
                 );
-                hashmap.insert("locale".into(), Value::String(context.locale.clone()));
-                hashmap.insert(
+                i_hashmap.insert("locale".into(), Value::String(context.locale.clone()));
+                i_hashmap.insert(
                     "user_agent".into(),
                     Value::String(context.user_agent.clone()),
                 );
-                hashmap.insert("user_id".into(), Value::String(user_id.clone()));
-                hashmap.insert("path".into(), Value::String(context.page.path.to_string()));
-                hashmap.insert("search".into(), Value::String(context.page.search.clone()));
-                hashmap.insert("title".into(), Value::String(context.page.title.clone()));
-                hashmap.insert("url".into(), Value::String(context.page.url.clone()));
+                i_hashmap.insert("user_id".into(), Value::String(user_id.clone()));
+                i_hashmap.insert("path".into(), Value::String(context.page.path.to_string()));
+                i_hashmap.insert("search".into(), Value::String(context.page.search.clone()));
+                i_hashmap.insert("title".into(), Value::String(context.page.title.clone()));
+                i_hashmap.insert("url".into(), Value::String(context.page.url.clone()));
 
-                let mut event = Event::new("Identify", user_id);
+                let mut f_hashmap = HashMap::<String, Value>::new();
+                f_hashmap.insert(
+                    "$set".into(),
+                    serde_json::to_value(i_hashmap).unwrap_or_default(),
+                );
 
-                for (key, value) in hashmap {
+                let mut event = Event::new("$set", user_id);
+
+                for (key, value) in f_hashmap {
                     event.insert_prop(key, value).inspect_err(|e| {
                         tracing::error!("Could not insert prop: {e}");
                     })?
