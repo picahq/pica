@@ -3707,8 +3707,9 @@ dependencies = [
 
 [[package]]
 name = "osentities"
-version = "9.0.0"
-source = "git+https://github.com/picahq/pica?branch=fix%2Fusing-prod-api#ca237b0e93164ad10c47e658ad18d3d5d25fe078"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "056d989cb3e07dfb8133cc1e6d04fb79869039ecea847d2cf4a151208d2fa3f0"
 dependencies = [
  "aes",
  "anyhow",
@@ -3955,7 +3956,7 @@ dependencies = [
  "clap_mangen",
  "config",
  "directories",
- "osentities 9.0.0",
+ "osentities 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "reqwest 0.12.9",
  "serde",
  "serde_json",
