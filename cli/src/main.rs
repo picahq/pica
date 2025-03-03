@@ -1,5 +1,5 @@
 use clap::Parser;
-use pica::{algebra::Handler, service::Pica};
+use picahq::{algebra::Handler, service::Pica};
 use std::error::Error;
 
 #[tokio::main]

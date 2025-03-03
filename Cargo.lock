@@ -3947,7 +3947,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pica"
+name = "picahq"
 version = "0.1.0"
 dependencies = [
  "axum",
