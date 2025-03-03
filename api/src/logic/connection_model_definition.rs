@@ -189,6 +189,7 @@ pub async fn test_connection_model_definition(
             &payload.request.query_params.unwrap_or(HashMap::new()),
             &Arc::new(secret_result),
             request_body_vec,
+            &state.template
         )
         .await
         .map_err(|e| {
