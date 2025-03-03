@@ -1,6 +1,6 @@
 use crate::context::TestServer;
 use api::logic::{common_enum::CreateRequest, ReadResponse};
-use entities::common_model::CommonEnum;
+use osentities::common_model::CommonEnum;
 use fake::{Fake, Faker};
 use http::{Method, StatusCode};
 use serde_json::Value;

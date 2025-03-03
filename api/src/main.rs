@@ -1,7 +1,7 @@
 use anyhow::Result;
 use api::{domain::config::ConnectionsConfig, server::Server};
 use dotenvy::dotenv;
-use entities::telemetry::{get_subscriber, init_subscriber, OtelGuard};
+use osentities::telemetry::{get_subscriber, init_subscriber, OtelGuard};
 use envconfig::Envconfig;
 use tracing::info;
 

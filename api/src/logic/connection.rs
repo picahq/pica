@@ -14,7 +14,7 @@ use axum::{
     Extension, Json, Router,
 };
 use chrono::Utc;
-use entities::{
+use osentities::{
     algebra::MongoStore,
     connection_definition::{ConnectionDefinition, ConnectionDefinitionType},
     database::{DatabasePodConfig, PostgresConfig},
@@ -345,7 +345,7 @@ async fn generate_k8s_specs_and_secret(
     PicaError,
 > {
     Ok(match connection_config.to_connection_type() {
-        entities::ConnectionType::DatabaseSql {} => {
+        osentities::ConnectionType::DatabaseSql {} => {
             let service_name = ServiceName::from_id(*connection_id)?;
             let namespace = state.config.namespace.clone();
 

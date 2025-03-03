@@ -8,7 +8,7 @@ use axum::{
     Extension,
 };
 use cache::remote::RedisCache;
-use entities::{event_access::EventAccess, ApplicationError};
+use osentities::{event_access::EventAccess, ApplicationError};
 use http::{HeaderName, Request};
 use redis::AsyncCommands;
 use std::sync::Arc;

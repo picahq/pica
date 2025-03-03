@@ -1,6 +1,6 @@
 use crate::server::AppState;
 use axum::{body::Body, extract::State, middleware::Next, response::Response};
-use entities::{
+use osentities::{
     constant::{DEFAULT_AUDIENCE, DEFAULT_ISSUER, FALLBACK_AUDIENCE, FALLBACK_ISSUER},
     ApplicationError, Claims, PicaError, BEARER_PREFIX,
 };

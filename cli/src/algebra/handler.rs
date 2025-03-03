@@ -1,4 +1,4 @@
-use entities::{PicaError, Unit};
+use osentities::{PicaError, Unit};
 
 // Doesn't need a State for now since each command is atomic
 pub trait Handler<Context, Command, Event> {

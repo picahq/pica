@@ -3,7 +3,7 @@ use clap::{
     builder::StyledStr,
     error::{ContextKind, ContextValue, ErrorFormatter, ErrorKind, RichFormatter},
 };
-use entities::Unit;
+use osentities::Unit;
 use std::fmt::Write;
 use std::io::Write as IoWrite;
 

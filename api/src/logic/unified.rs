@@ -8,7 +8,7 @@ use axum::{
 };
 use bson::doc;
 use convert_case::{Case, Casing};
-use entities::{
+use osentities::{
     connection_model_definition::CrudAction,
     constant::{PASSWORD_LENGTH, PICA_PASSTHROUGH_HEADER},
     destination::Action,

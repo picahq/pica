@@ -5,7 +5,7 @@ use api::logic::{
     metrics::MetricResponse,
 };
 use chrono::{Datelike, Utc};
-use entities::{
+use osentities::{
     api_model_config::{AuthMethod, SamplesInput, SchemasInput},
     connection_model_definition::{ConnectionModelDefinition, CrudAction, CrudMapping},
     connection_model_schema::{ConnectionModelSchema, Mappings},

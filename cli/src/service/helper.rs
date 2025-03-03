@@ -1,7 +1,7 @@
 use super::{Pica, Printer};
 use crate::domain::{CHECK_INTERNET_CONNECTION_SUG, CHECK_PARAMETERS_SUG, GO_TO_URL};
 use clap::error::ErrorKind;
-use entities::{InternalError, PicaError};
+use osentities::{InternalError, PicaError};
 use reqwest::{Error as ReqwestError, Response};
 use serde::de::DeserializeOwned;
 

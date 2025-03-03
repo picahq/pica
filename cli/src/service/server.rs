@@ -7,7 +7,7 @@ use crate::{
 };
 use axum::{Router, extract::Query, response::Html, routing::get};
 use clap::error::ErrorKind;
-use entities::{InternalError, PicaError, Unit};
+use osentities::{InternalError, PicaError, Unit};
 use reqwest::Client;
 use serde::Deserialize;
 use serde_json::json;

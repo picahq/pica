@@ -1,4 +1,4 @@
-use entities::{ApplicationError, PicaError};
+use osentities::{ApplicationError, PicaError};
 use js_sandbox_ios::Script;
 use serde::de::DeserializeOwned;
 use serde::Serialize;

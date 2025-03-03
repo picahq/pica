@@ -1,4 +1,4 @@
-use entities::{cache::CacheConfig, InternalError, PicaError};
+use osentities::{cache::CacheConfig, InternalError, PicaError};
 use redis::aio::{ConnectionManager, ConnectionManagerConfig};
 use std::time::Duration;
 

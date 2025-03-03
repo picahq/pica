@@ -12,7 +12,7 @@ use api::{
     server::Server,
 };
 use axum::async_trait;
-use entities::{
+use osentities::{
     access_key_data::AccessKeyData,
     access_key_prefix::AccessKeyPrefix,
     algebra::MongoStore,
@@ -27,7 +27,7 @@ use entities::{
     secret::Secret,
     AccessKey, Claims, PicaError, SanitizedConnection, Store,
 };
-use entities::{SecretExt, SecretVersion, DEFAULT_AUDIENCE, DEFAULT_ISSUER};
+use osentities::{SecretExt, SecretVersion, DEFAULT_AUDIENCE, DEFAULT_ISSUER};
 use envconfig::Envconfig;
 use fake::{Fake, Faker};
 use http::StatusCode;

@@ -9,7 +9,7 @@ use axum::{
     routing::{patch, post},
     Extension, Json, Router,
 };
-use entities::{
+use osentities::{
     algebra::MongoStore,
     connection_model_schema::{
         ConnectionModelSchema, Mappings, PublicConnectionModelSchema, SchemaPaths,

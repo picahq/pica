@@ -8,7 +8,7 @@ use axum::{
 };
 use bson::doc;
 use chrono::Utc;
-use entities::{
+use osentities::{
     constant::PICA_PASSTHROUGH_HEADER,
     destination::{Action, Destination},
     encrypted_access_key::EncryptedAccessKey,

@@ -10,7 +10,7 @@ use axum::{
     routing::{delete as axum_delete, get, post},
     Extension, Json, Router,
 };
-use entities::{
+use osentities::{
     access_key_data::AccessKeyData,
     access_key_prefix::AccessKeyPrefix,
     algebra::MongoStore,

@@ -1,5 +1,5 @@
 use convert_case::{Case, Casing};
-use entities::{common_model::CommonModel, connection_model_definition::CrudAction, constant::*};
+use osentities::{common_model::CommonModel, connection_model_definition::CrudAction, constant::*};
 use indexmap::IndexMap;
 use openapiv3::*;
 use strum::IntoEnumIterator;

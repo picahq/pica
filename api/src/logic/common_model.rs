@@ -5,7 +5,7 @@ use axum::{
     routing::{get, patch, post},
     Router,
 };
-use entities::{
+use osentities::{
     algebra::MongoStore,
     api_model_config::Lang,
     common_model::{CommonModel, Field},

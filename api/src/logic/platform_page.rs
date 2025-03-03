@@ -9,7 +9,7 @@ use axum::{
     Extension, Json, Router,
 };
 use convert_case::{Case, Casing};
-use entities::{
+use osentities::{
     algebra::MongoStore,
     event_access::EventAccess,
     hashed_secret::HashedSecret,

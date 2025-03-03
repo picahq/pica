@@ -16,7 +16,7 @@ use cache::local::{
     ConnectionDefinitionCache, ConnectionHeaderCache, ConnectionOAuthDefinitionCache,
     EventAccessCache,
 };
-use entities::{
+use osentities::{
     algebra::{DefaultTemplate, MongoStore},
     common_model::{CommonEnum, CommonModel},
     connection_definition::{ConnectionDefinition, PublicConnectionDetails},

@@ -1,5 +1,5 @@
 use crate::checker::{CheckType, JsonChecker, JsonCheckerImpl};
-use entities::{
+use osentities::{
     api_model_config::{ApiModelConfig, AuthMethod, ContentType, SamplesInput, SchemasInput},
     common_model::{CommonEnum, CommonModel, DataType, Field},
     connection_definition::{
@@ -238,8 +238,8 @@ fn test_json_connection_definition() {
             password: "password".to_string(),
         }),
         multi_env: true,
-        frontend: entities::connection_definition::Frontend {
-            spec: entities::connection_definition::Spec {
+        frontend: osentities::connection_definition::Frontend {
+            spec: osentities::connection_definition::Spec {
                 title: "title".to_string(),
                 description: "description".to_string(),
                 platform: "platform".to_string(),

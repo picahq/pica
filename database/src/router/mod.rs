@@ -1,6 +1,6 @@
 use crate::{logic::connection, server::AppState};
 use axum::{middleware::from_fn, response::IntoResponse, routing::get, Json, Router};
-use entities::telemetry::log_request_middleware;
+use osentities::telemetry::log_request_middleware;
 use http::StatusCode;
 use serde_json::json;
 use std::sync::Arc;

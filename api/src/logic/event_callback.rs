@@ -5,7 +5,7 @@ use axum::{
     Json, Router,
 };
 use bson::doc;
-use entities::{
+use osentities::{
     database_secret::DatabaseConnectionSecret, emitted_events::ConnectionLostReason,
     ApplicationError, Connection, Id, PicaError,
 };

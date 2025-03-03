@@ -1,5 +1,5 @@
 use crate::storage::StorageProvider;
-use entities::database::DatabaseConfig;
+use osentities::database::DatabaseConfig;
 use envconfig::Envconfig;
 use std::fmt::{Display, Formatter};
 use strum::{AsRefStr, EnumString};

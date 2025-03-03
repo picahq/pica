@@ -22,7 +22,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use entities::{
+use osentities::{
     connection_model_schema::PublicConnectionModelSchema, telemetry::log_request_middleware,
 };
 use http::HeaderName;

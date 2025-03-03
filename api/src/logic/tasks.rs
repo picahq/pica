@@ -5,7 +5,7 @@ use axum::{
     Router,
 };
 use chrono::Utc;
-use entities::{
+use osentities::{
     event_access::EventAccess, prefix::IdPrefix, record_metadata::RecordMetadata, task::Task, Id,
 };
 use fake::Dummy;
@@ -53,7 +53,7 @@ impl RequestExt for CreateRequest {
         })
     }
 
-    fn get_store(stores: AppStores) -> entities::MongoStore<Self::Output> {
+    fn get_store(stores: AppStores) -> osentities::MongoStore<Self::Output> {
         stores.tasks
     }
 

@@ -5,7 +5,7 @@ use crate::client::WatchdogClient;
 use anyhow::{Context, Result};
 use config::WatchdogConfig;
 use dotenvy::dotenv;
-use entities::{
+use osentities::{
     cache::CacheConfig,
     database::DatabaseConfig,
     telemetry::{get_subscriber, init_subscriber},

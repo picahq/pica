@@ -165,7 +165,7 @@ dependencies = [
  "chrono",
  "convert_case 0.6.0",
  "dotenvy",
- "entities 9.0.0",
+ "osentities 9.0.0",
  "envconfig",
  "fake",
  "futures",
@@ -218,7 +218,7 @@ dependencies = [
  "bson",
  "chrono",
  "dotenvy",
- "entities 9.0.0",
+ "osentities 9.0.0",
  "envconfig",
  "fake",
  "futures",
@@ -684,7 +684,7 @@ name = "cache"
 version = "0.1.0"
 dependencies = [
  "deadpool-redis",
- "entities 9.0.0",
+ "osentities 9.0.0",
  "fake",
  "futures",
  "http 1.1.0",
@@ -1178,7 +1178,7 @@ dependencies = [
  "cache",
  "chrono",
  "dotenvy",
- "entities 9.0.0",
+ "osentities 9.0.0",
  "envconfig",
  "futures",
  "futures-util",
@@ -1529,7 +1529,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "entities"
+name = "osentities"
 version = "9.0.0"
 dependencies = [
  "aes",
@@ -1594,7 +1594,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "entities"
+name = "osentities"
 version = "9.0.0"
 source = "git+https://github.com/picahq/pica?branch=main#486c94ce624ba9e0f356c987c06f5128b3f58a5a"
 dependencies = [
@@ -3955,7 +3955,7 @@ dependencies = [
  "clap_mangen",
  "config",
  "directories",
- "entities 9.0.0 (git+https://github.com/picahq/pica?branch=main)",
+ "osentities 9.0.0 (git+https://github.com/picahq/pica?branch=main)",
  "reqwest 0.12.9",
  "serde",
  "serde_json",
@@ -6447,7 +6447,7 @@ dependencies = [
  "cache",
  "chrono",
  "derive_builder",
- "entities 9.0.0",
+ "osentities 9.0.0",
  "futures",
  "handlebars",
  "http 1.1.0",
@@ -6771,7 +6771,7 @@ dependencies = [
  "cache",
  "chrono",
  "dotenvy",
- "entities 9.0.0",
+ "osentities 9.0.0",
  "envconfig",
  "futures",
  "mockito",

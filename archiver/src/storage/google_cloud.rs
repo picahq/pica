@@ -4,7 +4,7 @@ use crate::storage::Chunk;
 use crate::Extension;
 use anyhow::{Context, Result};
 use chrono::Utc;
-use entities::Unit;
+use osentities::Unit;
 use google_cloud_storage::client::{Client as GClient, ClientConfig};
 use google_cloud_storage::http::objects::upload::{UploadObjectRequest, UploadType};
 use google_cloud_storage::http::objects::Object;

@@ -2,7 +2,7 @@ use crate::config::WatchdogConfig;
 use bson::doc;
 use cache::remote::RedisCache;
 use chrono::Utc;
-use entities::{
+use osentities::{
     cache::CacheConfig, database::DatabaseConfig, task::Task, Id, InternalError, MongoStore,
     PicaError, Store, Unit,
 };

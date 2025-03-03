@@ -8,7 +8,7 @@ edition = "2021"
 deadpool-redis = { version = "0.15.1", features = ["serde"] }
 futures.workspace = true
 http.workspace = true
-entities = { path = "../entities", features = ["dummy"] }
+osentities = { path = "../osentities", features = ["dummy"] }
 moka.workspace = true
 fake.workspace = true
 mongodb.workspace = true

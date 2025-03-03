@@ -9,7 +9,7 @@ use axum::{
 };
 use bson::doc;
 use cache::local::{ConnectionHeaderCache, LocalCacheExt};
-use entities::{
+use osentities::{
     algebra::MongoStore, event_access::EventAccess, ApplicationError, Connection, InternalError,
     OAuth, PicaError, Store, Unit,
 };

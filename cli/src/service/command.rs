@@ -9,7 +9,7 @@ use crate::{
     },
 };
 use clap::{Args, Parser, Subcommand, ValueEnum, error::ErrorKind};
-use entities::{
+use osentities::{
     EmbedTokenSlim, Event, InternalError, PicaError, PublicConnection, Unit,
     connection_definition::ConnectionDefinition,
 };

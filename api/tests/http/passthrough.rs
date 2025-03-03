@@ -1,6 +1,6 @@
 use crate::context::TestServer;
 use api::logic::connection_model_definition::CreateRequest as CreateConnectionModelDefinitionRequest;
-use entities::{
+use osentities::{
     api_model_config::{AuthMethod, SamplesInput, SchemasInput},
     connection_model_definition::CrudAction,
     environment::Environment,

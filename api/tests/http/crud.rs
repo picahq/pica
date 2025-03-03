@@ -1,12 +1,12 @@
 use crate::context::TestServer;
 use api::logic::{common_model, ReadResponse};
 use api::logic::{connection_definition, connection_model_definition, connection_model_schema};
-use entities::{
+use osentities::{
     common_model::CommonModel, connection_definition::ConnectionDefinition,
     connection_model_definition::ConnectionModelDefinition,
     connection_model_schema::ConnectionModelSchema,
 };
-use entities::{
+use osentities::{
     common_model::{DataType, Expandable, Field},
     json_schema::JsonSchema,
 };

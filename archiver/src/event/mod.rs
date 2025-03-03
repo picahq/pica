@@ -9,7 +9,7 @@ pub mod uploaded;
 use chosen::DateChosen;
 use completed::Completed;
 use dumped::Dumped;
-use entities::Id;
+use osentities::Id;
 use failed::Failed;
 use finished::Finished;
 use serde::{Deserialize, Serialize};

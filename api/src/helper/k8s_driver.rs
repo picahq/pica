@@ -1,5 +1,5 @@
 use axum::async_trait;
-use entities::{Id, InternalError, PicaError, Unit};
+use osentities::{Id, InternalError, PicaError, Unit};
 use k8s_openapi::{
     api::{
         apps::v1::{Deployment, DeploymentSpec},

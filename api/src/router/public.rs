@@ -15,7 +15,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use entities::{
+use osentities::{
     common_model::{CommonEnum, CommonModel},
     connection_definition::{ConnectionDefinition, PublicConnectionDetails},
     telemetry::log_request_middleware,

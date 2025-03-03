@@ -4,7 +4,7 @@ use crate::{
     server::{AppState, Server},
 };
 use axum::async_trait;
-use entities::{
+use osentities::{
     database::{DatabaseConnectionType, DatabasePodConfig},
     database_secret::DatabaseConnectionSecret,
     Claims, InternalError, Secret,

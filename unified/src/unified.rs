@@ -11,7 +11,7 @@ use cache::local::{
     LocalCacheExt, SecretCache,
 };
 use chrono::Utc;
-use entities::{
+use osentities::{
     algebra::JsonExt,
     api_model_config::{ModelPaths, RequestModelPaths},
     connection_model_definition::{ConnectionModelDefinition, CrudAction, PlatformInfo},

@@ -12,7 +12,7 @@ envconfig.workspace = true
 futures.workspace = true
 google-cloud-storage = "0.23.0"
 http.workspace = true
-entities = { path = "../entities" }
+osentities = { path = "../osentities" }
 unified = { path = "../unified" }
 mongodb.workspace = true
 reqwest = { workspace = true, features = ["rustls-tls"] }

@@ -1,5 +1,5 @@
 use derive_builder::Builder;
-use entities::{
+use osentities::{
     api_model_config::{ApiModelConfig, AuthMethod, OAuthLegacyHashAlgorithm},
     oauth_secret::OAuthLegacySecret,
     prelude::oauth_secret::OAuthSecret,
@@ -170,7 +170,7 @@ impl<'a> CallerClient<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use entities::{
+    use osentities::{
         api_model_config::{SamplesInput, SchemasInput},
         connection_model_definition::{
             ConnectionModelDefinition, CrudAction, PlatformInfo, TestConnection,

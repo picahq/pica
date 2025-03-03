@@ -1,5 +1,5 @@
 use axum::extract::Query;
-use entities::{
+use osentities::{
     event_access::EventAccess, CONTAINS_FILTER, DELETED_FILTER, DUAL_ENVIRONMENT_HEADER,
     ENVIRONMENT_FILTER, LIMIT_FILTER, OPTIONS_FILTER, OWNERSHIP_FILTER, REGEX_FILTER, SKIP_FILTER,
 };
@@ -102,7 +102,7 @@ mod test {
         OWNERSHIP_FILTER, SKIP_FILTER,
     };
     use axum::extract::Query;
-    use entities::{
+    use osentities::{
         id::{prefix::IdPrefix, Id},
         {
             connection_definition::{ConnectionDefinitionType, Paths},

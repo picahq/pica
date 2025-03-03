@@ -1,8 +1,8 @@
 use database::algebra::init::DatabaseInitializer;
 use database::algebra::init::Initializer;
-use entities::prefix::IdPrefix;
-use entities::Id;
-use entities::{database::DatabasePodConfig, InternalError, PicaError};
+use osentities::prefix::IdPrefix;
+use osentities::Id;
+use osentities::{database::DatabasePodConfig, InternalError, PicaError};
 use envconfig::Envconfig;
 use http::{Method, StatusCode};
 use serde::{de::DeserializeOwned, Serialize};

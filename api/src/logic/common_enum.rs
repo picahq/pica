@@ -4,7 +4,7 @@ use axum::{
     routing::{patch, post},
     Router,
 };
-use entities::{
+use osentities::{
     algebra::MongoStore,
     common_model::CommonEnum,
     id::{prefix::IdPrefix, Id},

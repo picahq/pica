@@ -1,4 +1,4 @@
-use entities::{cache::CacheConfig, database::DatabaseConfig};
+use osentities::{cache::CacheConfig, database::DatabaseConfig};
 use envconfig::Envconfig;
 use std::fmt::{Display, Formatter};
 

@@ -6,7 +6,7 @@ use axum::{
     Extension, Json, Router,
 };
 use bson::Document;
-use entities::{
+use osentities::{
     constant::{DAILY_KEY, MONTHLY_KEY, PLATFORMS_KEY, TOTAL_KEY},
     event_access::EventAccess,
     ApplicationError, InternalError, PicaError, Store,

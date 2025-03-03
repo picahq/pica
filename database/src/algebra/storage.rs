@@ -1,7 +1,7 @@
 use crate::domain::postgres::serialize_pgvalueref;
 use crate::domain::postgres::PostgresDatabaseConnection;
 use async_trait::async_trait;
-use entities::{constant::MAX_LIMIT, ApplicationError, PicaError};
+use osentities::{constant::MAX_LIMIT, ApplicationError, PicaError};
 use futures::{StreamExt, TryStreamExt};
 use serde_json::Value;
 use sqlx::postgres::PgRow;

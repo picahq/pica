@@ -1,5 +1,5 @@
 use chrono::{DateTime, Datelike, Utc};
-use entities::{
+use osentities::{
     constant::{CREATED_AT_KEY, DAILY_KEY, MONTHLY_KEY, PLATFORMS_KEY, TOTAL_KEY},
     destination::Action,
     event_access::EventAccess,

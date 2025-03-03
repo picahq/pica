@@ -6,7 +6,7 @@ use axum::{
     Extension, Json, Router,
 };
 use chrono::{Duration, Utc};
-use entities::{
+use osentities::{
     algebra::{MongoStore, TemplateExt},
     api_model_config::ContentType,
     connection_definition::ConnectionDefinition,

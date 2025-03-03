@@ -1,5 +1,5 @@
 use crate::context::{TestServer, DOCKER, POSTGRES};
-use entities::{
+use osentities::{
     database::PostgresConfig, database_secret::DatabaseConnectionSecret, prefix::IdPrefix, Id,
     PicaError, Secret, SecretVersion, Unit,
 };

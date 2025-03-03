@@ -1,4 +1,4 @@
-use entities::{
+use osentities::{
     database::DatabasePodConfig, emitted_events::ConnectionLostReason, ApplicationError, Claims,
     Id, InternalError, PicaError, Unit,
 };

@@ -16,7 +16,7 @@ http-serde-ext-ios.workspace = true
 http.workspace = true
 hyper = "0.14.31"
 cache = { path = "../cache" }
-entities = { path = "../entities" }
+osentities = { path = "../osentities" }
 unified = { path = "../unified" }
 mongodb.workspace = true
 num_cpus.workspace = true

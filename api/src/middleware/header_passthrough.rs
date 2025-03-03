@@ -1,6 +1,6 @@
 use crate::server::AppState;
 use axum::{body::Body, extract::State, middleware::Next, response::Response};
-use entities::PicaError;
+use osentities::PicaError;
 use http::Request;
 use std::sync::Arc;
 

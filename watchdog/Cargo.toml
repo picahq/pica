@@ -11,7 +11,7 @@ dotenvy.workspace = true
 envconfig.workspace = true
 futures.workspace = true
 cache = { path = "../cache" }
-entities = { path = "../entities" }
+osentities = { path = "../osentities" }
 reqwest = { workspace = true, features = ["stream"] }
 serde_json.workspace = true
 mongodb.workspace = true

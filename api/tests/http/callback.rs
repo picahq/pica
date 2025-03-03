@@ -1,5 +1,5 @@
 use crate::context::TestServer;
-use entities::{
+use osentities::{
     emitted_events::ConnectionLostReason, environment::Environment, prefix::IdPrefix, Connection,
     Id,
 };

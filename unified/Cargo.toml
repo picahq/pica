@@ -10,7 +10,7 @@ bson.workspace = true
 chrono = { workspace = true, features = ["serde"] }
 derive_builder.workspace = true
 cache = { path = "../cache" }
-entities = { path = "../entities" }
+osentities = { path = "../osentities" }
 futures.workspace = true
 handlebars.workspace = true
 http.workspace = true

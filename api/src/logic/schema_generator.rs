@@ -6,7 +6,7 @@ use axum::{
     Json, Router,
 };
 use bson::{doc, Document};
-use entities::{
+use osentities::{
     api_model_config::Lang,
     common_model::{CommonEnum, DataType, SchemaType, TypeGenerationStrategy},
     prefix::IdPrefix,

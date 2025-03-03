@@ -1,5 +1,5 @@
 use crate::context::TestServer;
-use entities::{emitted_events::ConnectionLostReason, prefix::IdPrefix, Id, PicaError, Unit};
+use osentities::{emitted_events::ConnectionLostReason, prefix::IdPrefix, Id, PicaError, Unit};
 use http::header::{ACCEPT, CONTENT_LENGTH, CONTENT_TYPE, HOST};
 use mockito::Server as MockServer;
 use std::collections::HashMap;

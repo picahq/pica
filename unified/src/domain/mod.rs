@@ -1,7 +1,7 @@
 use bson::doc;
 use derive_builder::Builder;
-use entities::Id;
-use entities::PicaError;
+use osentities::Id;
+use osentities::PicaError;
 use http::StatusCode;
 use http::{HeaderMap, HeaderName, HeaderValue};
 use serde::{Deserialize, Serialize};

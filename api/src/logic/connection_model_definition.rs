@@ -10,7 +10,7 @@ use axum::{
     Extension, Json, Router,
 };
 use chrono::Utc;
-use entities::{
+use osentities::{
     algebra::MongoStore,
     api_model_config::{
         ApiModelConfig, AuthMethod, ModelPaths, ResponseBody, SamplesInput, SchemasInput,

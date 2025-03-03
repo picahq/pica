@@ -1,7 +1,7 @@
 use crate::server::AppState;
 use axum::{body::Body, extract::State, middleware::Next, response::Response};
 use cache::local::LocalCacheExt;
-use entities::{ApplicationError, InternalError, PicaError};
+use osentities::{ApplicationError, InternalError, PicaError};
 use http::Request;
 use mongodb::bson::doc;
 use std::sync::Arc;

@@ -5,7 +5,7 @@ use axum::{
     Router,
 };
 use chrono::Utc;
-use entities::{
+use osentities::{
     algebra::MongoStore,
     api_model_config::{ApiModelConfig, Compute, Function, Lang},
     connection_oauth_definition::{

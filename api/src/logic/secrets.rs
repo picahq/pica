@@ -5,7 +5,7 @@ use axum::{
     Extension, Json, Router,
 };
 use bson::doc;
-use entities::{event_access::EventAccess, secret::Secret, ApplicationError, Id, PicaError};
+use osentities::{event_access::EventAccess, secret::Secret, ApplicationError, Id, PicaError};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::sync::Arc;

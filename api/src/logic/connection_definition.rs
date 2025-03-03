@@ -8,7 +8,7 @@ use axum::{
     routing::{patch, post},
     Json, Router,
 };
-use entities::{
+use osentities::{
     algebra::MongoStore,
     api_model_config::AuthMethod,
     connection_definition::{
