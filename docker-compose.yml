@@ -1,7 +1,7 @@
 services:
   typescript-services:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.29.1
+    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.35.0
     ports:
       - 3001:3001
     environment:
@@ -27,7 +27,7 @@ services:
 
   connections-api:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/api:1.29.1
+    image: us-docker.pkg.dev/integrationos/docker-oss/api:1.35.0
     ports:
       - 3005:3005
     environment:
@@ -57,7 +57,7 @@ services:
 
   oauth-refresh:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/oauth-refresh:1.29.1
+    image: us-docker.pkg.dev/integrationos/docker-oss/oauth-refresh:1.35.0
     ports:
       - 3003:3003
     environment:
@@ -83,7 +83,7 @@ services:
 
   watchdog:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/watchdog:1.29.1
+    image: us-docker.pkg.dev/integrationos/docker-oss/watchdog:1.35.0
     environment:
       - CONTEXT_COLLECTION_NAME=event-transactions
       - CONTEXT_DATABASE_NAME=events-service
