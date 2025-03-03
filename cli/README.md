@@ -5,7 +5,9 @@ Build performant, high-converting native integrations with a few lines of code. 
 ## Installation
 
 ```sh
-npm install -g @picahq/cli
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+cargo install picahq
 ```
 
 ## Running the Tests
