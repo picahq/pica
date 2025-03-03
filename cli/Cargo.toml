@@ -2,6 +2,9 @@
 name = "pica"
 version = "0.1.0"
 edition = "2024"
+description = "Build performant, high-converting native integrations with a few lines of code. By unlocking more integrations, you can onboard more customers and expand app usage, overnight."
+license = "GPL-3.0"
+
 
 [profile.release]
 lto = "thin"
