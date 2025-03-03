@@ -2,8 +2,8 @@ use super::{read_without_key, HookExt, PublicExt, RequestExt};
 use crate::server::{AppState, AppStores};
 use axum::{routing::get, Router};
 use bson::doc;
-use entities::{record_metadata::RecordMetadata, Id, MongoStore};
 use fake::Dummy;
+use osentities::{record_metadata::RecordMetadata, Id, MongoStore};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

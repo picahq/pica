@@ -4,11 +4,11 @@ use database::algebra::{
     on_error_callback,
 };
 use dotenvy::dotenv;
-use entities::{
+use envconfig::Envconfig;
+use osentities::{
     database::DatabasePodConfig,
     telemetry::{get_subscriber, init_subscriber},
 };
-use envconfig::Envconfig;
 use tracing::info;
 
 fn main() -> Result<()> {

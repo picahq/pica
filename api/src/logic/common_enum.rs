@@ -4,12 +4,12 @@ use axum::{
     routing::{patch, post},
     Router,
 };
-use entities::{
+use fake::Dummy;
+use osentities::{
     algebra::MongoStore,
     common_model::CommonEnum,
     id::{prefix::IdPrefix, Id},
 };
-use fake::Dummy;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

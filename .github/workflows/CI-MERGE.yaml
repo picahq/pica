@@ -1,9 +1,10 @@
 # See https://stackoverflow.com/questions/75951150/why-cant-my-cache-action-triggered-inside-a-pull-request-not-access-the-cache-t
 
-name: Post Merge Cache Building on Master Branch
+name: Post Merge Cache
 on:
   push:
-    branches: [master]
+    branches:
+      - main
   workflow_dispatch:
 jobs:
   fmt:

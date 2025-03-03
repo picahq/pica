@@ -9,7 +9,9 @@ use axum::{
     Extension, Json, Router,
 };
 use convert_case::{Case, Casing};
-use entities::{
+use fake::Dummy;
+use mongodb::bson::doc;
+use osentities::{
     algebra::MongoStore,
     event_access::EventAccess,
     hashed_secret::HashedSecret,
@@ -19,8 +21,6 @@ use entities::{
     r#type::PageType,
     ApplicationError, InternalError, PicaError,
 };
-use fake::Dummy;
-use mongodb::bson::doc;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::sync::Arc;

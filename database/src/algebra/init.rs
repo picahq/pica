@@ -4,12 +4,12 @@ use crate::{
     server::{AppState, Server},
 };
 use axum::async_trait;
-use entities::{
+use http::header::AUTHORIZATION;
+use osentities::{
     database::{DatabaseConnectionType, DatabasePodConfig},
     database_secret::DatabaseConnectionSecret,
     Claims, InternalError, Secret,
 };
-use http::header::AUTHORIZATION;
 use reqwest::Client;
 use std::sync::Arc;
 

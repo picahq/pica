@@ -10,7 +10,9 @@ use axum::{
     routing::{delete as axum_delete, get, post},
     Extension, Json, Router,
 };
-use entities::{
+use fake::Dummy;
+use mongodb::bson::doc;
+use osentities::{
     access_key_data::AccessKeyData,
     access_key_prefix::AccessKeyPrefix,
     algebra::MongoStore,
@@ -23,8 +25,6 @@ use entities::{
     record_metadata::RecordMetadata,
     AccessKey, ApplicationError, InternalError, PicaError, DEFAULT_NAMESPACE,
 };
-use fake::Dummy;
-use mongodb::bson::doc;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;

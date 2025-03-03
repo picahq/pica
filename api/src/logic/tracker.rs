@@ -1,6 +1,6 @@
 use crate::{domain::track::TrackedMetric, server::AppState};
 use axum::{extract::State, routing::post, Json, Router};
-use entities::{PicaError, Unit};
+use osentities::{PicaError, Unit};
 use std::sync::Arc;
 
 pub fn get_router() -> Router<Arc<AppState>> {

@@ -2,7 +2,7 @@ use super::{read_without_count, PublicExt, RequestExt};
 use crate::server::{AppState, AppStores};
 use axum::{routing::get, Router};
 use bson::doc;
-use entities::{algebra::MongoStore, Event};
+use osentities::{algebra::MongoStore, Event};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

@@ -22,10 +22,10 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use entities::{
+use http::HeaderName;
+use osentities::{
     connection_model_schema::PublicConnectionModelSchema, telemetry::log_request_middleware,
 };
-use http::HeaderName;
 use std::{iter::once, sync::Arc};
 use tower::{filter::FilterLayer, ServiceBuilder};
 use tower_http::{sensitive_headers::SetSensitiveRequestHeadersLayer, trace::TraceLayer};

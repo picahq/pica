@@ -1,6 +1,6 @@
 use super::EventMetadata;
 use chrono::{DateTime, Utc};
-use entities::{prefix::IdPrefix, Id};
+use osentities::{prefix::IdPrefix, Id};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

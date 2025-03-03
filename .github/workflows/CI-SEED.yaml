@@ -5,7 +5,7 @@ on:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
     paths:
-      - .github/workflows/build-seed-data.yaml
+      - .github/workflows/CI-SEED.yaml
       - "resources/Dockerfile"
       - "resources/seed/**"
 

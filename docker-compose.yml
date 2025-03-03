@@ -49,7 +49,7 @@ services:
       - IOS_CRYPTO_SECRET=${IOS_CRYPTO_SECRET}
       - JWT_SECRET=${JWT_SECRET}
       - REDIS_URL=redis://redis:6379
-      - RUST_LOG=api=info,tower_http=info,udm=info,entities=info
+      - RUST_LOG=api=info,tower_http=info,udm=info,osentities=info
       - SECRETS_SERVICE_PROVIDER=google-kms
       - WORKER_THREADS=4
     volumes:

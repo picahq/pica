@@ -1,5 +1,5 @@
 use super::EventMetadata;
-use entities::{prefix::IdPrefix, Id};
+use osentities::{prefix::IdPrefix, Id};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

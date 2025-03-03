@@ -1,4 +1,4 @@
-use entities::connection_definition::ConnectionDefinition;
+use osentities::connection_definition::ConnectionDefinition;
 
 #[derive(Debug)]
 pub struct Step {

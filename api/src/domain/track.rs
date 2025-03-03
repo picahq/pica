@@ -1,6 +1,6 @@
 use super::Metric;
 use axum::async_trait;
-use entities::{InternalError, PicaError, Unit};
+use osentities::{InternalError, PicaError, Unit};
 use posthog_rs::{ClientOptionsBuilder, Event};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

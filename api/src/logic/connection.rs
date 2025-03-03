@@ -14,7 +14,14 @@ use axum::{
     Extension, Json, Router,
 };
 use chrono::Utc;
-use entities::{
+use envconfig::Envconfig;
+use http::HeaderMap;
+use k8s_openapi::{
+    api::core::v1::{ContainerPort, EnvVar, EnvVarSource, SecretKeySelector, ServicePort},
+    apimachinery::pkg::util::intstr::IntOrString,
+};
+use mongodb::bson::doc;
+use osentities::{
     algebra::MongoStore,
     connection_definition::{ConnectionDefinition, ConnectionDefinitionType},
     database::{DatabasePodConfig, PostgresConfig},
@@ -28,13 +35,6 @@ use entities::{
     Throughput, APP_LABEL, DATABASE_TYPE_LABEL, DEFAULT_NAMESPACE, JWT_SECRET_REF_KEY,
     JWT_SECRET_REF_NAME,
 };
-use envconfig::Envconfig;
-use http::HeaderMap;
-use k8s_openapi::{
-    api::core::v1::{ContainerPort, EnvVar, EnvVarSource, SecretKeySelector, ServicePort},
-    apimachinery::pkg::util::intstr::IntOrString,
-};
-use mongodb::bson::doc;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
@@ -345,7 +345,7 @@ async fn generate_k8s_specs_and_secret(
     PicaError,
 > {
     Ok(match connection_config.to_connection_type() {
-        entities::ConnectionType::DatabaseSql {} => {
+        osentities::ConnectionType::DatabaseSql {} => {
             let service_name = ServiceName::from_id(*connection_id)?;
             let namespace = state.config.namespace.clone();
 

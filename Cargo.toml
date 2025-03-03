@@ -5,7 +5,7 @@ members = [
     "archiver", 
     "cache",
     "cli",
-    "entities",
+    "osentities",
     "database",
     "unified",
     "watchdog"

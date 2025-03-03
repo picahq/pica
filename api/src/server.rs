@@ -16,7 +16,8 @@ use cache::local::{
     ConnectionDefinitionCache, ConnectionHeaderCache, ConnectionOAuthDefinitionCache,
     EventAccessCache,
 };
-use entities::{
+use mongodb::{options::UpdateOptions, Client, Database};
+use osentities::{
     algebra::{DefaultTemplate, MongoStore},
     common_model::{CommonEnum, CommonModel},
     connection_definition::{ConnectionDefinition, PublicConnectionDetails},
@@ -31,7 +32,6 @@ use entities::{
     user::UserClient,
     Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
 };
-use mongodb::{options::UpdateOptions, Client, Database};
 use std::{sync::Arc, time::Duration};
 use tokio::{net::TcpListener, sync::mpsc::Sender, time::timeout, try_join};
 use tracing::{error, info, trace, warn};

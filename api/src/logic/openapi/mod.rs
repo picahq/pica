@@ -5,15 +5,15 @@ use axum::extract::{Json, State};
 use bson::doc;
 use builder::{generate_openapi_schema, generate_path_item};
 use convert_case::{Case, Casing};
-use entities::{
-    algebra::{MongoStore, TimedExt},
-    common_model::{CommonEnum, CommonModel},
-    InternalError, PicaError,
-};
 use futures::{Stream, StreamExt, TryStreamExt};
 use indexmap::IndexMap;
 use mongodb::error::Error as MongoError;
 use openapiv3::*;
+use osentities::{
+    algebra::{MongoStore, TimedExt},
+    common_model::{CommonEnum, CommonModel},
+    InternalError, PicaError,
+};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashSet,
@@ -280,7 +280,7 @@ async fn generate_references_data(
         .get_enum_references()
         .into_iter()
         .filter_map(|x| match x.datatype {
-            entities::common_model::DataType::Enum { reference, .. } => {
+            osentities::common_model::DataType::Enum { reference, .. } => {
                 Some(reference.to_case(Case::Pascal))
             }
             _ => None,
@@ -298,7 +298,7 @@ async fn generate_references_data(
             .get_enum_references()
             .into_iter()
             .filter_map(|x| match x.datatype {
-                entities::common_model::DataType::Enum { reference, .. } => {
+                osentities::common_model::DataType::Enum { reference, .. } => {
                     Some(reference.to_case(Case::Pascal))
                 }
                 _ => None,

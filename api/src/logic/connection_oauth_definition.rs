@@ -5,7 +5,8 @@ use axum::{
     Router,
 };
 use chrono::Utc;
-use entities::{
+use mongodb::bson::doc;
+use osentities::{
     algebra::MongoStore,
     api_model_config::{ApiModelConfig, Compute, Function, Lang},
     connection_oauth_definition::{
@@ -14,7 +15,6 @@ use entities::{
     id::{prefix::IdPrefix, Id},
     record_metadata::RecordMetadata,
 };
-use mongodb::bson::doc;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

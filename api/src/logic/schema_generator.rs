@@ -6,14 +6,14 @@ use axum::{
     Json, Router,
 };
 use bson::{doc, Document};
-use entities::{
+use futures::StreamExt;
+use mongodb::options::FindOptions;
+use osentities::{
     api_model_config::Lang,
     common_model::{CommonEnum, DataType, SchemaType, TypeGenerationStrategy},
     prefix::IdPrefix,
     ApplicationError, Id, InternalError, PicaError, Store, StringExt,
 };
-use futures::StreamExt;
-use mongodb::options::FindOptions;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, sync::Arc};
 

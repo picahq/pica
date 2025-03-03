@@ -1,9 +1,9 @@
 use crate::context::TestServer;
-use entities::{
+use http::{Method, StatusCode};
+use osentities::{
     emitted_events::ConnectionLostReason, environment::Environment, prefix::IdPrefix, Connection,
     Id,
 };
-use http::{Method, StatusCode};
 use serde_json::Value;
 
 #[tokio::test]

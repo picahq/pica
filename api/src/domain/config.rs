@@ -1,6 +1,6 @@
-use entities::{cache::CacheConfig, environment::Environment};
-use entities::{database::DatabaseConfig, secrets::SecretsConfig};
 use envconfig::Envconfig;
+use osentities::{cache::CacheConfig, environment::Environment};
+use osentities::{database::DatabaseConfig, secrets::SecretsConfig};
 use std::{
     fmt::{Display, Formatter, Result},
     net::SocketAddr,

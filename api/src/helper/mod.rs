@@ -5,8 +5,8 @@ pub use k8s_driver::*;
 pub use shape_mongo_filter::*;
 
 use axum::{extract::Path, Json};
-use entities::{prefix::IdPrefix, Id, PicaError};
 use http::StatusCode;
+use osentities::{prefix::IdPrefix, Id, PicaError};
 use serde::Serialize;
 
 #[derive(Serialize)]

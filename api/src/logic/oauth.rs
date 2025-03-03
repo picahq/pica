@@ -6,7 +6,10 @@ use axum::{
     Extension, Json, Router,
 };
 use chrono::{Duration, Utc};
-use entities::{
+use fake::Dummy;
+use http::{HeaderMap, HeaderName, HeaderValue};
+use mongodb::bson::doc;
+use osentities::{
     algebra::{MongoStore, TemplateExt},
     api_model_config::ContentType,
     connection_definition::ConnectionDefinition,
@@ -20,9 +23,6 @@ use entities::{
     ApplicationError, Connection, ConnectionIdentityType, ErrorMeta, InternalError, OAuth,
     PicaError, Throughput, DEFAULT_NAMESPACE,
 };
-use fake::Dummy;
-use http::{HeaderMap, HeaderName, HeaderValue};
-use mongodb::bson::doc;
 use reqwest::Request;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{to_string_pretty, Value};

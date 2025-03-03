@@ -1,7 +1,7 @@
 use crate::context::TestServer;
-use entities::{emitted_events::ConnectionLostReason, prefix::IdPrefix, Id, PicaError, Unit};
 use http::header::{ACCEPT, CONTENT_LENGTH, CONTENT_TYPE, HOST};
 use mockito::Server as MockServer;
+use osentities::{emitted_events::ConnectionLostReason, prefix::IdPrefix, Id, PicaError, Unit};
 use std::collections::HashMap;
 
 #[tokio::test]

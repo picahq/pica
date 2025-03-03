@@ -5,7 +5,9 @@ use axum::{
     routing::{get, patch, post},
     Router,
 };
-use entities::{
+use fake::Dummy;
+use mongodb::bson::doc;
+use osentities::{
     algebra::MongoStore,
     api_model_config::Lang,
     common_model::{CommonModel, Field},
@@ -13,8 +15,6 @@ use entities::{
     json_schema::JsonSchema,
     ApplicationError, PicaError, Unit,
 };
-use fake::Dummy;
-use mongodb::bson::doc;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

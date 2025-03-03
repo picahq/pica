@@ -1,13 +1,13 @@
 use derive_builder::Builder;
-use entities::{
+use http::HeaderMap;
+use indexmap::IndexMap;
+use osentities::{
     api_model_config::{ApiModelConfig, AuthMethod, OAuthLegacyHashAlgorithm},
     oauth_secret::OAuthLegacySecret,
     prelude::oauth_secret::OAuthSecret,
     AuthorizationType, InternalError, Nonce, OAuthData, PicaError, SignableRequest,
     SignatureMethod, SigningKey,
 };
-use http::HeaderMap;
-use indexmap::IndexMap;
 use reqwest::{Client, Response, Url};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -170,15 +170,15 @@ impl<'a> CallerClient<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use entities::{
+    use http::StatusCode;
+    use mockito::Server;
+    use osentities::{
         api_model_config::{SamplesInput, SchemasInput},
         connection_model_definition::{
             ConnectionModelDefinition, CrudAction, PlatformInfo, TestConnection,
         },
         id::Id,
     };
-    use http::StatusCode;
-    use mockito::Server;
     use reqwest::Client;
     use std::str::FromStr;
 

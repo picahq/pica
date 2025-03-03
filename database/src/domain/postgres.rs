@@ -1,6 +1,6 @@
 use anyhow::Result;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
-use entities::database_secret::DatabaseConnectionSecret;
+use osentities::database_secret::DatabaseConnectionSecret;
 use serde::ser::Error;
 use serde::Serializer;
 use serde_json::Value;

@@ -7,8 +7,8 @@ use axum::{
     routing::{delete, get, patch, post},
     Router,
 };
-use entities::{algebra::MongoStore, id::Id, ConnectionIdentityType, PublicConnection};
 use mongodb::bson::doc;
+use osentities::{algebra::MongoStore, id::Id, ConnectionIdentityType, PublicConnection};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 use validator::Validate;

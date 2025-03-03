@@ -1,10 +1,10 @@
 use axum::extract::Query;
-use entities::{
+use http::HeaderMap;
+use mongodb::bson::{doc, Document};
+use osentities::{
     event_access::EventAccess, CONTAINS_FILTER, DELETED_FILTER, DUAL_ENVIRONMENT_HEADER,
     ENVIRONMENT_FILTER, LIMIT_FILTER, OPTIONS_FILTER, OWNERSHIP_FILTER, REGEX_FILTER, SKIP_FILTER,
 };
-use http::HeaderMap;
-use mongodb::bson::{doc, Document};
 use std::{collections::BTreeMap, sync::Arc};
 
 #[derive(Debug, Clone)]
@@ -102,7 +102,8 @@ mod test {
         OWNERSHIP_FILTER, SKIP_FILTER,
     };
     use axum::extract::Query;
-    use entities::{
+    use http::HeaderMap;
+    use osentities::{
         id::{prefix::IdPrefix, Id},
         {
             connection_definition::{ConnectionDefinitionType, Paths},
@@ -112,7 +113,6 @@ mod test {
             record_metadata::RecordMetadata,
         },
     };
-    use http::HeaderMap;
     use std::{collections::BTreeMap, sync::Arc};
 
     #[test]

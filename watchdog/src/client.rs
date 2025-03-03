@@ -2,11 +2,11 @@ use crate::config::WatchdogConfig;
 use bson::doc;
 use cache::remote::RedisCache;
 use chrono::Utc;
-use entities::{
+use futures::{stream::FuturesUnordered, StreamExt};
+use osentities::{
     cache::CacheConfig, database::DatabaseConfig, task::Task, Id, InternalError, MongoStore,
     PicaError, Store, Unit,
 };
-use futures::{stream::FuturesUnordered, StreamExt};
 use redis::{AsyncCommands, RedisResult};
 use std::fmt::Display;
 use std::time::Duration;
