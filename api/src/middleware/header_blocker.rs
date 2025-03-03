@@ -1,9 +1,9 @@
 use crate::server::AppState;
 use axum::response::IntoResponse;
-use osentities::{ApplicationError, Store};
 use futures_util::StreamExt;
 use http::{HeaderName, HeaderValue, Request};
 use mongodb::options::FindOptions;
+use osentities::{ApplicationError, Store};
 use serde::Deserialize;
 use std::{
     collections::BTreeSet,

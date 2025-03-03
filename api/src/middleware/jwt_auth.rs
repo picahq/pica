@@ -1,11 +1,11 @@
 use crate::server::AppState;
 use axum::{body::Body, extract::State, middleware::Next, response::Response};
+use http::Request;
+use jsonwebtoken::{DecodingKey, Validation};
 use osentities::{
     constant::{DEFAULT_AUDIENCE, DEFAULT_ISSUER, FALLBACK_AUDIENCE, FALLBACK_ISSUER},
     ApplicationError, Claims, PicaError, BEARER_PREFIX,
 };
-use http::Request;
-use jsonwebtoken::{DecodingKey, Validation};
 use std::sync::Arc;
 use tracing::info;
 

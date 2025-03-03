@@ -1,8 +1,8 @@
 use crate::context::TestServer;
 use api::logic::{common_enum::CreateRequest, ReadResponse};
-use osentities::common_model::CommonEnum;
 use fake::{Fake, Faker};
 use http::{Method, StatusCode};
+use osentities::common_model::CommonEnum;
 use serde_json::Value;
 use std::time::Duration;
 use tokio::time::sleep;

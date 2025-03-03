@@ -5,12 +5,12 @@ use crate::client::WatchdogClient;
 use anyhow::{Context, Result};
 use config::WatchdogConfig;
 use dotenvy::dotenv;
+use envconfig::Envconfig;
 use osentities::{
     cache::CacheConfig,
     database::DatabaseConfig,
     telemetry::{get_subscriber, init_subscriber},
 };
-use envconfig::Envconfig;
 use tracing::info;
 
 #[tokio::main]

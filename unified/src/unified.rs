@@ -11,6 +11,16 @@ use cache::local::{
     LocalCacheExt, SecretCache,
 };
 use chrono::Utc;
+use futures::{
+    future::{join_all, OptionFuture},
+    FutureExt,
+};
+use handlebars::Handlebars;
+use http::{HeaderMap, HeaderName, HeaderValue, Response, StatusCode};
+use mongodb::{
+    options::{Collation, CollationStrength, FindOneOptions},
+    Client,
+};
 use osentities::{
     algebra::JsonExt,
     api_model_config::{ModelPaths, RequestModelPaths},
@@ -25,16 +35,6 @@ use osentities::{
     id::{prefix::IdPrefix, Id},
     prelude::{MongoStore, TimedExt},
     ApplicationError, Connection, ErrorMeta, PicaError, Secret, SecretExt, Store,
-};
-use futures::{
-    future::{join_all, OptionFuture},
-    FutureExt,
-};
-use handlebars::Handlebars;
-use http::{HeaderMap, HeaderName, HeaderValue, Response, StatusCode};
-use mongodb::{
-    options::{Collation, CollationStrength, FindOneOptions},
-    Client,
 };
 use serde_json::{json, Number, Value};
 use std::{collections::HashMap, str::FromStr, sync::Arc};

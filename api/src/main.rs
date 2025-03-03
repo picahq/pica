@@ -1,8 +1,8 @@
 use anyhow::Result;
 use api::{domain::config::ConnectionsConfig, server::Server};
 use dotenvy::dotenv;
-use osentities::telemetry::{get_subscriber, init_subscriber, OtelGuard};
 use envconfig::Envconfig;
+use osentities::telemetry::{get_subscriber, init_subscriber, OtelGuard};
 use tracing::info;
 
 fn main() -> Result<()> {

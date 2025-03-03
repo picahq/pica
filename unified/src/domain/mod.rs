@@ -1,9 +1,9 @@
 use bson::doc;
 use derive_builder::Builder;
-use osentities::Id;
-use osentities::PicaError;
 use http::StatusCode;
 use http::{HeaderMap, HeaderName, HeaderValue};
+use osentities::Id;
+use osentities::PicaError;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;

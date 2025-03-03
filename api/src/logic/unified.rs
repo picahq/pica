@@ -8,6 +8,7 @@ use axum::{
 };
 use bson::doc;
 use convert_case::{Case, Casing};
+use http::{HeaderMap, HeaderName};
 use osentities::{
     connection_model_definition::CrudAction,
     constant::{PASSWORD_LENGTH, PICA_PASSTHROUGH_HEADER},
@@ -16,7 +17,6 @@ use osentities::{
     event_access::EventAccess,
     AccessKey, ApplicationError, Event, InternalError, META,
 };
-use http::{HeaderMap, HeaderName};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{collections::HashMap, sync::Arc};

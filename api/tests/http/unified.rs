@@ -5,6 +5,12 @@ use api::logic::{
     metrics::MetricResponse,
 };
 use chrono::{Datelike, Utc};
+use fake::{faker::filesystem::raw::DirPath, locales::EN, Fake, Faker};
+use http::{
+    header::{AUTHORIZATION, CONTENT_TYPE},
+    Method, StatusCode,
+};
+use mockito::Mock;
 use osentities::{
     api_model_config::{AuthMethod, SamplesInput, SchemasInput},
     connection_model_definition::{ConnectionModelDefinition, CrudAction, CrudMapping},
@@ -13,12 +19,6 @@ use osentities::{
     id::{prefix::IdPrefix, Id},
     SanitizedConnection,
 };
-use fake::{faker::filesystem::raw::DirPath, locales::EN, Fake, Faker};
-use http::{
-    header::{AUTHORIZATION, CONTENT_TYPE},
-    Method, StatusCode,
-};
-use mockito::Mock;
 use serde_json::Value;
 use std::time::Duration;
 

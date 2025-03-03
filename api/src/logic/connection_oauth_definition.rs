@@ -5,6 +5,7 @@ use axum::{
     Router,
 };
 use chrono::Utc;
+use mongodb::bson::doc;
 use osentities::{
     algebra::MongoStore,
     api_model_config::{ApiModelConfig, Compute, Function, Lang},
@@ -14,7 +15,6 @@ use osentities::{
     id::{prefix::IdPrefix, Id},
     record_metadata::RecordMetadata,
 };
-use mongodb::bson::doc;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

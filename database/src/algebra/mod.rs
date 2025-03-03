@@ -1,8 +1,8 @@
+use http::header::AUTHORIZATION;
 use osentities::{
     database::DatabasePodConfig, emitted_events::ConnectionLostReason, ApplicationError, Claims,
     Id, InternalError, PicaError, Unit,
 };
-use http::header::AUTHORIZATION;
 use reqwest::Client;
 use std::str::FromStr;
 

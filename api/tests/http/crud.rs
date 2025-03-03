@@ -1,6 +1,8 @@
 use crate::context::TestServer;
 use api::logic::{common_model, ReadResponse};
 use api::logic::{connection_definition, connection_model_definition, connection_model_schema};
+use fake::{Fake, Faker};
+use http::{Method, StatusCode};
 use osentities::{
     common_model::CommonModel, connection_definition::ConnectionDefinition,
     connection_model_definition::ConnectionModelDefinition,
@@ -10,8 +12,6 @@ use osentities::{
     common_model::{DataType, Expandable, Field},
     json_schema::JsonSchema,
 };
-use fake::{Fake, Faker};
-use http::{Method, StatusCode};
 use serde_json::{json, Value};
 use std::{collections::HashMap, ops::Deref};
 

@@ -1,7 +1,7 @@
 use crate::{logic::connection, server::AppState};
 use axum::{middleware::from_fn, response::IntoResponse, routing::get, Json, Router};
-use osentities::telemetry::log_request_middleware;
 use http::StatusCode;
+use osentities::telemetry::log_request_middleware;
 use serde_json::json;
 use std::sync::Arc;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};

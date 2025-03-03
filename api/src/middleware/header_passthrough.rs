@@ -1,7 +1,7 @@
 use crate::server::AppState;
 use axum::{body::Body, extract::State, middleware::Next, response::Response};
-use osentities::PicaError;
 use http::Request;
+use osentities::PicaError;
 use std::sync::Arc;
 
 pub async fn header_passthrough_middleware(

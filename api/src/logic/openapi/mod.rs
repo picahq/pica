@@ -5,15 +5,15 @@ use axum::extract::{Json, State};
 use bson::doc;
 use builder::{generate_openapi_schema, generate_path_item};
 use convert_case::{Case, Casing};
+use futures::{Stream, StreamExt, TryStreamExt};
+use indexmap::IndexMap;
+use mongodb::error::Error as MongoError;
+use openapiv3::*;
 use osentities::{
     algebra::{MongoStore, TimedExt},
     common_model::{CommonEnum, CommonModel},
     InternalError, PicaError,
 };
-use futures::{Stream, StreamExt, TryStreamExt};
-use indexmap::IndexMap;
-use mongodb::error::Error as MongoError;
-use openapiv3::*;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashSet,

@@ -9,12 +9,12 @@ use axum::{
 };
 use bson::doc;
 use cache::local::{ConnectionHeaderCache, LocalCacheExt};
+use http::{HeaderMap, HeaderValue};
+use mongodb::options::FindOneOptions;
 use osentities::{
     algebra::MongoStore, event_access::EventAccess, ApplicationError, Connection, InternalError,
     OAuth, PicaError, Store, Unit,
 };
-use http::{HeaderMap, HeaderValue};
-use mongodb::options::FindOneOptions;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 use std::{collections::BTreeMap, fmt::Debug, future::Future, sync::Arc};

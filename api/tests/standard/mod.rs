@@ -1,4 +1,5 @@
 use crate::checker::{CheckType, JsonChecker, JsonCheckerImpl};
+use http::{HeaderMap, HeaderName, HeaderValue, Method};
 use osentities::{
     api_model_config::{ApiModelConfig, AuthMethod, ContentType, SamplesInput, SchemasInput},
     common_model::{CommonEnum, CommonModel, DataType, Field},
@@ -18,7 +19,6 @@ use osentities::{
     settings::Settings,
     Connection, ConnectionIdentityType, ConnectionType, Id, OAuth, Throughput,
 };
-use http::{HeaderMap, HeaderName, HeaderValue, Method};
 use serde_json::{json, Value};
 
 #[test]

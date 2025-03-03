@@ -8,6 +8,8 @@ use axum::{
     routing::{patch, post},
     Json, Router,
 };
+use fake::Dummy;
+use mongodb::bson::doc;
 use osentities::{
     algebra::MongoStore,
     api_model_config::AuthMethod,
@@ -21,8 +23,6 @@ use osentities::{
     settings::Settings,
     ApplicationError, PicaError,
 };
-use fake::Dummy;
-use mongodb::bson::doc;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tracing::error;

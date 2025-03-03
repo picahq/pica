@@ -1,5 +1,4 @@
 use axum::async_trait;
-use osentities::{Id, InternalError, PicaError, Unit};
 use k8s_openapi::{
     api::{
         apps::v1::{Deployment, DeploymentSpec},
@@ -15,6 +14,7 @@ use kube::{
     api::{DeleteParams, ObjectMeta, PostParams},
     Api, Client, Resource,
 };
+use osentities::{Id, InternalError, PicaError, Unit};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt::Debug;
 use std::{collections::BTreeMap, fmt::Display};

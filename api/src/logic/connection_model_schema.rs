@@ -9,6 +9,9 @@ use axum::{
     routing::{patch, post},
     Extension, Json, Router,
 };
+use fake::Dummy;
+use futures::try_join;
+use mongodb::bson::doc;
 use osentities::{
     algebra::MongoStore,
     connection_model_schema::{
@@ -19,9 +22,6 @@ use osentities::{
     json_schema::JsonSchema,
     ApplicationError, PicaError, StringExt,
 };
-use fake::Dummy;
-use futures::try_join;
-use mongodb::bson::doc;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 use std::{collections::BTreeMap, sync::Arc};
