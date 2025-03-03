@@ -2,7 +2,7 @@
 name = "entities"
 description = "Shared library for Pica"
 license = "GPL-3.0"
-version = "9.0.0"
+version = "10.0.0"
 edition = "2021"
 repository = "https://github.com/picahq/entities"
 
