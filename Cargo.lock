@@ -165,7 +165,7 @@ dependencies = [
  "chrono",
  "convert_case 0.6.0",
  "dotenvy",
- "entities 10.0.0",
+ "entities 9.0.0",
  "envconfig",
  "fake",
  "futures",
@@ -218,7 +218,7 @@ dependencies = [
  "bson",
  "chrono",
  "dotenvy",
- "entities 10.0.0",
+ "entities 9.0.0",
  "envconfig",
  "fake",
  "futures",
@@ -684,7 +684,7 @@ name = "cache"
 version = "0.1.0"
 dependencies = [
  "deadpool-redis",
- "entities 10.0.0",
+ "entities 9.0.0",
  "fake",
  "futures",
  "http 1.1.0",
@@ -1178,7 +1178,7 @@ dependencies = [
  "cache",
  "chrono",
  "dotenvy",
- "entities 10.0.0",
+ "entities 9.0.0",
  "envconfig",
  "futures",
  "futures-util",
@@ -1530,7 +1530,7 @@ dependencies = [
 
 [[package]]
 name = "entities"
-version = "10.0.0"
+version = "9.0.0"
 dependencies = [
  "aes",
  "anyhow",
@@ -1595,8 +1595,8 @@ dependencies = [
 
 [[package]]
 name = "entities"
-version = "10.0.0"
-source = "git+https://github.com/picahq/pica.git?rev=refs%2Fheads%2Ffix%2Fusing-prod-api#fca2c47f2c119673ce358877c37b91a4205e584a"
+version = "9.0.0"
+source = "git+https://github.com/picahq/pica?branch=main#486c94ce624ba9e0f356c987c06f5128b3f58a5a"
 dependencies = [
  "aes",
  "anyhow",
@@ -3955,7 +3955,7 @@ dependencies = [
  "clap_mangen",
  "config",
  "directories",
- "entities 10.0.0 (git+https://github.com/picahq/pica.git?rev=refs%2Fheads%2Ffix%2Fusing-prod-api)",
+ "entities 9.0.0 (git+https://github.com/picahq/pica?branch=main)",
  "reqwest 0.12.9",
  "serde",
  "serde_json",
@@ -6447,7 +6447,7 @@ dependencies = [
  "cache",
  "chrono",
  "derive_builder",
- "entities 10.0.0",
+ "entities 9.0.0",
  "futures",
  "handlebars",
  "http 1.1.0",
@@ -6771,7 +6771,7 @@ dependencies = [
  "cache",
  "chrono",
  "dotenvy",
- "entities 10.0.0",
+ "entities 9.0.0",
  "envconfig",
  "futures",
  "mockito",
