@@ -1,7 +1,7 @@
 services:
   migrate-before:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.29.1
+    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.35.0
     command: npm run run-migrations::before
     environment:
       - MONGO_URI=mongodb://pica:${MONGO_PASSWORD}@mongo:27017/events-service?authSource=admin
@@ -9,7 +9,7 @@ services:
 
   migrate-after:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.29.1
+    image: us-docker.pkg.dev/integrationos/docker-oss/typescript-services:1.35.0
     command: npm run run-migrations::after
     environment:
       - MONGO_URI=mongodb://pica:${MONGO_PASSWORD}@mongo:27017/events-service?authSource=admin
@@ -17,7 +17,7 @@ services:
 
   seed-data:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/seed-data:1.29.1
+    image: us-docker.pkg.dev/integrationos/docker-oss/seed-data:1.35.0
     restart: "no"
     environment:
       - MONGO_HOST=mongo
