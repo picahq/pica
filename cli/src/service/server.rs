@@ -1,7 +1,7 @@
 use crate::{
     domain::{
-        CHECK_PORT_FOR_SERVER_SUG, CliConfig, DEFAULT_API, DEFAULT_BASE, GO_TO_TERMINAL, Http,
-        Keys, RUN_PICA_CONNECTION_LIST_SUG, Server as ConfigServer,
+        CHECK_PORT_FOR_SERVER_SUG, CliConfig, DEFAULT_API, DEFAULT_BASE, DEFAULT_PORT,
+        GO_TO_TERMINAL, Http, Keys, RUN_PICA_CONNECTION_LIST_SUG, Server as ConfigServer,
     },
     service::{Pica, Printer, open_browser},
 };
@@ -172,7 +172,7 @@ impl Server {
         })?;
 
         let config = {
-            let http = Http::new(Some(30000));
+            let http = Http::new(Some(DEFAULT_PORT));
             let keys = Keys::new(response.sandbox, response.production);
             let server = ConfigServer::new(
                 api_url.clone().unwrap_or(DEFAULT_API.to_string()),
