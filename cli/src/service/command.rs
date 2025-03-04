@@ -180,7 +180,7 @@ impl Handler<AppContext, Command, Event> for Pica {
                 ConnectionCommand::Create { .. } => Ok(()),
                 ConnectionCommand::Delete { .. } => Ok(()),
                 ConnectionCommand::List { limit, .. } => {
-                    if limit.map(|l| l > 100).is_some() {
+                    if limit.map(|l| l > 100).unwrap_or(false) {
                         ctx.printer().stderr::<Pica>(
                             LIMIT_GREATER_THAN_EXPECTED,
                             ErrorKind::InvalidValue,
