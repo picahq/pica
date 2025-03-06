@@ -21,7 +21,7 @@ use osentities::{
     oauth_secret::OAuthSecret,
     ownership::Ownership,
     ApplicationError, Connection, ConnectionIdentityType, ErrorMeta, InternalError, OAuth,
-    PicaError, Throughput, DEFAULT_NAMESPACE,
+    PicaError, SanitizedConnection, Throughput, DEFAULT_NAMESPACE,
 };
 use reqwest::Request;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -72,7 +72,7 @@ async fn oauth_handler(
     Extension(user_event_access): Extension<Arc<EventAccess>>,
     Path(platform): Path<String>,
     Json(payload): Json<OAuthRequest>,
-) -> Result<Json<Connection>, PicaError> {
+) -> Result<Json<SanitizedConnection>, PicaError> {
     let conn_oauth_definition = get_conn_oauth_definition(&state, &platform).await?;
     let setting = get_user_settings(
         &state,
@@ -284,7 +284,7 @@ async fn oauth_handler(
             ApplicationError::service_unavailable("Failed to create connection", None)
         })?;
 
-    Ok(Json(connection))
+    Ok(Json(connection.into()))
 }
 
 fn request(
