@@ -126,7 +126,8 @@ pub struct IdentifyData {
 pub struct TrackData {
     event: String,
     user_id: String,
-    properties: Properties,
+    #[serde(default)]
+    properties: HashMap<String, Value>,
     context: Context,
 }
 
@@ -137,14 +138,6 @@ enum TrackType {
     Identify { data: IdentifyData },
     #[serde(rename = "t")]
     Track { data: TrackData },
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Properties {
-    pub version: String,
-    #[serde(default)]
-    pub properties: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -203,15 +196,17 @@ impl TrackedMetric {
                         event,
                     },
             } => {
-                let mut hashmap = properties.properties.clone();
-                hashmap.insert("version".into(), properties.version.clone());
-                hashmap.insert("locale".into(), context.locale.clone());
-                hashmap.insert("user_agent".into(), context.user_agent.clone());
-                hashmap.insert("user_id".into(), user_id.clone());
-                hashmap.insert("path".into(), context.page.path.to_string());
-                hashmap.insert("search".into(), context.page.search.clone());
-                hashmap.insert("title".into(), context.page.title.clone());
-                hashmap.insert("url".into(), context.page.url.clone());
+                let mut hashmap = properties.clone();
+
+                hashmap.insert("locale".into(), Value::String(context.locale.clone()));
+                hashmap.insert(
+                    "user_agent".into(),
+                    Value::String(context.user_agent.clone()),
+                );
+                hashmap.insert("path".into(), Value::String(context.page.path.to_string()));
+                hashmap.insert("search".into(), Value::String(context.page.search.clone()));
+                hashmap.insert("title".into(), Value::String(context.page.title.clone()));
+                hashmap.insert("url".into(), Value::String(context.page.url.clone()));
 
                 let mut event = Event::new(event.clone(), user_id.clone());
 
