@@ -10,18 +10,9 @@ use fake::Dummy;
 use http::{HeaderMap, HeaderName, HeaderValue};
 use mongodb::bson::doc;
 use osentities::{
-    algebra::{MongoStore, TemplateExt},
-    api_model_config::ContentType,
-    connection_definition::ConnectionDefinition,
-    connection_oauth_definition::{
+    algebra::{MongoStore, TemplateExt}, api_model_config::ContentType, connection_definition::ConnectionDefinition, connection_oauth_definition::{
         Computation, ConnectionOAuthDefinition, OAuthResponse, PlatformSecret, Settings,
-    },
-    event_access::EventAccess,
-    id::{prefix::IdPrefix, Id},
-    oauth_secret::OAuthSecret,
-    ownership::Ownership,
-    ApplicationError, Connection, ConnectionIdentityType, ErrorMeta, InternalError, OAuth,
-    PicaError, Throughput, DEFAULT_NAMESPACE,
+    }, event_access::EventAccess, id::{prefix::IdPrefix, Id}, oauth_secret::OAuthSecret, ownership::Ownership, ApplicationError, Connection, ConnectionIdentityType, ErrorMeta, InternalError, OAuth, PicaError, SanitizedConnection, Throughput, DEFAULT_NAMESPACE
 };
 use reqwest::Request;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -72,7 +63,7 @@ async fn oauth_handler(
     Extension(user_event_access): Extension<Arc<EventAccess>>,
     Path(platform): Path<String>,
     Json(payload): Json<OAuthRequest>,
-) -> Result<Json<Connection>, PicaError> {
+) -> Result<Json<SanitizedConnection>, PicaError> {
     let conn_oauth_definition = get_conn_oauth_definition(&state, &platform).await?;
     let setting = get_user_settings(
         &state,
@@ -284,7 +275,7 @@ async fn oauth_handler(
             ApplicationError::service_unavailable("Failed to create connection", None)
         })?;
 
-    Ok(Json(connection))
+    Ok(Json(connection.into()))
 }
 
 fn request(
