@@ -10,9 +10,18 @@ use fake::Dummy;
 use http::{HeaderMap, HeaderName, HeaderValue};
 use mongodb::bson::doc;
 use osentities::{
-    algebra::{MongoStore, TemplateExt}, api_model_config::ContentType, connection_definition::ConnectionDefinition, connection_oauth_definition::{
+    algebra::{MongoStore, TemplateExt},
+    api_model_config::ContentType,
+    connection_definition::ConnectionDefinition,
+    connection_oauth_definition::{
         Computation, ConnectionOAuthDefinition, OAuthResponse, PlatformSecret, Settings,
-    }, event_access::EventAccess, id::{prefix::IdPrefix, Id}, oauth_secret::OAuthSecret, ownership::Ownership, ApplicationError, Connection, ConnectionIdentityType, ErrorMeta, InternalError, OAuth, PicaError, SanitizedConnection, Throughput, DEFAULT_NAMESPACE
+    },
+    event_access::EventAccess,
+    id::{prefix::IdPrefix, Id},
+    oauth_secret::OAuthSecret,
+    ownership::Ownership,
+    ApplicationError, Connection, ConnectionIdentityType, ErrorMeta, InternalError, OAuth,
+    PicaError, SanitizedConnection, Throughput, DEFAULT_NAMESPACE,
 };
 use reqwest::Request;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
