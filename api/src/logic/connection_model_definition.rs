@@ -308,6 +308,7 @@ pub struct CreateRequest {
     pub supported: Option<bool>,
     pub active: Option<bool>,
     pub knowledge: Option<String>,
+    pub tags: Option<Vec<String>>,
 }
 
 impl HookExt<ConnectionModelDefinition> for CreateRequest {}
@@ -363,6 +364,11 @@ impl RequestExt for CreateRequest {
             knowledge: self.knowledge.clone(),
         };
         record.record_metadata.version = self.version.clone();
+
+        if let Some(tags) = &self.tags {
+            record.record_metadata.tags.clone_from(tags);
+        }
+
         Some(record)
     }
 
@@ -404,6 +410,10 @@ impl RequestExt for CreateRequest {
         record.extractor_config.clone_from(&self.extractor_config);
         record.knowledge.clone_from(&self.knowledge);
         record.record_metadata.version.clone_from(&self.version);
+
+        if let Some(tags) = &self.tags {
+            record.record_metadata.tags.clone_from(tags);
+        }
 
         if let Some(supported) = self.supported {
             record.supported = supported;
