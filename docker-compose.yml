@@ -57,7 +57,7 @@ services:
 
   oauth-refresh:
     platform: linux/amd64
-    image: us-docker.pkg.dev/integrationos/docker-oss/oauth-refresh:1.35.0
+    image: us-docker.pkg.dev/integrationos/docker-oss/oauth-refresh:1.32.1
     ports:
       - 3003:3003
     environment:
