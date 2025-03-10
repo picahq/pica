@@ -12,7 +12,7 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
         const data = {
             client_id,
             client_secret,
-            scope: 'offline_access Mail.Read Mail.Read.Shared Mail.ReadBasic Mail.ReadBasic.Shared Mail.ReadWrite Mail.ReadWrite.Shared Mail.Send Mail.Send.Shared MailboxFolder.Read MailboxFolder.ReadWrite MailboxItem.ImportExport MailboxItem.Read MailboxSettings.ReadWrite',
+            scope: 'offline_access Calendars.ReadWrite Calendars.ReadWrite.Shared',
             refresh_token,
             grant_type: 'refresh_token',
         };
@@ -47,7 +47,7 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
         };
     } catch (error) {
         throw new Error(
-            `Error fetching refresh token for Outlook Mail: ${error}`,
+            `Error fetching refresh token for Outlook Calendar: ${error}`,
         );
     }
 };
