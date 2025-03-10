@@ -1,20 +1,21 @@
-import { DataObject, OAuthResponse } from '../../lib/types';
 import axios from 'axios';
+import { DataObject, OAuthResponse } from '../../lib/types';
 
-export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
+export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
     try {
         const {
-            OAUTH_CLIENT_ID: client_id,
-            OAUTH_CLIENT_SECRET: client_secret,
-            OAUTH_REFRESH_TOKEN: refresh_token,
+            clientId: client_id,
+            clientSecret: client_secret,
+            metadata: { code, redirectUri: redirect_uri } = {},
         } = body;
 
         const data = {
             client_id,
             client_secret,
-            scope: 'offline_access Mail.Read Mail.Read.Shared Mail.ReadBasic Mail.ReadBasic.Shared Mail.ReadWrite Mail.ReadWrite.Shared Mail.Send Mail.Send.Shared MailboxFolder.Read MailboxFolder.ReadWrite MailboxItem.ImportExport MailboxItem.Read MailboxSettings.ReadWrite',
-            refresh_token,
-            grant_type: 'refresh_token',
+            code,
+            redirect_uri,
+            scope: 'offline_access Calendars.ReadWrite Calendars.ReadWrite.Shared',
+            grant_type: 'authorization_code',
         };
 
         const response = await axios({
@@ -47,7 +48,7 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
         };
     } catch (error) {
         throw new Error(
-            `Error fetching refresh token for Outlook Mail: ${error}`,
+            `Error fetching access token for Outlook Calendar: ${error}`,
         );
     }
 };
