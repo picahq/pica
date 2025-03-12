@@ -1,8 +1,11 @@
-use super::{create, delete, read, update, HookExt, PublicExt, RequestExt};
+use super::{create, delete, read, update, HookExt, PublicExt, ReadResponse, RequestExt};
 use crate::{
+    helper::shape_mongo_filter,
     router::ServerResponse,
     server::{AppState, AppStores},
 };
+use axum::extract::Query;
+use axum::http::HeaderMap;
 use axum::{
     extract::{Path, State},
     routing::{patch, post},
@@ -24,7 +27,9 @@ use osentities::{
     ApplicationError, PicaError,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use std::sync::Arc;
+use tokio::try_join;
 use tracing::error;
 
 pub fn get_router() -> Router<Arc<AppState>> {
@@ -387,4 +392,134 @@ impl RequestExt for CreateRequest {
     fn get_store(stores: AppStores) -> MongoStore<Self::Output> {
         stores.connection_config
     }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AvailableConnectorsResponse {
+    pub name: String,
+    pub key: String,
+    pub platform_version: String,
+    pub description: String,
+    pub category: String,
+    pub image: String,
+    pub tags: Vec<String>,
+    pub oauth: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub actions: Option<Vec<ActionItem>>,
+    #[serde(flatten)]
+    pub record_metadata: RecordMetadata,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ActionItem {
+    pub title: String,
+    pub key: String,
+    #[serde(with = "http_serde_ext_ios::method")]
+    pub method: http::Method,
+}
+
+pub async fn get_available_connectors(
+    headers: HeaderMap,
+    query: Option<Query<BTreeMap<String, String>>>,
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<ServerResponse<ReadResponse<AvailableConnectorsResponse>>>, PicaError> {
+    let mut query_params = query.clone().map(|q| q.0).unwrap_or_default();
+
+    let include_actions = query_params
+        .get("includeActions")
+        .map(|v| v.to_lowercase() == "true")
+        .unwrap_or(false);
+
+    query_params.remove("includeActions");
+
+    let filtered_query = if !query_params.is_empty() {
+        Some(Query(query_params))
+    } else {
+        None
+    };
+
+    let query = shape_mongo_filter(filtered_query, None, Some(headers));
+
+    let store = state.app_stores.connection_config.clone();
+
+    let filter = query.filter.clone();
+    let count = store.count(filter, None);
+
+    let find = store.get_many(
+        Some(query.filter),
+        None,
+        None,
+        Some(query.limit),
+        Some(query.skip),
+    );
+
+    let res = match try_join!(count, find) {
+        Ok((total, rows)) => {
+            let mut available_connectors = Vec::with_capacity(rows.len());
+
+            for conn_def in rows {
+                let actions = if include_actions {
+                    let model_definitions = state
+                        .app_stores
+                        .model_config
+                        .get_many(
+                            Some(doc! {
+                                "connectionPlatform": &conn_def.platform,
+                                "supported": true,
+                                "deleted": false
+                            }),
+                            None,
+                            None,
+                            None,
+                            None,
+                        )
+                        .await
+                        .map_err(|e| {
+                            error!("Error reading from connection model definitions: {e}");
+                            e
+                        })?;
+
+                    let action_items = model_definitions
+                        .into_iter()
+                        .map(|model_def| ActionItem {
+                            title: model_def.title,
+                            key: model_def.name,
+                            method: model_def.action,
+                        })
+                        .collect();
+
+                    Some(action_items)
+                } else {
+                    None
+                };
+
+                available_connectors.push(AvailableConnectorsResponse {
+                    name: conn_def.name,
+                    key: conn_def.key,
+                    platform_version: conn_def.platform_version,
+                    description: conn_def.frontend.spec.description,
+                    category: conn_def.frontend.spec.category,
+                    image: conn_def.frontend.spec.image,
+                    tags: conn_def.frontend.spec.tags,
+                    oauth: matches!(conn_def.auth_method, Some(AuthMethod::OAuth)),
+                    actions,
+                    record_metadata: conn_def.record_metadata,
+                });
+            }
+
+            ReadResponse {
+                rows: available_connectors,
+                skip: query.skip,
+                limit: query.limit,
+                total,
+            }
+        }
+        Err(e) => {
+            error!("Error reading from store: {e}");
+            return Err(e);
+        }
+    };
+
+    Ok(Json(ServerResponse::new("connection_definition", res)))
 }

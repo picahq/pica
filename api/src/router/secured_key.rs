@@ -1,6 +1,6 @@
 use crate::{
     logic::{
-        connection,
+        connection, connection_definition,
         connection_model_definition::test_connection_model_definition,
         connection_model_schema::{
             public_get_connection_model_schema, PublicGetConnectionModelSchema,
@@ -55,6 +55,10 @@ pub async fn get_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
                 PublicGetConnectionModelSchema,
                 PublicConnectionModelSchema,
             >),
+        )
+        .route(
+            "/available-connectors",
+            get(connection_definition::get_available_connectors),
         );
 
     let routes = match RateLimiter::from_state(state.clone()).await {
