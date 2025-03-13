@@ -1,7 +1,7 @@
 use crate::{
     logic::{
         connection, connection_definition,
-        connection_model_definition::test_connection_model_definition,
+        connection_model_definition::{get_available_actions, test_connection_model_definition},
         connection_model_schema::{
             public_get_connection_model_schema, PublicGetConnectionModelSchema,
         },
@@ -59,7 +59,8 @@ pub async fn get_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
         .route(
             "/available-connectors",
             get(connection_definition::get_available_connectors),
-        );
+        )
+        .route("/available-actions/:platform", get(get_available_actions));
 
     let routes = match RateLimiter::from_state(state.clone()).await {
         Ok(rate_limiter) => routes.layer(axum::middleware::from_fn_with_state(
