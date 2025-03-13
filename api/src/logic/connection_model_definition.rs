@@ -500,8 +500,5 @@ pub async fn get_available_actions(
         }
     };
 
-    Ok(Json(ServerResponse::new(
-        "connection_model_definition",
-        res,
-    )))
+    Ok(Json(ServerResponse::new("Available Actions", res)))
 }

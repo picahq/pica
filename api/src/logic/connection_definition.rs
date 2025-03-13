@@ -459,5 +459,5 @@ pub async fn get_available_connectors(
         }
     };
 
-    Ok(Json(ServerResponse::new("connection_definition", res)))
+    Ok(Json(ServerResponse::new("Available Connectors", res)))
 }
