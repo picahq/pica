@@ -405,18 +405,8 @@ pub struct AvailableConnectorsResponse {
     pub image: String,
     pub tags: Vec<String>,
     pub oauth: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub actions: Option<Vec<ActionItem>>,
     #[serde(flatten)]
     pub record_metadata: RecordMetadata,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct ActionItem {
-    pub title: String,
-    pub key: String,
-    #[serde(with = "http_serde_ext_ios::method")]
-    pub method: http::Method,
 }
 
 pub async fn get_available_connectors(
@@ -424,22 +414,7 @@ pub async fn get_available_connectors(
     query: Option<Query<BTreeMap<String, String>>>,
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<ServerResponse<ReadResponse<AvailableConnectorsResponse>>>, PicaError> {
-    let mut query_params = query.clone().map(|q| q.0).unwrap_or_default();
-
-    let include_actions = query_params
-        .get("includeActions")
-        .map(|v| v.to_lowercase() == "true")
-        .unwrap_or(false);
-
-    query_params.remove("includeActions");
-
-    let filtered_query = if !query_params.is_empty() {
-        Some(Query(query_params))
-    } else {
-        None
-    };
-
-    let query = shape_mongo_filter(filtered_query, None, Some(headers));
+    let query = shape_mongo_filter(query, None, Some(headers));
 
     let store = state.app_stores.connection_config.clone();
 
@@ -456,45 +431,9 @@ pub async fn get_available_connectors(
 
     let res = match try_join!(count, find) {
         Ok((total, rows)) => {
-            let mut available_connectors = Vec::with_capacity(rows.len());
-
-            for conn_def in rows {
-                let actions = if include_actions {
-                    let model_definitions = state
-                        .app_stores
-                        .model_config
-                        .get_many(
-                            Some(doc! {
-                                "connectionPlatform": &conn_def.platform,
-                                "supported": true,
-                                "deleted": false
-                            }),
-                            None,
-                            None,
-                            None,
-                            None,
-                        )
-                        .await
-                        .map_err(|e| {
-                            error!("Error reading from connection model definitions: {e}");
-                            e
-                        })?;
-
-                    let action_items = model_definitions
-                        .into_iter()
-                        .map(|model_def| ActionItem {
-                            title: model_def.title,
-                            key: model_def.name,
-                            method: model_def.action,
-                        })
-                        .collect();
-
-                    Some(action_items)
-                } else {
-                    None
-                };
-
-                available_connectors.push(AvailableConnectorsResponse {
+            let available_connectors = rows
+                .into_iter()
+                .map(|conn_def| AvailableConnectorsResponse {
                     name: conn_def.name,
                     key: conn_def.key,
                     platform_version: conn_def.platform_version,
@@ -503,10 +442,9 @@ pub async fn get_available_connectors(
                     image: conn_def.frontend.spec.image,
                     tags: conn_def.frontend.spec.tags,
                     oauth: matches!(conn_def.auth_method, Some(AuthMethod::OAuth)),
-                    actions,
                     record_metadata: conn_def.record_metadata,
-                });
-            }
+                })
+                .collect();
 
             ReadResponse {
                 rows: available_connectors,
@@ -521,5 +459,5 @@ pub async fn get_available_connectors(
         }
     };
 
-    Ok(Json(ServerResponse::new("connection_definition", res)))
+    Ok(Json(ServerResponse::new("Available Connectors", res)))
 }

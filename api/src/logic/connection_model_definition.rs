@@ -1,17 +1,18 @@
-use super::{create, delete, read, update, HookExt, PublicExt, RequestExt};
+use super::{create, delete, read, update, HookExt, PublicExt, ReadResponse, RequestExt};
 use crate::{
+    helper::shape_mongo_filter,
     router::ServerResponse,
     server::{AppState, AppStores},
 };
 use axum::{
+    extract::Query,
     extract::{Path, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     routing::{patch, post},
     Extension, Json, Router,
 };
 use chrono::Utc;
 use fake::Dummy;
-use http::HeaderMap;
 use mongodb::bson::doc;
 use osentities::{
     algebra::MongoStore,
@@ -33,6 +34,7 @@ use std::{
     collections::{BTreeMap, HashMap},
     sync::Arc,
 };
+use tokio::try_join;
 use tracing::error;
 
 pub fn get_router() -> Router<Arc<AppState>> {
@@ -437,4 +439,66 @@ impl RequestExt for CreateRequest {
     fn get_store(stores: AppStores) -> MongoStore<Self::Output> {
         stores.model_config.clone()
     }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ActionItem {
+    pub title: String,
+    pub key: String,
+    #[serde(with = "http_serde_ext_ios::method")]
+    pub method: http::Method,
+    pub platform: String,
+}
+
+pub async fn get_available_actions(
+    headers: HeaderMap,
+    Path(platform): Path<String>,
+    query: Option<Query<BTreeMap<String, String>>>,
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<ServerResponse<ReadResponse<ActionItem>>>, PicaError> {
+    let query = shape_mongo_filter(query, None, Some(headers));
+
+    let mut filter = query.filter;
+    filter.insert("connectionPlatform", platform.clone());
+    filter.insert("supported", true);
+
+    let store = state.app_stores.model_config.clone();
+
+    let count_filter = filter.clone();
+    let count = store.count(count_filter, None);
+
+    let find = store.get_many(
+        Some(filter),
+        None,
+        None,
+        Some(query.limit),
+        Some(query.skip),
+    );
+
+    let res = match try_join!(count, find) {
+        Ok((total, rows)) => {
+            let action_items = rows
+                .into_iter()
+                .map(|model_def| ActionItem {
+                    title: model_def.title,
+                    key: model_def.name,
+                    method: model_def.action,
+                    platform: model_def.connection_platform,
+                })
+                .collect();
+
+            ReadResponse {
+                rows: action_items,
+                skip: query.skip,
+                limit: query.limit,
+                total,
+            }
+        }
+        Err(e) => {
+            error!("Error reading from store: {e}");
+            return Err(e);
+        }
+    };
+
+    Ok(Json(ServerResponse::new("Available Actions", res)))
 }
