@@ -161,6 +161,12 @@ pub enum InternalError {
         subtype: Option<String>,
         meta: Option<Box<Value>>,
     },
+    #[error("Rate limit exceeded: {}", .message)]
+    RateLimitError {
+        message: String,
+        subtype: Option<String>,
+        meta: Option<Box<Value>>,
+    },
 }
 
 impl From<anyhow::Error> for InternalError {
@@ -281,6 +287,14 @@ impl InternalError {
         })
     }
 
+    pub fn rate_limit_error(message: &str, subtype: Option<&str>) -> PicaError {
+        PicaError::internal(InternalError::RateLimitError {
+            message: message.to_string(),
+            subtype: subtype.map(|s| s.to_string().snake_case()),
+            meta: None,
+        })
+    }
+
     fn set_meta(self, metadata: Box<Value>) -> Self {
         match self {
             InternalError::UnknownError {
@@ -374,6 +388,11 @@ impl InternalError {
                 subtype,
                 meta: Some(metadata),
             },
+            InternalError::RateLimitError { message, subtype, .. } => InternalError::RateLimitError {
+                message: message.to_string(),
+                subtype: subtype.clone(),
+                meta: Some(metadata),
+            },
         }
     }
 }
@@ -394,6 +413,7 @@ impl ErrorMeta for InternalError {
             InternalError::ScriptError { .. } => ErrorCode(1010),
             InternalError::SerializeError { .. } => ErrorCode(1011),
             InternalError::DeserializeError { .. } => ErrorCode(1012),
+            InternalError::RateLimitError { .. } => ErrorCode(1013),
         }
     }
 
@@ -438,6 +458,9 @@ impl ErrorMeta for InternalError {
             InternalError::DeserializeError { subtype, .. } => {
                 ErrorKey::internal("deserialize_error", subtype.as_deref())
             }
+            InternalError::RateLimitError { subtype, .. } => {
+                ErrorKey::internal("rate_limit", subtype.as_deref())
+            }
         }
     }
 
@@ -458,6 +481,7 @@ impl ErrorMeta for InternalError {
             InternalError::ScriptError { message, .. } => ErrorMessage(message.to_string()),
             InternalError::SerializeError { message, .. } => ErrorMessage(message.to_string()),
             InternalError::DeserializeError { message, .. } => ErrorMessage(message.to_string()),
+            InternalError::RateLimitError { message, .. } => ErrorMessage(message.to_string()),
         }
     }
 
@@ -476,6 +500,7 @@ impl ErrorMeta for InternalError {
             InternalError::ScriptError { meta, .. } => meta.clone(),
             InternalError::SerializeError { meta, .. } => meta.clone(),
             InternalError::DeserializeError { meta, .. } => meta.clone(),
+            InternalError::RateLimitError { meta, .. } => meta.clone(),
         }
     }
 }
@@ -938,6 +963,13 @@ impl From<InternalError> for ApplicationError {
                 subtype,
                 meta,
             },
+            InternalError::RateLimitError { message, subtype, meta } => {
+                ApplicationError::TooManyRequests {
+                    message,
+                    subtype,
+                    meta,
+                }
+            }
         }
     }
 }
@@ -1009,6 +1041,7 @@ impl<'a> From<&'a PicaError> for StatusCode {
                 | InternalError::ConfigurationError { .. }
                 | InternalError::ScriptError { .. }
                 | InternalError::DecryptionError { .. } => StatusCode::INTERNAL_SERVER_ERROR,
+                InternalError::RateLimitError { .. } => StatusCode::TOO_MANY_REQUESTS,
             },
             PicaError::Application(e) => match e {
                 ApplicationError::BadRequest { .. } => StatusCode::BAD_REQUEST,
