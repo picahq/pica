@@ -56,3 +56,20 @@ export const generateBasicHeaders = (
         'Content-Type': 'application/x-www-form-urlencoded',
     };
 };
+
+export const base64UrlEncode = async (input: string) => {
+    const byteArray = new TextEncoder().encode(input);
+
+    let base64String = btoa(String.fromCharCode(...byteArray));
+
+    base64String = base64String
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+    while (base64String.length % 4 !== 0) {
+        base64String += '=';
+    }
+
+    return base64String;
+};
