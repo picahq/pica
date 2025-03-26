@@ -1,6 +1,6 @@
-import axios from 'axios';
-import { DataObject, OAuthResponse } from '../../lib/types';
-import qs from 'qs';
+import axios from "axios";
+import { DataObject, OAuthResponse } from "../../lib/types";
+import qs from "qs";
 
 export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
     try {
@@ -40,7 +40,9 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             refreshToken,
             expiresIn,
             tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
-            meta: {},
+            meta: {
+                subdomain,
+            },
         };
     } catch (error) {
         throw new Error(`Error fetching access token for ShareFile: ${error}`);

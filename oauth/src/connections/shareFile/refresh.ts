@@ -43,7 +43,9 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
             refreshToken,
             expiresIn,
             tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
-            meta: {},
+            meta: {
+                subdomain,
+            },
         };
     } catch (error) {
         throw new Error(`Error fetching refresh token for ShareFine: ${error}`);
