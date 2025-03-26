@@ -42,7 +42,7 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
             accessToken,
             refreshToken,
             expiresIn,
-            tokenType,
+            tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
             meta: {},
         };
     } catch (error) {
