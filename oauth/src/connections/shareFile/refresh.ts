@@ -46,6 +46,6 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
             meta: {},
         };
     } catch (error) {
-        throw new Error(`Error fetching refresh token for ShareVine: ${error}`);
+        throw new Error(`Error fetching refresh token for ShareFine: ${error}`);
     }
 };
