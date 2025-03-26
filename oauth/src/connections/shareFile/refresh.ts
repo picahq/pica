@@ -42,10 +42,12 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
             accessToken,
             refreshToken,
             expiresIn,
-            tokenType,
-            meta: {},
+            tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
+            meta: {
+                subdomain,
+            },
         };
     } catch (error) {
-        throw new Error(`Error fetching refresh token for ShareVine: ${error}`);
+        throw new Error(`Error fetching refresh token for ShareFine: ${error}`);
     }
 };
