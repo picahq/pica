@@ -399,6 +399,7 @@ impl RequestExt for CreateRequest {
 pub struct AvailableConnectorsResponse {
     pub name: String,
     pub key: String,
+    pub platform: String,
     pub platform_version: String,
     pub description: String,
     pub category: String,
@@ -436,6 +437,7 @@ pub async fn get_available_connectors(
                 .map(|conn_def| AvailableConnectorsResponse {
                     name: conn_def.name,
                     key: conn_def.key,
+                    platform: conn_def.frontend.spec.platform,
                     platform_version: conn_def.platform_version,
                     description: conn_def.frontend.spec.description,
                     category: conn_def.frontend.spec.category,
