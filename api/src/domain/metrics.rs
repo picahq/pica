@@ -42,6 +42,12 @@ pub struct Metric {
 }
 
 impl Metric {
+    pub(crate) fn is_passthrough(&self) -> bool {
+        matches!(self.metric_type, MetricType::Passthrough(_))
+    }
+}
+
+impl Metric {
     pub fn passthrough(connection: Arc<Connection>) -> Self {
         Self {
             metric_type: MetricType::Passthrough(connection),
