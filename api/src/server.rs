@@ -260,42 +260,46 @@ impl Server {
                     receiver.recv(),
                 )
                 .await;
-                if let Ok(Some(metric)) = res {
-                    let doc = metric.update_doc();
-                    let client = metrics
-                        .update_one(
-                            bson::doc! {
-                                "clientId": &metric.ownership().client_id,
-                            },
-                            doc.clone(),
-                        )
-                        .with_options(options.clone());
-                    let system = metrics
-                        .update_one(
-                            bson::doc! {
-                                "clientId": metric_system_id.as_str(),
-                            },
-                            doc,
-                        )
-                        .with_options(options.clone());
-                    if let Err(e) = try_join!(client, system) {
-                        error!("Could not upsert metric: {e}");
-                    }
-
-                    event_buffer.push(metric);
-                } else if let Ok(None) = res {
+                if let Ok(None) = res {
                     break;
-                } else {
-                    trace!("Event receiver timed out waiting for new event");
-                    if let Err(e) = cloned_tracker_client
-                        .track_many_metrics(&event_buffer)
-                        .await
-                    {
-                        warn!("Could not track metrics: {e}");
+                }
+
+                if let Ok(Some(metric)) = res {
+                    if !metric.is_passthrough() {
+                        let doc = metric.update_doc();
+                        let client = metrics
+                            .update_one(
+                                bson::doc! {
+                                    "clientId": &metric.ownership().client_id,
+                                },
+                                doc.clone(),
+                            )
+                            .with_options(options.clone());
+                        let system = metrics
+                            .update_one(
+                                bson::doc! {
+                                    "clientId": metric_system_id.as_str(),
+                                },
+                                doc,
+                            )
+                            .with_options(options.clone());
+                        if let Err(e) = try_join!(client, system) {
+                            error!("Could not upsert metric: {e}");
+                        }
+
+                        event_buffer.push(metric);
                     } else {
-                        trace!("Tracked {} metrics", event_buffer.len());
+                        trace!("Event receiver timed out waiting for new event");
+                        if let Err(e) = cloned_tracker_client
+                            .track_many_metrics(&event_buffer)
+                            .await
+                        {
+                            warn!("Could not track metrics: {e}");
+                        } else {
+                            trace!("Tracked {} metrics", event_buffer.len());
+                        }
+                        event_buffer.clear();
                     }
-                    event_buffer.clear();
                 }
             }
         });
