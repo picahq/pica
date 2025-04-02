@@ -23,7 +23,7 @@ use osentities::{
 use serde::Deserialize;
 use serde_json::json;
 use std::{collections::HashMap, sync::Arc};
-use tracing::error;
+use tracing::{error, info};
 use unified::domain::UnifiedMetadataBuilder;
 
 pub fn get_router() -> Router<Arc<AppState>> {
@@ -77,7 +77,9 @@ pub async fn passthrough_request(
         .get(QUERY_BY_ID_PASSTHROUGH)
         .and_then(|h| h.to_str().ok());
 
-    tracing::info!("Executing {} request on {}", method, uri.path());
+    let id_str = id.map(|i| i.to_string());
+
+    info!("Executing {} request on {}", method, uri.path());
 
     let destination = Destination {
         platform: connection.platform.clone(),
@@ -156,20 +158,29 @@ pub async fn passthrough_request(
             })
             .build();
 
-        let cmd = database_c
-            .collection::<SparseCMD>(&Store::ConnectionModelDefinitions.to_string())
-            .find_one(doc! {
+        let query = if let Some(id) = id_str {
+            doc! {
+                "_id": id.to_string(),
+            }
+        } else {
+            doc! {
                 "connectionPlatform": connection_platform.clone(),
                 "path": uri.path().to_string(),
                 "action": method.to_string().to_uppercase()
-            })
-            .with_options(options)
+            }
+        };
+
+        let cmd = database_c
+            .collection::<SparseCMD>(&Store::ConnectionModelDefinitions.to_string())
+            .find_one(query)
+            .with_options(options.clone())
             .await
             .ok()
             .flatten();
 
         if let (Some(cmd), Some(encrypted_access_key)) = (cmd, connection_secret_header) {
             if let Ok(encrypted_access_key) = EncryptedAccessKey::parse(&encrypted_access_key) {
+                tracing::info!("encrypted_access_key: {:?}", encrypted_access_key);
                 let path = uri.path().trim_end_matches('/');
 
                 let metadata = UnifiedMetadataBuilder::default()
