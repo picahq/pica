@@ -65,6 +65,7 @@ pub enum ConnectionIdentityType {
     Organization,
     User,
     Team,
+    Project,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Tabled)]
