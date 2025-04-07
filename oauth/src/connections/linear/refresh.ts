@@ -14,6 +14,6 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
             meta,
         };
     } catch (error) {
-        throw new Error(`Error fetching refresh token for Attio: ${error}`);
+        throw new Error(`Error fetching refresh token for Linear: ${error}`);
     }
 };
