@@ -1,30 +1,29 @@
-import { DataObject, OAuthResponse } from '../../lib/types';
 import axios from 'axios';
+import { DataObject, OAuthResponse } from '../../lib/types';
 import qs from 'qs';
 
-export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
+export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
     try {
         const {
-            OAUTH_CLIENT_ID: client_id,
-            OAUTH_CLIENT_SECRET: client_secret,
-            OAUTH_REFRESH_TOKEN: refresh_token,
-            OAUTH_REQUEST_PAYLOAD: {
-                additionalData: { subdomain, apicp },
-            },
+            clientId: client_id,
+            clientSecret: client_secret,
+            metadata: { code, redirectUri: redirect_uri } = {},
         } = body;
 
         const data = qs.stringify({
             client_id,
             client_secret,
-            refresh_token,
-            grant_type: 'refresh_token',
+            code,
+            redirect_uri,
+            grant_type: 'authorization_code',
         });
 
         const response = await axios({
-            url: `https://${subdomain}.${apicp}/oauth/token `,
+            url: 'https://api.linear.app/oauth/token',
             method: 'POST',
             headers: {
                 Accept: 'application/x-www-form-urlencoded',
+                'Content-Type': 'application/x-www-form-urlencoded ',
             },
             data,
         });
@@ -43,11 +42,9 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
             refreshToken,
             expiresIn,
             tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
-            meta: {
-                subdomain,
-            },
+            meta: {},
         };
     } catch (error) {
-        throw new Error(`Error fetching refresh token for ShareFile: ${error}`);
+        throw new Error(`Error fetching access token for Linear: ${error}`);
     }
 };
