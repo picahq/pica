@@ -5,6 +5,7 @@ pub mod failed;
 pub mod finished;
 pub mod started;
 pub mod uploaded;
+pub mod deleted;
 
 use chosen::DateChosen;
 use completed::Completed;
@@ -15,6 +16,7 @@ use osentities::Id;
 use serde::{Deserialize, Serialize};
 use started::Started;
 use uploaded::Uploaded;
+use deleted::Deleted;
 
 pub trait EventMetadata {
     fn reference(&self) -> Id;
@@ -37,6 +39,8 @@ pub enum Event {
     Completed(Completed),
     /// Archive process finished event. Emitted when the archive process is finished.
     Finished(Finished),
+    /// Archive process deleted event. Emitted when the archive process is deleted.
+    Deleted(Deleted),
 }
 
 impl Event {
@@ -55,6 +59,7 @@ impl EventMetadata for Event {
             Event::Uploaded(event) => event.reference(),
             Event::Completed(event) => event.reference(),
             Event::Finished(event) => event.reference(),
+            Event::Deleted(event) => event.reference(),
         }
     }
 }
