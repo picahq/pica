@@ -10,12 +10,7 @@ pub struct Deleted {
 }
 
 impl Deleted {
-    pub fn new(
-        reference: Id,
-        start_time: i64,
-        end_time: i64,
-        deleted_count: i64,
-    ) -> Self {
+    pub fn new(reference: Id, start_time: i64, end_time: i64, deleted_count: i64) -> Self {
         Self {
             reference,
             start_time,

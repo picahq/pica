@@ -1,14 +1,15 @@
 pub mod chosen;
 pub mod completed;
+pub mod deleted;
 pub mod dumped;
 pub mod failed;
 pub mod finished;
 pub mod started;
 pub mod uploaded;
-pub mod deleted;
 
 use chosen::DateChosen;
 use completed::Completed;
+use deleted::Deleted;
 use dumped::Dumped;
 use failed::Failed;
 use finished::Finished;
@@ -16,7 +17,6 @@ use osentities::Id;
 use serde::{Deserialize, Serialize};
 use started::Started;
 use uploaded::Uploaded;
-use deleted::Deleted;
 
 pub trait EventMetadata {
     fn reference(&self) -> Id;
