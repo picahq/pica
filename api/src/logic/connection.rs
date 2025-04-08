@@ -1,6 +1,6 @@
-use super::{delete, read, PublicExt, RequestExt};
+use super::{delete, read, PublicExt, ReadResponse, RequestExt};
 use crate::{
-    helper::{DeploymentSpecParams, ServiceName, ServiceSpecParams},
+    helper::{shape_mongo_filter, DeploymentSpecParams, ServiceName, ServiceSpecParams},
     logic::event_access::{
         generate_event_access, get_client_throughput, CreateEventAccessPayloadWithOwnership,
     },
@@ -9,7 +9,7 @@ use crate::{
 };
 use anyhow::{bail, Result};
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     routing::{delete as axum_delete, get, patch, post},
     Extension, Json, Router,
 };
@@ -26,6 +26,7 @@ use osentities::{
     connection_definition::{ConnectionDefinition, ConnectionDefinitionType},
     database::{DatabasePodConfig, PostgresConfig},
     database_secret::DatabaseConnectionSecret,
+    domain::configuration::environment::Environment,
     domain::connection::SanitizedConnection,
     event_access::EventAccess,
     id::{prefix::IdPrefix, Id},
@@ -650,4 +651,109 @@ pub async fn delete_connection(
             id: connection.args.id,
         }),
     )))
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VaultConnection {
+    #[serde(rename = "_id")]
+    pub id: Id,
+    pub platform_version: String,
+    pub name: Option<String>,
+    pub r#type: ConnectionType,
+    pub key: Arc<str>,
+    pub environment: Environment,
+    pub platform: Arc<str>,
+    pub identity: Option<String>,
+    pub identity_type: Option<ConnectionIdentityType>,
+    pub description: String,
+    #[serde(flatten, default)]
+    pub record_metadata: RecordMetadata,
+}
+
+pub async fn get_vault_connections(
+    Extension(access): Extension<Arc<EventAccess>>,
+    headers: HeaderMap,
+    query: Option<Query<BTreeMap<String, String>>>,
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<ServerResponse<ReadResponse<VaultConnection>>>, PicaError> {
+    let mongo_query = shape_mongo_filter(query, Some(access), Some(headers));
+
+    let connections = state
+        .app_stores
+        .connection
+        .get_many(
+            Some(mongo_query.filter.clone()),
+            None,
+            None,
+            Some(mongo_query.limit),
+            Some(mongo_query.skip),
+        )
+        .await
+        .map_err(|e| {
+            error!("Error fetching connections: {:?}", e);
+            e
+        })?;
+
+    let mut vault_connections = Vec::new();
+
+    for connection in connections {
+        let connection_definition = match state
+            .app_stores
+            .connection_config
+            .get_one_by_id(&connection.connection_definition_id.to_string())
+            .await
+        {
+            Ok(Some(definition)) => definition,
+            Ok(None) => {
+                // Skip connections with missing definitions
+                error!(
+                    "Connection definition with id {} not found",
+                    connection.connection_definition_id
+                );
+                continue;
+            }
+            Err(e) => {
+                error!("Error fetching connection definition: {:?}", e);
+                continue;
+            }
+        };
+
+        let description = connection_definition.frontend.spec.description;
+
+        let vault_connection = VaultConnection {
+            id: connection.id,
+            platform_version: connection.platform_version,
+            name: connection.name,
+            r#type: connection.r#type,
+            key: connection.key,
+            environment: connection.environment,
+            platform: connection.platform,
+            identity: connection.identity,
+            identity_type: connection.identity_type,
+            description,
+            record_metadata: connection.record_metadata,
+        };
+
+        vault_connections.push(vault_connection);
+    }
+
+    let total = state
+        .app_stores
+        .connection
+        .count(mongo_query.filter, None)
+        .await
+        .map_err(|e| {
+            error!("Error counting connections: {:?}", e);
+            e
+        })?;
+
+    let response = ReadResponse {
+        rows: vault_connections,
+        skip: mongo_query.skip,
+        limit: mongo_query.limit,
+        total,
+    };
+
+    Ok(Json(ServerResponse::new("Vault Connections", response)))
 }
