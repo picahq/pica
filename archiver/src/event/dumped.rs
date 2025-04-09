@@ -24,6 +24,18 @@ impl Dumped {
             end_time: end_time.timestamp_millis(),
         }
     }
+
+    pub fn start_time(&self) -> i64 {
+        self.start_time
+    }
+
+    pub fn end_time(&self) -> i64 {
+        self.end_time
+    }
+
+    pub fn reference(&self) -> Id {
+        self.reference
+    }
 }
 
 impl EventMetadata for Dumped {

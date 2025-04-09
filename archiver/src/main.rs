@@ -12,6 +12,7 @@ use dotenvy::dotenv;
 use envconfig::Envconfig;
 use event::chosen::DateChosen;
 use event::completed::Completed;
+use event::deleted::Deleted;
 use event::dumped::Dumped;
 use event::failed::Failed;
 use event::started::Started;
@@ -104,17 +105,57 @@ async fn dump(
     destructive: bool,
 ) -> Result<Unit> {
     tracing::info!(
-        "Starting archiver in dump mode for the {} collection",
+        "Starting archiver in {} mode for the {} collection",
+        if destructive { "dump-delete" } else { "dump" },
         started.collection()
     );
+
+    // If switching to destructive mode, delete previously dumped events
+    if destructive {
+        tracing::info!("Checking for previously dumped events to delete in destructive mode");
+
+        let dumped_events = archives
+            .collection
+            .find(doc! { "type": "Dumped" })
+            .await?
+            .try_collect::<Vec<Event>>()
+            .await?;
+
+        for event in dumped_events {
+            if let Event::Dumped(dumped) = event {
+                let filter = doc! {
+                    "createdAt": {
+                        "$gte": dumped.start_time(),
+                        "$lt": dumped.end_time()
+                    }
+                };
+                let delete_result = target_store.collection.delete_many(filter).await?;
+                tracing::info!(
+                    "Deleted {} events from {} to {} in destructive mode",
+                    delete_result.deleted_count,
+                    dumped.start_time(),
+                    dumped.end_time()
+                );
+
+                archives
+                    .create_one(&Event::Deleted(Deleted::new(
+                        dumped.reference(),
+                        dumped.start_time(),
+                        dumped.end_time(),
+                        delete_result.deleted_count as i64,
+                    )))
+                    .await?;
+            }
+        }
+    }
 
     let document = target_store
         .collection
         .find_one(doc! {})
         .with_options(
             FindOneOptions::builder()
-                .sort(doc! { "createdAt": 1 }) // Sort by `createdAt` in ascending order
-                .projection(doc! { "createdAt": 1 }) // Only retrieve the `createdAt` field
+                .sort(doc! { "createdAt": 1 })
+                .projection(doc! { "createdAt": 1 })
                 .build(),
         )
         .await
@@ -124,22 +165,18 @@ async fn dump(
         Some(document) => document
             .get_i64("createdAt")
             .map_err(|e| anyhow!("Failed to get createdAt from document: {e}"))?,
-
         None => {
             tracing::info!(
                 "No events found in collection {}",
                 target_store.collection.name()
             );
-
             return Ok(());
         }
     };
 
     let last_chosen_date_event = archives
         .collection
-        .find_one(doc! {
-            "type": "DateChosen"
-        })
+        .find_one(doc! { "type": "DateChosen" })
         .with_options(
             FindOneOptions::builder()
                 .sort(doc! { "endsAt": -1 })
@@ -180,12 +217,10 @@ async fn dump(
         _ => return Err(anyhow!("Invalid timestamp")),
     };
 
-    // End date should be a chunk of size config.chunk_to_process_in_days and not bigger than 30 days ago
     let max_end = Utc::now() - CDuration::days(config.min_date_days);
     let end = (start + CDuration::days(config.chunk_to_process_in_days)).min(max_end);
 
     if start.timestamp_millis() >= end.timestamp_millis() {
-        // If the very first event is after the end time, exit
         tracing::warn!("No events to process, exiting");
         return Ok(());
     }
@@ -200,7 +235,7 @@ async fn dump(
 
     tracing::info!("Start date: {}, End date: {}", start, end);
 
-    let chunks = start.divide_by_stream(CDuration::minutes(config.chunk_size_minutes), end); // Chunk size is 20 minutes by default
+    let chunks = start.divide_by_stream(CDuration::minutes(config.chunk_size_minutes), end);
 
     let stream = chunks
         .enumerate()
@@ -234,7 +269,6 @@ async fn dump(
                 }
                 Err(e) => {
                     tracing::error!("Failed to save archive: {e}");
-
                     return Err(e);
                 }
             };
@@ -247,7 +281,6 @@ async fn dump(
                         "$lt": end_time.timestamp_millis()
                     }
                 };
-
                 target_store.collection.delete_many(filter).await?;
                 tracing::warn!("Old events deleted successfully");
             }
@@ -269,8 +302,6 @@ async fn dump(
         for error in &errors {
             tracing::error!("Error: {:?}", error);
         }
-        // If we return an error it'll prevent from moving forward in the loop
-        // return Err(anyhow!("Encountered {} errors during processing", errors.len()));
     } else {
         tracing::info!("All chunks processed successfully.");
     }
