@@ -4,8 +4,8 @@ use crate::{
     router::ServerResponse,
     server::{AppState, AppStores},
 };
-use axum::extract::Query;
 use axum::http::HeaderMap;
+use axum::{extract::Query, Extension};
 use axum::{
     extract::{Path, State},
     routing::{patch, post},
@@ -21,6 +21,7 @@ use osentities::{
         ConnectionStatus, Filter, FormDataItem, Frontend, Paths, PublicConnectionDetails, Spec,
     },
     connection_model_definition::{ConnectionModelDefinition, CrudAction},
+    event_access::EventAccess,
     id::{prefix::IdPrefix, Id},
     record_metadata::RecordMetadata,
     settings::Settings,
@@ -411,19 +412,59 @@ pub struct AvailableConnectorsResponse {
 }
 
 pub async fn get_available_connectors(
+    Extension(user_event_access): Extension<Arc<EventAccess>>,
     headers: HeaderMap,
     query: Option<Query<BTreeMap<String, String>>>,
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<ServerResponse<ReadResponse<AvailableConnectorsResponse>>>, PicaError> {
-    let query = shape_mongo_filter(query, None, Some(headers));
+    const AUTHKIT_ENABLED_QUERY_PARAM: &str = "authkit";
 
+    let mut query_map = query.clone().map(|q| q.0).unwrap_or_default();
+    let authkit_enabled = query_map
+        .remove(AUTHKIT_ENABLED_QUERY_PARAM)
+        .map(|val| val == "true")
+        .unwrap_or(false);
+
+    let cleaned_query = if !query_map.is_empty() {
+        Some(Query(query_map))
+    } else {
+        None
+    };
+
+    let query = shape_mongo_filter(cleaned_query, None, Some(headers));
     let store = state.app_stores.connection_config.clone();
+    let mut filter = query.filter.clone();
 
-    let filter = query.filter.clone();
-    let count = store.count(filter, None);
+    if authkit_enabled {
+        let settings_store = state.app_stores.settings.clone();
+        let settings = settings_store
+            .get_one(doc! {
+                "ownership.buildableId": user_event_access.ownership.id.to_string(),
+            })
+            .await
+            .unwrap();
 
+        if let Some(settings) = settings {
+            // Get platforms that are active and match the user's environment
+            let filtered_platforms: Vec<String> = settings
+                .connected_platforms
+                .iter()
+                .filter(|platform| {
+                    platform.active.unwrap_or(false)
+                        && platform.environment == user_event_access.environment
+                })
+                .map(|platform| platform.r#type.clone())
+                .collect();
+
+            if !filtered_platforms.is_empty() {
+                filter.insert("platform", doc! { "$in": filtered_platforms });
+            }
+        }
+    }
+
+    let count = store.count(filter.clone(), None);
     let find = store.get_many(
-        Some(query.filter),
+        Some(filter),
         None,
         None,
         Some(query.limit),
