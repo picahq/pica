@@ -1,6 +1,5 @@
 pub mod chosen;
 pub mod completed;
-pub mod deleted;
 pub mod dumped;
 pub mod failed;
 pub mod finished;
@@ -9,7 +8,6 @@ pub mod uploaded;
 
 use chosen::DateChosen;
 use completed::Completed;
-use deleted::Deleted;
 use dumped::Dumped;
 use failed::Failed;
 use finished::Finished;
@@ -39,8 +37,6 @@ pub enum Event {
     Completed(Completed),
     /// Archive process finished event. Emitted when the archive process is finished.
     Finished(Finished),
-    /// Archive process deleted event. Emitted when the archive process is deleted.
-    Deleted(Deleted),
 }
 
 impl Event {
@@ -59,7 +55,6 @@ impl EventMetadata for Event {
             Event::Uploaded(event) => event.reference(),
             Event::Completed(event) => event.reference(),
             Event::Finished(event) => event.reference(),
-            Event::Deleted(event) => event.reference(),
         }
     }
 }
