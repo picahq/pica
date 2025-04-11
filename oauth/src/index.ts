@@ -19,9 +19,7 @@ app.get('/', (_, res: Response) => {
 });
 
 app.listen(port, hostname, () => {
-    console.log(
-        `Pica Oauth Server is running on http://${hostname}:${port}`,
-    );
+    console.log(`Pica Oauth Server is running on http://${hostname}:${port}`);
 });
 
 app.route('/oauth/:platform/init')

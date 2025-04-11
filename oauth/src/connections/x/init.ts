@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { DataObject, OAuthResponse } from '../../lib/types';
 import qs from 'qs';
+import 'dotenv/config';
 
 export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
     try {
@@ -16,8 +17,7 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             code,
             redirect_uri,
             grant_type: 'authorization_code',
-            code_verifier:
-                '2a67864e439b338f40487eef9ffcf11d5f785981dc58a568cd1cf005',
+            code_verifier: process.env.X_CODE_VERIFIER,
         });
 
         const response = await axios({
