@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DataObject, OAuthResponse } from '../../lib/types';
+import 'dotenv/config';
 
 export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
     try {
@@ -20,8 +21,7 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             client_secret,
             redirect_uri,
             scope: 'read write',
-            code_verifier:
-                'eNmtK0mRHQ.-93QxgrniB7rb.-TZ_Tjbonygt2aqk1.ltiwXQHmNFeFJPh19MZwXzFDfmFMpUZbAFVtSAtChNU08R4txdDBi7EY6ZHiBp6I8F1drUHZR',
+            code_verifier: process.env.ZENDESK_CODE_VERIFIER,
         };
 
         const response = await axios.post(
