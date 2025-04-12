@@ -314,7 +314,6 @@ const executeOAuthRequest = async (
     }
 };
 
-
 type OAuthRequest = {
     connectionOAuthDefinition: ConnectionOAuthDefinition;
     payload: {
@@ -341,12 +340,8 @@ export const init = async ({
         metadata: body.payload.metadata,
     };
 
-    const oauthResponse = await executeOAuthRequest(
+    return await executeOAuthRequest(
         body.connectionOAuthDefinition,
         oauthPayload,
     );
-
-    console.log('OAuth Response:', oauthResponse);
-
-    return oauthResponse;
 };
