@@ -7,14 +7,12 @@ use axum::{
 };
 use chrono::{Duration, Utc};
 use fake::Dummy;
-use http::{HeaderMap, HeaderName, HeaderValue};
 use mongodb::bson::doc;
 use osentities::{
     algebra::{MongoStore, TemplateExt},
-    api_model_config::ContentType,
     connection_definition::ConnectionDefinition,
     connection_oauth_definition::{
-        Computation, ConnectionOAuthDefinition, OAuthResponse, PlatformSecret, Settings,
+        ConnectionOAuthDefinition, OAuthResponse, PlatformSecret, Settings,
     },
     event_access::EventAccess,
     id::{prefix::IdPrefix, Id},
@@ -23,14 +21,9 @@ use osentities::{
     ApplicationError, Connection, ConnectionIdentityType, ErrorMeta, InternalError, OAuth,
     PicaError, SanitizedConnection, Throughput, DEFAULT_NAMESPACE,
 };
-use reqwest::Request;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use serde_json::{to_string_pretty, Value};
-use std::{
-    collections::{BTreeMap, HashMap},
-    str::FromStr,
-    sync::Arc,
-};
+use serde_json::Value;
+use std::sync::Arc;
 use tracing::{debug, error};
 use uuid::Uuid;
 
@@ -87,7 +80,7 @@ async fn oauth_handler(
 
     let environment = user_event_access.environment;
 
-    let secret = get_secret::<PlatformSecret>(
+    let secret: PlatformSecret = get_secret::<PlatformSecret>(
         &state,
         setting
             .platform_secret(&payload.connection_definition_id, environment)
@@ -113,9 +106,9 @@ async fn oauth_handler(
     })?;
 
     let mut oauth_payload = OAuthPayload {
-        metadata: payload.payload.clone().unwrap_or(Value::Null),
-        client_id: payload.client_id,
-        client_secret: secret.client_secret,
+        metadata: payload.clone().payload.clone().unwrap_or(Value::Null),
+        client_id: payload.clone().client_id,
+        client_secret: secret.clone().client_secret,
     };
 
     if let Some(metadata) = oauth_payload.metadata.as_object_mut() {
@@ -137,39 +130,36 @@ async fn oauth_handler(
         conn_oauth_definition
     };
 
-    let request =
-        request(&conn_oauth_definition, &oauth_payload, &state.template).map_err(|e| {
-            error!("Failed to create oauth request: {}", e);
-            e
-        })?;
+    let req_payload = serde_json::json!({
+        "connectionOAuthDefinition": conn_oauth_definition,
+        "payload": oauth_payload.clone(),
+        "secret": secret.clone(),
+    });
 
-    debug!("Request: {:?}", request);
     let response = state
         .http_client
-        .execute(request)
+        .post("http://localhost:3000/oauth/generic/init")
+        .header("Content-Type", "application/json")
+        .json(&req_payload)
+        .send()
         .await
-        .map(|response| response.json::<Value>())
         .map_err(|e| {
             error!("Failed to execute oauth request: {}", e);
             InternalError::script_error(&e.to_string(), None)
         })?
+        .json::<Value>()
         .await
         .map_err(|e| {
             error!("Failed to decode third party oauth response: {:?}", e);
             InternalError::deserialize_error(&e.to_string(), None)
         })?;
 
-    debug!("Response: {:?}", response);
+    let decoded: OAuthResponse = serde_json::from_value(response.clone()).map_err(|e| {
+        error!("Failed to decode oauth response: {:?}", e);
+        InternalError::script_error(&e.to_string(), None)
+    })?;
 
-    let decoded: OAuthResponse = conn_oauth_definition
-        .compute
-        .init
-        .response
-        .compute(&response)
-        .map_err(|e| {
-            error!("Failed to decode oauth response: {:?}", e);
-            InternalError::script_error(e.message().as_ref(), None)
-        })?;
+    debug!("Response: {:?}", response);
 
     let oauth_secret = OAuthSecret::from_init(
         decoded,
@@ -285,179 +275,6 @@ async fn oauth_handler(
         })?;
 
     Ok(Json(connection.into()))
-}
-
-fn request(
-    oauth_definition: &ConnectionOAuthDefinition,
-    payload: &OAuthPayload,
-    template: &impl TemplateExt,
-) -> Result<Request, PicaError> {
-    let payload = serde_json::to_value(payload).map_err(|e| {
-        error!("Failed to serialize oauth payload: {}", e);
-        InternalError::serialize_error(&e.to_string(), None)
-    })?;
-    let computation = oauth_definition
-        .compute
-        .init
-        .computation
-        .clone()
-        .map(|computation| computation.compute::<Computation>(&payload))
-        .transpose()
-        .map_err(|e| {
-            error!("Failed to compute oauth payload: {}", e);
-            InternalError::script_error(e.message().as_ref(), None)
-        })?;
-
-    let headers = header(oauth_definition, computation.as_ref(), template)?;
-    let query = query(oauth_definition, computation.as_ref(), template)?;
-    let body = body(&payload, computation.as_ref(), template)?;
-
-    let request = reqwest::Client::new()
-        .post(oauth_definition.configuration.init.uri())
-        .headers(headers);
-
-    let request = match oauth_definition.configuration.init.content {
-        Some(ContentType::Json) => request.json(&body).query(&query),
-        Some(ContentType::Form) => request.form(&body).query(&query),
-        _ => request.query(&query),
-    };
-
-    request.build().map_err(|e| {
-        error!("Failed to build static request: {}", e);
-        InternalError::unknown(&e.to_string(), None)
-    })
-}
-
-fn query(
-    oauth_definition: &ConnectionOAuthDefinition,
-    computation: Option<&Computation>,
-    template: &impl TemplateExt,
-) -> Result<Option<Value>, PicaError> {
-    let query_params = oauth_definition
-        .configuration
-        .init
-        .query_params
-        .as_ref()
-        .map(|query_params| {
-            let mut map = HashMap::new();
-            for (key, value) in query_params {
-                let key = key.to_string();
-                let value = value.as_str();
-
-                map.insert(key, value.to_string());
-            }
-            map
-        });
-
-    match query_params {
-        Some(query_params) => {
-            let payload = computation.and_then(|computation| computation.clone().query_params);
-
-            let query_params_str = to_string_pretty(&query_params).map_err(|e| {
-                error!("Failed to serialize query params: {}", e);
-                InternalError::serialize_error(&e.to_string(), None)
-            })?;
-
-            let query_params = template.render(&query_params_str, payload.as_ref())?;
-
-            let query_params: BTreeMap<String, String> = serde_json::from_str(&query_params)
-                .map_err(|e| {
-                    error!("Failed to deserialize query params: {}", e);
-                    InternalError::deserialize_error(&e.to_string(), None)
-                })?;
-
-            Ok(Some(serde_json::to_value(query_params).map_err(|e| {
-                error!("Failed to serialize query params: {}", e);
-                InternalError::serialize_error(&e.to_string(), None)
-            })?))
-        }
-        None => Ok(None),
-    }
-}
-
-fn body(
-    payload: &Value,
-    computation: Option<&Computation>,
-    template: &impl TemplateExt,
-) -> Result<Option<Value>, PicaError> {
-    let body = computation.and_then(|computation| computation.clone().body);
-
-    match body {
-        Some(body) => {
-            let body_str = to_string_pretty(&body).map_err(|e| {
-                error!("Failed to serialize body: {}", e);
-                InternalError::serialize_error(&e.to_string(), None)
-            })?;
-
-            let body = template.render(&body_str, Some(payload))?;
-
-            Ok(Some(serde_json::from_str(&body).map_err(|e| {
-                error!("Failed to deserialize body: {}", e);
-                InternalError::deserialize_error(&e.to_string(), None)
-            })?))
-        }
-        None => Ok(None),
-    }
-}
-
-fn header(
-    conn_oauth_definition: &ConnectionOAuthDefinition,
-    computation: Option<&Computation>,
-    template: &impl TemplateExt,
-) -> Result<HeaderMap, PicaError> {
-    let headers = conn_oauth_definition
-        .configuration
-        .init
-        .headers
-        .as_ref()
-        .and_then(|headers| {
-            let mut map = HashMap::new();
-            for (key, value) in headers {
-                let key = key.to_string();
-                let value = value.to_str().ok()?;
-
-                map.insert(key, value.to_string());
-            }
-            Some(map)
-        });
-
-    match headers {
-        Some(headers) => {
-            let payload = computation.and_then(|computation| computation.clone().headers);
-
-            let headers_str = to_string_pretty(&headers).map_err(|e| {
-                error!("Failed to serialize headers: {}", e);
-                InternalError::serialize_error(&e.to_string(), None)
-            })?;
-
-            let headers = template.render(&headers_str, payload.as_ref())?;
-
-            let headers: BTreeMap<String, String> =
-                serde_json::from_str(&headers).map_err(|e| {
-                    error!("Failed to deserialize headers: {}", e);
-                    InternalError::deserialize_error(&e.to_string(), None)
-                })?;
-
-            headers
-                .iter()
-                .try_fold(HeaderMap::new(), |mut header_map, (key, value)| {
-                    let key = HeaderName::from_str(key).map_err(|e| {
-                        error!("Failed to parse header name: {}", e);
-                        InternalError::invalid_argument(&e.to_string(), None)
-                    })?;
-
-                    let value = HeaderValue::from_str(value).map_err(|e| {
-                        error!("Failed to parse header value: {}", e);
-                        InternalError::invalid_argument(&e.to_string(), None)
-                    })?;
-
-                    header_map.insert(key, value);
-
-                    Ok(header_map)
-                })
-        }
-        None => Ok(HeaderMap::new()),
-    }
 }
 
 async fn get_conn_definition(
