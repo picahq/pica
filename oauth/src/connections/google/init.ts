@@ -4,7 +4,7 @@ import { DataObject, OAuthResponse } from '../../lib/types';
 
 export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
     try {
-        /*const {
+        const {
             clientId: client_id,
             clientSecret: client_secret,
             metadata: { code, redirectUri: redirect_uri },
@@ -33,13 +33,13 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             refresh_token: refreshToken,
             token_type: tokenType,
             expires_in: expiresIn,
-        } = response.data;*/
+        } = response.data;
 
         return {
-            accessToken: '',
-            refreshToken: '',
-            expiresIn: 0,
-            tokenType: 'Bearer',
+            accessToken,
+            refreshToken,
+            expiresIn,
+            tokenType,
             meta: {},
         };
     } catch (error) {
