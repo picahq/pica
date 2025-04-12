@@ -133,12 +133,15 @@ async fn oauth_handler(
     let req_payload = serde_json::json!({
         "connectionOAuthDefinition": conn_oauth_definition,
         "payload": oauth_payload.clone(),
-        "secret": secret.clone(),
+        "secret": {
+            "clientId": secret.clone().client_id,
+            "clientSecret": secret.clone().client_secret
+        }
     });
 
     let response = state
         .http_client
-        .post("http://localhost:3000/oauth/generic/init")
+        .post("http://localhost:3000/oauth/dynamic-dispatch/init")
         .header("Content-Type", "application/json")
         .json(&req_payload)
         .send()

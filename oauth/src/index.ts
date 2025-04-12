@@ -41,6 +41,8 @@ app.route('/oauth/:platform/init')
                 await toCamelCase(platform),
             );
 
+            console.log(platformOAuthPath);
+
             if (!(await checkExistence(platformOAuthPath))) {
                 return res.status(404).send({
                     message: `Error: OAuth does not exist for ${platform}!`,

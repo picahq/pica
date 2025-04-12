@@ -81,8 +81,8 @@ enum ContentType {
 }
 
 interface OAuthPayload {
-    client_id: string;
-    client_secret: string;
+    clientId: string;
+    clientSecret: string;
     metadata?: Record<string, unknown>;
 }
 
@@ -322,8 +322,8 @@ type OAuthRequest = {
         metadata: Record<string, unknown>;
     };
     secret: {
-        CLIENT_ID: string;
-        CLIENT_SECRET: string;
+        clientId: string;
+        clientSecret: string;
     };
 };
 
@@ -335,8 +335,8 @@ export const init = async ({
     body,
 }: NestedOAuthRequest): Promise<OAuthResponse> => {
     const oauthPayload = {
-        client_id: body.secret.CLIENT_ID,
-        client_secret: body.secret.CLIENT_SECRET,
+        clientId: body.secret.clientId,
+        clientSecret: body.secret.clientSecret,
         metadata: body.payload.metadata,
     };
 
