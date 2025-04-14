@@ -65,7 +65,7 @@ pub struct ConnectionsConfig {
     /// Same as self url, but this may vary in a k8s environment hence it's a separate config
     pub connections_url: String,
     #[envconfig(from = "OAUTH_URL", default = "http://platform-oauth")]
-    /// Same as self url, but this may vary in a k8s environment hence it's a separate config
+    /// Same as oauth url, but this may vary in a k8s environment hence it's a separate config
     pub oauth_url: String,
     /// Burst size limit
     #[envconfig(from = "API_VERSION", default = "v1")]
