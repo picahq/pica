@@ -139,9 +139,11 @@ async fn oauth_handler(
         }
     });
 
+    let oauth_url = state.config.oauth_url.clone();
+    let oauth_url = format!("{}/oauth/dynamic-dispatch/init", oauth_url);
     let response = state
         .http_client
-        .post("http://localhost:3000/oauth/dynamic-dispatch/init")
+        .post(oauth_url)
         .header("Content-Type", "application/json")
         .json(&req_payload)
         .send()
