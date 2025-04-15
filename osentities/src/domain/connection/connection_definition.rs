@@ -178,6 +178,7 @@ pub struct FormDataItem {
     pub r#type: String,
     pub label: String,
     pub placeholder: String,
+    pub options: Option<Vec<String>>,
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
