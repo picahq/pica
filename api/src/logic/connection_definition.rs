@@ -441,6 +441,8 @@ pub async fn get_available_connectors(
     let store = state.app_stores.connection_config.clone();
     let mut filter = query.filter.clone();
 
+    filter.insert("active", true);
+
     if authkit_enabled {
         let settings_store = state.app_stores.settings.clone();
         let settings = settings_store
