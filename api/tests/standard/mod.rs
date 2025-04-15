@@ -257,6 +257,7 @@ fn test_json_connection_definition() {
                     r#type: "type".to_string(),
                     label: "label".to_string(),
                     placeholder: "placeholder".to_string(),
+                    options: None,
                 }],
             },
         },

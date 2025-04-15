@@ -85,6 +85,7 @@ pub struct AuthenticationItem {
     pub label: String,
     pub r#type: String,
     pub placeholder: String,
+    pub options: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -324,6 +325,11 @@ impl RequestExt for CreateRequest {
                 r#type: item.r#type.clone(),
                 label: item.label.clone(),
                 placeholder: item.placeholder.clone(),
+                options: if item.options.is_some() {
+                    item.options.clone()
+                } else {
+                    None
+                },
             })
             .collect();
 
