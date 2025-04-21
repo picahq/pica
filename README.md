@@ -63,7 +63,9 @@ import { Pica } from "@picahq/ai";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const pica = new Pica(process.env.PICA_SECRET_KEY!);
+const pica = new Pica(process.env.PICA_SECRET_KEY!, {
+  connectors: ["*"]
+});
 
 async function runAgentTask(message: string): Promise<string> {
   const system = await pica.generateSystemPrompt();
