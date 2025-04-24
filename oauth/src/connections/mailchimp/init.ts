@@ -23,7 +23,7 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
         );
 
         const {
-            data: { access_token: accessToken, token_type: tokenType },
+            data: { access_token: accessToken },
         } = response;
 
         const metadataResponse = await axios.get(
@@ -43,7 +43,7 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             accessToken,
             refreshToken: accessToken,
             expiresIn: 2147483647,
-            tokenType,
+            tokenType: 'Bearer',
             meta: {
                 serverPrefix: dc,
             },
