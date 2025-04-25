@@ -43,6 +43,6 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
             meta,
         };
     } catch (error) {
-        throw new Error(`Error fetching access token for Box: ${error}`);
+        throw new Error(`Error fetching access token for Amazon Ads: ${error}`);
     }
 };
