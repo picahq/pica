@@ -19,7 +19,7 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
         };
 
         const response = await axios({
-            url: `https://api.hubapi.com/oauth/v1/token`,
+            url: ' https://api.amazon.com/auth/o2/token',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -31,6 +31,7 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
         const {
             access_token: accessToken,
             refresh_token: refreshToken,
+            token_type: tokenType,
             expires_in: expiresIn,
         } = response.data;
 
@@ -38,10 +39,10 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             accessToken,
             refreshToken,
             expiresIn,
-            tokenType: 'Bearer',
+            tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
             meta: {},
         };
     } catch (error) {
-        throw new Error(`Error fetching access token for Hubspot: ${error}`);
+        throw new Error(`Error fetching access token for Amazon Ads: ${error}`);
     }
 };

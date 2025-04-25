@@ -2,24 +2,24 @@ import axios from 'axios';
 import qs from 'qs';
 import { DataObject, OAuthResponse } from '../../lib/types';
 
-export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
+export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
     try {
         const {
-            clientId: client_id,
-            clientSecret: client_secret,
-            metadata: { code, redirectUri: redirect_uri },
+            OAUTH_CLIENT_ID: client_id,
+            OAUTH_CLIENT_SECRET: client_secret,
+            OAUTH_REFRESH_TOKEN: refresh_token,
+            OAUTH_METADATA: { meta },
         } = body;
 
         const requestBody = {
-            grant_type: 'authorization_code',
-            code,
+            grant_type: 'refresh_token',
+            refresh_token,
             client_id,
             client_secret,
-            redirect_uri,
         };
 
         const response = await axios({
-            url: `https://api.hubapi.com/oauth/v1/token`,
+            url: 'https://api.amazon.com/auth/o2/token',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -31,6 +31,7 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
         const {
             access_token: accessToken,
             refresh_token: refreshToken,
+            token_type: tokenType,
             expires_in: expiresIn,
         } = response.data;
 
@@ -38,10 +39,10 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             accessToken,
             refreshToken,
             expiresIn,
-            tokenType: 'Bearer',
-            meta: {},
+            tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
+            meta,
         };
     } catch (error) {
-        throw new Error(`Error fetching access token for Hubspot: ${error}`);
+        throw new Error(`Error fetching access token for Amazon Ads: ${error}`);
     }
 };
