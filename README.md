@@ -4,7 +4,7 @@
   </a>
 </p>
 
-<p align="center"><b>The Complete Agentic Infrastructure</b></p>
+<p align="center"><b>Pica, The AI Integrations Solution</b></p>
 
 <p align="center">
   <b>
@@ -12,9 +12,9 @@
     ·
     <a href="https://docs.picaos.com">Documentation</a>
     ·
-    <a href="https://www.picaos.com/community">Community Hub</a>
+    <a href="https://app.picaos.com">Dashboard</a>
     ·
-    <a href="https://www.picaos.com/community/changelog">Changelog</a>
+    <a href="https://docs.picaos.com/changelog">Changelog</a>
     ·
     <a href="https://x.com/picahq">X</a>
     ·
@@ -24,18 +24,17 @@
 
 ---
 
-Effortlessly build, deploy, and scale AI agents—Pica provides everything you need to power autonomous [AI workflows](https://www.picaos.com/community/connectors).
+Pica gives every builder instant, reliable access to the tools they need—no keys, no configs, no headaches.
 
 ## Why Pica?
 
 Pica simplifies AI agent development with our four core products:
 
-✅ OneTool – A single SDK to connect AI agents to 100+ APIs and tools. <br/>
+✅ OneTool – Connect agents to [100+ APIs and tools](https://app.picaos.com/tools) with a single SDK. <br/>
 ✅ AuthKit – Secure authentication for seamless tool integration. <br/>
-✅ Agent (Coming Soon) – Build adaptive AI agents tailored to your needs. <br/>
-✅ AgentFlow (Coming Soon) – Enable agents to collaborate and automate workflows. <br/>
+✅ BuildKit - Empower vibe coding with integrations that work zero-shot.
 
-Pica also provides full logging and action traceability, giving developers complete visibility into their agents' decisions and activities.
+Pica also provides full logging and action traceability, giving developers complete visibility into their agents’ decisions and activities. Our tools simplify building and running AI agents so developers can focus on results.
 
 ## Getting started
 
@@ -71,7 +70,7 @@ async function runAgentTask(message: string): Promise<string> {
   const system = await pica.generateSystemPrompt();
 
   const { text } = await generateText({
-    model: openai("gpt-4o"),
+    model: openai("gpt-4.1"),
     system,
     prompt: message,
     tools: { ...pica.oneTool },
