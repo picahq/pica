@@ -547,12 +547,26 @@ impl UnifiedDestination {
                         doc! { "key": destination.connection_key.as_ref() },
                         None,
                     )
+                    .timed(|_, duration| {
+                        tracing::info!(
+                            "Connection for destination {} retrieved from cache in {} ms",
+                            destination.connection_key,
+                            duration.as_millis()
+                        );
+                    })
                     .await?,
             )
         };
 
         let config = match self
             .get_connection_model_definition(destination, cache)
+            .timed(|_, duration| {
+                tracing::info!(
+                    "Connection model definition for destination {} retrieved from cache in {} ms",
+                    destination.connection_key,
+                    duration.as_millis()
+                );
+            })
             .await
         {
             Ok(Some(c)) => Ok(Arc::new(c)),
@@ -593,6 +607,13 @@ impl UnifiedDestination {
                         None,
                     )),
                 }
+            })
+            .timed(|_, duration| {
+                tracing::info!(
+                    "Secret for destination {} retrieved from cache in {} ms",
+                    destination.connection_key,
+                    duration.as_millis()
+                );
             })
             .await?;
 
