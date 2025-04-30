@@ -228,23 +228,6 @@ pub async fn create_connection(
 
     let throughput = get_client_throughput(&access.ownership.id, &state).await?;
 
-    // let event_access = generate_event_access(
-    //     state.config.clone(),
-    //     CreateEventAccessPayloadWithOwnership {
-    //         name: format!("{} {}", access.environment, connection_config.name),
-    //         platform: connection_config.platform.clone(),
-    //         namespace: None,
-    //         connection_type: connection_config.r#type.clone(),
-    //         environment: access.environment,
-    //         paths: connection_config.paths.clone(),
-    //         ownership: access.ownership.clone(),
-    //         throughput: Some(throughput),
-    //     },
-    // )
-    // .inspect_err(|e| {
-    //     error!("Error creating event access for connection: {:?}", e);
-    // })?;
-
     let auth_form_data = serde_json::to_value(payload.auth_form_data.clone()).map_err(|e| {
         error!("Error serializing auth form data for connection: {:?}", e);
 
