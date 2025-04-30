@@ -202,7 +202,6 @@ pub async fn passthrough_request(
 
         if let (Some(cmd), Some(encrypted_access_key)) = (cmd, connection_secret_header) {
             if let Ok(encrypted_access_key) = EncryptedAccessKey::parse(&encrypted_access_key) {
-                tracing::info!("encrypted_access_key: {:?}", encrypted_access_key);
                 let path = uri.path().trim_end_matches('/');
 
                 let metadata = UnifiedMetadataBuilder::default()

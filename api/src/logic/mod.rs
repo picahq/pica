@@ -8,7 +8,7 @@ use axum::{
     Extension, Json,
 };
 use bson::doc;
-use cache::local::{ConnectionHeaderCache, LocalCacheExt};
+use cache::local::{ConnectionHeaderCache, ConnectionHeaderKey, LocalCacheExt};
 use http::{HeaderMap, HeaderValue};
 use mongodb::options::FindOneOptions;
 use osentities::{
@@ -336,11 +336,10 @@ async fn get_connection(
 ) -> Result<Arc<Connection>, PicaError> {
     let connection = cache
         .get_or_insert_with_filter(
-            &(access.ownership.id.clone().to_string()
-                + connection_key.clone().to_str().map_err(|e| {
-                    tracing::error!("Error converting connection key to string: {e}");
-                    ApplicationError::bad_request("Invalid connection key header", None)
-                })?),
+            &ConnectionHeaderKey {
+                ownership: access.clone().ownership.id,
+                header: connection_key.clone(),
+            },
             stores.connection.clone(),
             doc! {
                 "key": connection_key.to_str().map_err(|_| {
