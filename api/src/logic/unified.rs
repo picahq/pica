@@ -229,7 +229,7 @@ pub async fn process_request(
         access.as_ref(),
         connection_key_header,
         &state.app_stores,
-        &state.connections_cache,
+        &state.app_caches.connections_cache,
     )
     .await
     .map_err(|e| {
@@ -274,6 +274,7 @@ pub async fn process_request(
                         None,
                     )
                 })?,
+            state.app_caches.connection_model_definition.clone(),
         )
         .await
         .inspect_err(|e| {

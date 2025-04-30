@@ -183,8 +183,8 @@ fn test_json_connection() {
         environment: Environment::Live,
         platform: "platform".to_string().into(),
         secrets_service_id: "secrets-service-id".to_string(),
-        event_access_id: Id::test(IdPrefix::EventAccess),
-        access_key: "access-key".to_string(),
+        event_access_id: Some(Id::test(IdPrefix::EventAccess)),
+        access_key: Some("access-key".to_string()),
         identity: Some("identity".to_string()),
         identity_type: Some(ConnectionIdentityType::User),
         settings: Settings {

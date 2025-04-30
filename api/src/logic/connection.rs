@@ -1,9 +1,7 @@
 use super::{delete, read, PublicExt, ReadResponse, RequestExt};
 use crate::{
     helper::{shape_mongo_filter, DeploymentSpecParams, ServiceName, ServiceSpecParams},
-    logic::event_access::{
-        generate_event_access, get_client_throughput, CreateEventAccessPayloadWithOwnership,
-    },
+    logic::event_access::get_client_throughput,
     router::ServerResponse,
     server::{AppState, AppStores},
 };
@@ -230,22 +228,22 @@ pub async fn create_connection(
 
     let throughput = get_client_throughput(&access.ownership.id, &state).await?;
 
-    let event_access = generate_event_access(
-        state.config.clone(),
-        CreateEventAccessPayloadWithOwnership {
-            name: format!("{} {}", access.environment, connection_config.name),
-            platform: connection_config.platform.clone(),
-            namespace: None,
-            connection_type: connection_config.r#type.clone(),
-            environment: access.environment,
-            paths: connection_config.paths.clone(),
-            ownership: access.ownership.clone(),
-            throughput: Some(throughput),
-        },
-    )
-    .inspect_err(|e| {
-        error!("Error creating event access for connection: {:?}", e);
-    })?;
+    // let event_access = generate_event_access(
+    //     state.config.clone(),
+    //     CreateEventAccessPayloadWithOwnership {
+    //         name: format!("{} {}", access.environment, connection_config.name),
+    //         platform: connection_config.platform.clone(),
+    //         namespace: None,
+    //         connection_type: connection_config.r#type.clone(),
+    //         environment: access.environment,
+    //         paths: connection_config.paths.clone(),
+    //         ownership: access.ownership.clone(),
+    //         throughput: Some(throughput),
+    //     },
+    // )
+    // .inspect_err(|e| {
+    //     error!("Error creating event access for connection: {:?}", e);
+    // })?;
 
     let auth_form_data = serde_json::to_value(payload.auth_form_data.clone()).map_err(|e| {
         error!("Error serializing auth form data for connection: {:?}", e);
@@ -293,6 +291,9 @@ pub async fn create_connection(
             error!("Error creating secret for connection: {:?}", e);
         })?;
 
+    let environment = access.environment.clone();
+    let ownership = access.ownership.clone();
+
     let conn = Connection {
         id: connection_id,
         platform_version: connection_config.clone().platform_version,
@@ -306,16 +307,16 @@ pub async fn create_connection(
         error: None,
         identity_type: payload.identity_type,
         platform: connection_config.platform.into(),
-        environment: event_access.environment,
+        environment,
         secrets_service_id: secret_result.id(),
-        event_access_id: event_access.id,
-        access_key: event_access.access_key,
+        event_access_id: None,
+        access_key: None,
         settings: connection_config.settings,
         throughput: Throughput {
             key,
             limit: throughput,
         },
-        ownership: event_access.ownership,
+        ownership,
         oauth: None,
         record_metadata: RecordMetadata::default(),
     };

@@ -13,8 +13,8 @@ use crate::{
 use anyhow::{anyhow, Context, Result};
 use axum::Router;
 use cache::local::{
-    ConnectionDefinitionCache, ConnectionHeaderCache, ConnectionOAuthDefinitionCache,
-    EventAccessCache,
+    ConnectionDefinitionCache, ConnectionHeaderCache, ConnectionModelDefinitionCacheIdKey,
+    ConnectionModelDefinitionCacheStringKey, ConnectionOAuthDefinitionCache, EventAccessCache,
 };
 use mongodb::{options::UpdateOptions, Client, Database};
 use osentities::{
@@ -63,13 +63,20 @@ pub struct AppStores {
 }
 
 #[derive(Clone)]
-pub struct AppState {
-    pub app_stores: AppStores,
-    pub config: ConnectionsConfig,
+pub struct AppCaches {
     pub connection_definitions_cache: ConnectionDefinitionCache,
     pub connection_oauth_definitions_cache: ConnectionOAuthDefinitionCache,
     pub connections_cache: ConnectionHeaderCache,
     pub event_access_cache: EventAccessCache,
+    pub connection_model_definition: ConnectionModelDefinitionCacheIdKey,
+    pub connection_model_definition_string_key: ConnectionModelDefinitionCacheStringKey,
+}
+
+#[derive(Clone)]
+pub struct AppState {
+    pub app_stores: AppStores,
+    pub app_caches: AppCaches,
+    pub config: ConnectionsConfig,
     pub event_tx: Sender<Event>,
     pub extractor_caller: UnifiedDestination,
     pub http_client: reqwest::Client,
@@ -191,6 +198,15 @@ impl Server {
             config.cache_size,
             config.connection_oauth_definition_cache_ttl_secs,
         );
+        let connection_model_definition = ConnectionModelDefinitionCacheIdKey::new(
+            config.cache_size,
+            config.connection_model_definition_cache_ttl_secs,
+        );
+        let connection_model_definition_string_key = ConnectionModelDefinitionCacheStringKey::new(
+            config.cache_size,
+            config.connection_model_definition_cache_ttl_secs,
+        );
+
         let openapi_data = OpenAPIData::default();
         openapi_data.spawn_openapi_generation(
             app_stores.common_model.clone(),
@@ -305,14 +321,20 @@ impl Server {
             }
         });
 
+        let app_caches = AppCaches {
+            connection_definitions_cache,
+            connection_oauth_definitions_cache,
+            connections_cache,
+            event_access_cache,
+            connection_model_definition,
+            connection_model_definition_string_key,
+        };
+
         Ok(Self {
             state: Arc::new(AppState {
                 app_stores,
+                app_caches,
                 config,
-                connection_definitions_cache,
-                connection_oauth_definitions_cache,
-                connections_cache,
-                event_access_cache,
                 event_tx,
                 extractor_caller,
                 http_client,
