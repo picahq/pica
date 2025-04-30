@@ -7,10 +7,12 @@ use axum::{
     Extension, Router,
 };
 use bson::doc;
+use cache::local::LocalCacheExt;
 use chrono::Utc;
 use http::{header::CONTENT_LENGTH, HeaderMap, HeaderName, Method, Uri};
 use hyper::body::Bytes;
 use mongodb::options::FindOneOptions;
+use osentities::connection_model_definition::SparseCMD;
 use osentities::{
     constant::PICA_PASSTHROUGH_HEADER,
     destination::{Action, Destination},
@@ -20,7 +22,6 @@ use osentities::{
     AccessKey, ApplicationError, Event, Id, InternalError, Store, META, PASSWORD_LENGTH,
     QUERY_BY_ID_PASSTHROUGH,
 };
-use serde::Deserialize;
 use serde_json::json;
 use std::{collections::HashMap, sync::Arc};
 use tracing::{error, info};
@@ -69,7 +70,7 @@ pub async fn passthrough_request(
         user_event_access.as_ref(),
         connection_key_header,
         &state.app_stores,
-        &state.connections_cache,
+        &state.app_caches.connections_cache,
     )
     .await?;
 
@@ -104,6 +105,7 @@ pub async fn passthrough_request(
             headers.clone(),
             query_params,
             Some(body.to_vec()),
+            state.app_caches.connection_model_definition.clone(),
         )
         .await
         .map_err(|e| {
@@ -139,6 +141,10 @@ pub async fn passthrough_request(
     let database_c = state.app_stores.db.clone();
     let event_access_pass_c = state.config.event_access_password.clone();
     let event_tx_c = state.event_tx.clone();
+    let cache = state
+        .app_caches
+        .connection_model_definition_string_key
+        .clone();
 
     tokio::spawn(async move {
         let connection_secret_header: Option<String> =
@@ -158,6 +164,14 @@ pub async fn passthrough_request(
             })
             .build();
 
+        let key = format!(
+            "{}::{}::{}::{}",
+            connection_platform,
+            connection_platform_version,
+            uri.path().to_string(),
+            method.to_string()
+        );
+
         let query = if let Some(id) = id_str {
             doc! {
                 "_id": id.to_string(),
@@ -170,10 +184,16 @@ pub async fn passthrough_request(
             }
         };
 
-        let cmd = database_c
-            .collection::<SparseCMD>(&Store::ConnectionModelDefinitions.to_string())
-            .find_one(query)
-            .with_options(options.clone())
+        let cmd = cache
+            .get_or_insert_with_fn(&key, || async {
+                Ok(database_c
+                    .collection::<SparseCMD>(&Store::ConnectionModelDefinitions.to_string())
+                    .find_one(query)
+                    .with_options(options.clone())
+                    .await
+                    .ok()
+                    .flatten())
+            })
             .await
             .ok()
             .flatten();
@@ -263,19 +283,4 @@ pub async fn passthrough_request(
     })?;
 
     Ok((request_status_code, headers, bytes))
-}
-
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct SparseCMD {
-    pub connection_platform: String,
-    pub connection_definition_id: Id,
-    pub platform_version: String,
-    pub key: String,
-    pub title: String,
-    pub name: String,
-    pub path: String,
-    #[serde(with = "http_serde_ext_ios::method")]
-    pub action: Method,
-    pub action_name: String,
 }

@@ -7,8 +7,9 @@ use crate::{
 };
 use bson::doc;
 use cache::local::{
-    ConnectionCache, ConnectionModelDefinitionDestinationCache, ConnectionModelSchemaCache,
-    LocalCacheExt, SecretCache,
+    ConnectionCache, ConnectionModelDefinitionCacheIdKey,
+    ConnectionModelDefinitionDestinationCache, ConnectionModelSchemaCache, LocalCacheExt,
+    SecretCache,
 };
 use chrono::Utc;
 use futures::{
@@ -126,24 +127,21 @@ impl UnifiedDestination {
     pub async fn get_connection_model_definition(
         &self,
         destination: &Destination,
+        cmd_cache_id_key: ConnectionModelDefinitionCacheIdKey,
     ) -> Result<Option<ConnectionModelDefinition>, PicaError> {
         match &destination.action {
             Action::Passthrough { method, path, id } => match id {
                 Some(id) => {
-                    let connection_model_definitions = self
-                        .connection_model_definitions_store
-                        .get_many(
-                            Some(doc! {
-                                "_id": id.to_string(),
-                            }),
-                            None,
-                            None,
-                            None,
+                    let connection_model_definition = cmd_cache_id_key
+                        .get_or_insert_with_filter(
+                            &Id::from_str(id)?,
+                            self.connection_model_definitions_store.clone(),
+                            doc! {"_id": id.to_string()},
                             None,
                         )
                         .await?;
 
-                    Ok(connection_model_definitions.first().cloned())
+                    Ok(Some(connection_model_definition))
                 }
                 None => {
                     let connection_model_definitions = self
@@ -282,6 +280,7 @@ impl UnifiedDestination {
         action: Action,
         environment: Environment,
         params: RequestCrud,
+        cache: ConnectionModelDefinitionCacheIdKey,
     ) -> Result<UnifiedResponse, PicaError> {
         let mut metadata = UnifiedMetadataBuilder::default();
         let metadata = metadata
@@ -295,7 +294,7 @@ impl UnifiedDestination {
             .common_model_version("v1")
             .connection_key(connection.key.to_string());
 
-        self.perform_unified_request(connection, action, environment, params, metadata)
+        self.perform_unified_request(connection, action, environment, params, metadata, cache)
             .await
             .map_err(|e| match metadata.build().ok() {
                 Some(metadata) => e.set_meta(&metadata.as_value()),
@@ -310,6 +309,7 @@ impl UnifiedDestination {
         environment: Environment,
         params: RequestCrud,
         metadata: &mut UnifiedMetadataBuilder,
+        cache: ConnectionModelDefinitionCacheIdKey,
     ) -> Result<UnifiedResponse, PicaError> {
         let key = Destination {
             platform: connection.platform.clone(),
@@ -325,7 +325,7 @@ impl UnifiedDestination {
                 passthrough: is_passthrough,
             } => {
                 // (ConnectionModelDefinition, Secret, ConnectionModelSchema)
-                let (config, secret, cms) = self.get_dependencies(&key, &connection, &name).await.inspect_err(|e| {
+                let (config, secret, cms) = self.get_dependencies(&key, &connection, &name, cache).await.inspect_err(|e| {
                     error!("Failed to get dependencies for unified destination. Destination: {:?}, Error: {e}", key.platform);
                 })?;
                 tracing::info!("Dependencies retrieved for unified destination. Destination: {:?}, Config: {}, ConnectionModelSchema: {}", key.platform, config.id, cms.id);
@@ -348,7 +348,7 @@ impl UnifiedDestination {
 
                         jsruntime.create("mapFromCommonModel", &namespace, code)?.run::<Option<&Value>, Option<Value>>(&body, &namespace).await?.map(|v| v.drop_nulls())
                     }
-                    _   => body.cloned()
+                    _ => body.cloned()
                 };
 
                 let default_params = params.clone();
@@ -475,7 +475,7 @@ impl UnifiedDestination {
                                                     error!("Failed to run request schema mapping script for connection model schema. ID: {}, Error: {}", config.id, e);
                                                 })?.drop_nulls();
 
-                                                if let Value::Object(map) = &mut response{
+                                                if let Value::Object(map) = &mut response {
                                                     if !map.contains_key(MODIFY_TOKEN_KEY) {
                                                         let v = map.get(ID_KEY).cloned().unwrap_or_else(|| json!(""));
                                                         map.insert(MODIFY_TOKEN_KEY.to_owned(), v);
@@ -487,38 +487,38 @@ impl UnifiedDestination {
                                             }
                                         });
                                         let values = join_all(futures)
-                                                .await
-                                                .into_iter()
-                                                .collect::<Result<Vec<Value>, _>>()?;
+                                            .await
+                                            .into_iter()
+                                            .collect::<Result<Vec<Value>, _>>()?;
                                         Ok(Value::Array(values))
-                                    },
+                                    }
                                     Ok(Some(body)) => {
                                         Ok(jsruntime.run::<Value, Value>(&body, &namespace).await.inspect_err(|e| {
                                             error!("Failed to run request schema mapping script for connection model schema. ID: {}, Error: {}", config.id, e);
                                         })?.drop_nulls())
-                                    },
+                                    }
                                     Ok(_) if config.action_name == CrudAction::GetMany => Ok(Value::Array(Default::default())),
                                     Err(e) => Err(e),
                                     _ => Ok(Value::Object(Default::default())),
                                 };
 
                                 mapped_body.map(Some)
-                            },
+                            }
                             None => Err(InternalError::invalid_argument(
-                                        &format!(
-                                            "No js for schema mapping to common model {name} for {}. ID: {}",
-                                            connection.platform, config.id
-                                        ),
-                                        None,
-                                    )
+                                &format!(
+                                    "No js for schema mapping to common model {name} for {}. ID: {}",
+                                    connection.platform, config.id
+                                ),
+                                None,
+                            )
                             )
                         }
-                    },
+                    }
                     CrudAction::GetCount | CrudAction::Custom => body,
                     CrudAction::Update | CrudAction::Delete => Ok(None),
                 }?;
 
-                build_unified_response(config, metadata, is_passthrough)(body, pagination,  passthrough, params, status, headers)
+                build_unified_response(config, metadata, is_passthrough)(body, pagination, passthrough, params, status, headers)
             }
             Action::Passthrough { method, path, .. } => Err(InternalError::invalid_argument(
                 &format!("Passthrough action is not supported for destination {}, in method {method} and path {path}", key.connection_key),
@@ -534,6 +534,7 @@ impl UnifiedDestination {
         headers: HeaderMap,
         query_params: HashMap<String, String>,
         context: Option<Vec<u8>>,
+        cache: ConnectionModelDefinitionCacheIdKey,
     ) -> Result<reqwest::Response, PicaError> {
         let connection = if let Some(connection) = connection {
             connection
@@ -550,7 +551,10 @@ impl UnifiedDestination {
             )
         };
 
-        let config = match self.get_connection_model_definition(destination).await {
+        let config = match self
+            .get_connection_model_definition(destination, cache)
+            .await
+        {
             Ok(Some(c)) => Ok(Arc::new(c)),
             Ok(None) => Err(InternalError::key_not_found(
                 "ConnectionModelDefinition",
@@ -620,11 +624,12 @@ impl UnifiedDestination {
         key: &Destination,
         connection: &Connection,
         name: &str,
+        cache: ConnectionModelDefinitionCacheIdKey,
     ) -> Result<(ConnectionModelDefinition, Secret, ConnectionModelSchema), PicaError> {
         let config_fut = self
             .connection_model_definitions_cache
             .get_or_insert_with_fn(key, || async {
-                match self.get_connection_model_definition(key).await {
+                match self.get_connection_model_definition(key, cache).await {
                     Ok(Some(c)) => Ok(c),
                     Ok(None) => Err(InternalError::key_not_found("model definition", None)),
                     Err(e) => Err(InternalError::connection_error(

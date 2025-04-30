@@ -3,6 +3,7 @@ use crate::{
     id::Id,
     prelude::{schema::common_model::CommonModel, shared::record_metadata::RecordMetadata},
 };
+use http::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use strum::{Display, EnumIter};
@@ -514,4 +515,19 @@ mod tests {
             panic!("Wrong api config type");
         }
     }
+}
+
+#[derive(Deserialize, Debug, Serialize, Clone, PartialEq, Eq, Hash)]
+#[serde(rename_all = "camelCase")]
+pub struct SparseCMD {
+    pub connection_platform: String,
+    pub connection_definition_id: Id,
+    pub platform_version: String,
+    pub key: String,
+    pub title: String,
+    pub name: String,
+    pub path: String,
+    #[serde(with = "http_serde_ext_ios::method")]
+    pub action: Method,
+    pub action_name: String,
 }

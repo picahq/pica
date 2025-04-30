@@ -4,7 +4,7 @@ use moka::future::Cache;
 use mongodb::bson::Document;
 use mongodb::options::FindOneOptions;
 use osentities::connection_definition::ConnectionDefinition;
-use osentities::connection_model_definition::ConnectionModelDefinition;
+use osentities::connection_model_definition::{ConnectionModelDefinition, SparseCMD};
 use osentities::connection_model_schema::ConnectionModelSchema;
 use osentities::connection_oauth_definition::ConnectionOAuthDefinition;
 use osentities::destination::Destination;
@@ -154,3 +154,4 @@ pub type ConnectionModelDefinitionCacheIdKey = GenericCache<Id, ConnectionModelD
 pub type ConnectionDefinitionCache = GenericCache<Id, ConnectionDefinition>;
 pub type ConnectionHeaderCache = GenericCache<ConnectionHeaderKey, Connection>;
 pub type ConnectionCache = GenericCache<ConnectionKey, Connection>;
+pub type ConnectionModelDefinitionCacheStringKey = GenericCache<String, Option<SparseCMD>>;

@@ -1,4 +1,3 @@
-use super::event_access::CreateEventAccessPayloadWithOwnership;
 use crate::{logic::event_access::get_client_throughput, server::AppState};
 use axum::{
     extract::{Path, State},
@@ -205,32 +204,6 @@ async fn oauth_handler(
 
     let throughput = get_client_throughput(&user_event_access.ownership.id, &state).await?;
 
-    let event_access = CreateEventAccessPayloadWithOwnership {
-        name: format!("{} {}", user_event_access.environment, conn_definition.name),
-        platform: conn_definition.platform.clone(),
-        namespace: None,
-        connection_type: conn_definition.r#type.clone(),
-        environment: user_event_access.environment,
-        paths: conn_definition.paths.clone(),
-        ownership: user_event_access.ownership.clone(),
-        throughput: Some(throughput),
-    }
-    .as_event_access(&state.config)
-    .map_err(|e| {
-        error!("Error creating event access for oauth connection: {:?}", e);
-        ApplicationError::service_unavailable("Failed to create event access", None)
-    })?;
-
-    state
-        .app_stores
-        .event_access
-        .create_one(&event_access)
-        .await
-        .map_err(|e| {
-            error!("Error saving event access for oauth connection: {:?}", e);
-            e
-        })?;
-
     let connection = Connection {
         id: Id::new(IdPrefix::Connection, Utc::now()),
         platform_version: conn_definition.clone().platform_version,
@@ -242,8 +215,8 @@ async fn oauth_handler(
         environment: user_event_access.environment,
         platform: platform.into(),
         secrets_service_id: secret.id(),
-        event_access_id: event_access.id,
-        access_key: event_access.access_key,
+        event_access_id: None,
+        access_key: None,
         identity: Some(identity),
         identity_type: payload.identity_type,
         settings: conn_definition.settings,

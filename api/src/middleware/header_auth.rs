@@ -36,7 +36,10 @@ pub async fn header_auth_middleware(
         .to_str()
         .map_err(|_| ApplicationError::not_found("Invalid auth header", None))?;
 
+    // connection model definitions
+    // event access
     let event_access_result = state
+        .app_caches
         .event_access_cache
         .get_or_insert_with_filter(
             auth_header,
