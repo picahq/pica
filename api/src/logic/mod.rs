@@ -336,7 +336,11 @@ async fn get_connection(
 ) -> Result<Arc<Connection>, PicaError> {
     let connection = cache
         .get_or_insert_with_filter(
-            &(access.ownership.id.clone(), connection_key.clone()),
+            &(access.ownership.id.clone().to_string()
+                + connection_key.clone().to_str().map_err(|e| {
+                    tracing::error!("Error converting connection key to string: {e}");
+                    ApplicationError::bad_request("Invalid connection key header", None)
+                })?),
             stores.connection.clone(),
             doc! {
                 "key": connection_key.to_str().map_err(|_| {
