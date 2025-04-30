@@ -152,6 +152,12 @@ pub type ConnectionModelDefinitionDestinationCache =
     GenericCache<Destination, ConnectionModelDefinition>;
 pub type ConnectionModelDefinitionCacheIdKey = GenericCache<Id, ConnectionModelDefinition>;
 pub type ConnectionDefinitionCache = GenericCache<Id, ConnectionDefinition>;
-pub type ConnectionHeaderCache = GenericCache<String, Connection>;
+
+#[derive(Clone, Hash, Eq, Debug, PartialEq)]
+pub struct ConnectionHeaderKey {
+    pub ownership: Arc<str>,
+    pub header: HeaderValue,
+}
+pub type ConnectionHeaderCache = GenericCache<ConnectionHeaderKey, Connection>;
 pub type ConnectionCache = GenericCache<ConnectionKey, Connection>;
 pub type ConnectionModelDefinitionCacheStringKey = GenericCache<String, Option<SparseCMD>>;
