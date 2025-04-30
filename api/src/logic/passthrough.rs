@@ -22,6 +22,7 @@ use osentities::{
     AccessKey, ApplicationError, Event, Id, InternalError, Store, META, PASSWORD_LENGTH,
     QUERY_BY_ID_PASSTHROUGH,
 };
+use rand::distributions::{Alphanumeric, DistString};
 use serde_json::json;
 use std::{collections::HashMap, sync::Arc};
 use tracing::{error, info};
@@ -164,12 +165,13 @@ pub async fn passthrough_request(
             })
             .build();
 
-        let key = format!(
-            "{}::{}::{}::{}",
-            connection_platform,
-            connection_platform_version,
-            uri.path().to_string(),
-            method.to_string()
+        let cache_key = format!(
+            "{}",
+            id_str.clone().unwrap_or_else(|| format!(
+                "{}::{}",
+                connection_platform,
+                Alphanumeric.sample_string(&mut rand::thread_rng(), 16)
+            ))
         );
 
         let query = if let Some(id) = id_str {
@@ -185,7 +187,7 @@ pub async fn passthrough_request(
         };
 
         let cmd = cache
-            .get_or_insert_with_fn(&key, || async {
+            .get_or_insert_with_fn(&cache_key, || async {
                 Ok(database_c
                     .collection::<SparseCMD>(&Store::ConnectionModelDefinitions.to_string())
                     .find_one(query)
