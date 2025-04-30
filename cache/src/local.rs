@@ -141,7 +141,7 @@ where
 }
 
 type ConnectionModelSchemaKey = (Arc<str>, Arc<str>);
-type ConnectionHeaderKey = (Arc<str>, HeaderValue);
+// type ConnectionHeaderKey = (Arc<str>, HeaderValue);
 type ConnectionKey = Arc<str>;
 
 pub type EventAccessCache = GenericCache<HeaderValue, EventAccess>;
@@ -152,6 +152,6 @@ pub type ConnectionModelDefinitionDestinationCache =
     GenericCache<Destination, ConnectionModelDefinition>;
 pub type ConnectionModelDefinitionCacheIdKey = GenericCache<Id, ConnectionModelDefinition>;
 pub type ConnectionDefinitionCache = GenericCache<Id, ConnectionDefinition>;
-pub type ConnectionHeaderCache = GenericCache<ConnectionHeaderKey, Connection>;
+pub type ConnectionHeaderCache = GenericCache<String, Connection>;
 pub type ConnectionCache = GenericCache<ConnectionKey, Connection>;
 pub type ConnectionModelDefinitionCacheStringKey = GenericCache<String, Option<SparseCMD>>;
