@@ -148,7 +148,7 @@ pub async fn get_platform_models(
             platform_model: r
                 .model_name
                 .split(':')
-                .last()
+                .next_back()
                 .unwrap_or(&r.model_name)
                 .pascal_case()
                 .to_string(),

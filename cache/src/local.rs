@@ -150,7 +150,13 @@ pub type ConnectionOAuthDefinitionCache = GenericCache<Id, ConnectionOAuthDefini
 pub type ConnectionModelSchemaCache = GenericCache<ConnectionModelSchemaKey, ConnectionModelSchema>;
 pub type ConnectionModelDefinitionDestinationCache =
     GenericCache<Destination, ConnectionModelDefinition>;
-pub type ConnectionModelDefinitionCacheIdKey = GenericCache<Id, ConnectionModelDefinition>;
+
+#[derive(Clone, Hash, Eq, Debug, PartialEq)]
+pub struct ConnectionModelDefinitionCacheIdKeyInner {
+    pub id: String,
+}
+pub type ConnectionModelDefinitionCacheIdKey =
+    GenericCache<ConnectionModelDefinitionCacheIdKeyInner, ConnectionModelDefinition>;
 pub type ConnectionDefinitionCache = GenericCache<Id, ConnectionDefinition>;
 
 #[derive(Clone, Hash, Eq, Debug, PartialEq)]
