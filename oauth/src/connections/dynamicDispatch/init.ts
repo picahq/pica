@@ -1,39 +1,60 @@
 import Handlebars from 'handlebars';
 
 interface ConnectionOAuthDefinition {
-    _id: string;
-    configuration: OAuthApiConfig;
+    id: number;
+    connectionDefId: number;
     connectionPlatform: string;
-    compute: OAuthCompute;
-    isFullTemplateEnabled?: boolean;
+    initCompute: string;
+    callbackInitCompute: string;
+    refreshCompute: string;
+    callbackRefreshCompute: string;
+    frontend: Frontend;
+    templatedInFull: boolean;
+    createdAt: string;
+    updatedAt: string;
+    version: string;
+    deleted: boolean;
+    changeLog: Record<string, unknown>;
+    tags: string[];
+    active: boolean;
+    initEndpointInfo: EndpointInfo;
+    refreshEndpointInfo: EndpointInfo;
 }
 
-interface OAuthApiConfig {
-    init: ApiModelConfig;
-    refresh: ApiModelConfig;
+interface Frontend {
+    platformRedirectUri: string;
+    sandboxPlatformRedirectUri: string;
+    scopes: string;
+    iosRedirectUri: string;
+    separator: string;
 }
 
-interface OAuthCompute {
-    init: ComputeRequest;
-    refresh: ComputeRequest;
+interface EndpointInfo {
+    authMethod: AuthMethod;
+    baseUrl: string;
+    path: string;
+    headers: Record<string, string>;
+    queryParams: Record<string, string>;
+    content: ContentType;
 }
 
-interface ComputeRequest {
-    computation?: Compute;
-    response: Compute;
+interface AuthMethod {
+    authMethodType: string;
+    key: string;
+    value: string;
+    username: string;
+    password: string;
+    hashAlgorithm: string;
+    realm: string;
 }
 
-interface Compute {
-    entry: string;
-    function: string;
+enum ContentType {
+    Json = 'json',
+    Form = 'form',
 }
 
-const compute = async (
-    payload: unknown,
-    compute: Compute,
-): Promise<unknown> => {
-    const script = compute.function;
-    const entryPoint = compute.entry;
+const compute = async (payload: unknown, script: string): Promise<unknown> => {
+    const entryPoint = 'compute';
 
     try {
         // eslint-disable-next-line @typescript-eslint/ban-types
@@ -67,37 +88,28 @@ const compute = async (
     }
 };
 
-interface ApiModelConfig {
-    baseUrl: string;
-    path: string;
-    headers?: Record<string, string | string[]>;
-    queryParams?: { [key: string]: string };
-    content?: ContentType;
-}
-
-enum ContentType {
-    Json = 'json',
-    Form = 'form',
-}
-
 interface OAuthPayload {
     clientId: string;
     clientSecret: string;
     metadata?: Record<string, unknown>;
+    grant_type?: string;
+    code?: string;
+    code_verifier?: string;
 }
 
 interface OAuthResponse {
-    accessToken: string;
-    expiresIn: number;
-    refreshToken?: string;
-    tokenType?: string;
+    access_token: string;
+    expires_in: number;
+    refresh_token?: string;
+    token_type?: string;
+    metadata?: Record<string, unknown>;
 }
 
 const headers = async (
     conn_oauth_def: ConnectionOAuthDefinition,
     computationResult?: Record<string, unknown>,
 ): Promise<Headers> => {
-    const configHeaders = conn_oauth_def.configuration.init.headers;
+    const configHeaders = conn_oauth_def.initEndpointInfo.headers;
 
     if (!configHeaders) {
         return new Headers();
@@ -142,7 +154,7 @@ const query = async (
     conn_oauth_def: ConnectionOAuthDefinition,
     computationResult?: Record<string, unknown>,
 ): Promise<Record<string, string> | undefined> => {
-    const queryParams = conn_oauth_def.configuration.init.queryParams;
+    const queryParams = conn_oauth_def.initEndpointInfo.queryParams;
 
     if (!queryParams) {
         return undefined;
@@ -169,6 +181,8 @@ const query = async (
 };
 
 const body = async (
+    payload: OAuthPayload,
+    connOauthDef: ConnectionOAuthDefinition,
     serializedPayload: Record<string, unknown>,
     computationResult?: Record<string, unknown>,
 ): Promise<unknown | undefined> => {
@@ -185,7 +199,21 @@ const body = async (
         const bodyStr = JSON.stringify(bodyObj);
         const template = Handlebars.compile(bodyStr);
         const rendered = template(serializedPayload);
-        return JSON.parse(rendered);
+        const parsedBody = JSON.parse(rendered);
+        parsedBody.redirect_uri = connOauthDef.frontend.iosRedirectUri;
+        const grantType = payload.grant_type;
+        const code = payload.code;
+        const codeVerifier = payload.code_verifier;
+        parsedBody.grant_type = grantType;
+        parsedBody.code = code;
+        parsedBody.code_verifier = codeVerifier;
+        parsedBody.metadata = payload.metadata;
+
+        // for backward compatibility
+        parsedBody.metadata.code = code;
+        parsedBody.metadata.redirectUri = connOauthDef.frontend.iosRedirectUri;
+
+        return parsedBody;
     } catch (error) {
         console.error('Error in body:', error);
         throw new Error(
@@ -205,7 +233,7 @@ const buildRequest = async (
             JSON.stringify(payload),
         );
 
-        const script = conn_oauth_def.compute.init.computation;
+        const script = conn_oauth_def.initCompute;
         let computationResult: Record<string, unknown> | undefined;
         if (script) {
             computationResult = (await compute(
@@ -216,10 +244,15 @@ const buildRequest = async (
 
         const headersResult = await headers(conn_oauth_def, computationResult);
         const queryResult = await query(conn_oauth_def, computationResult);
-        const bodyResult = await body(serializedPayload, computationResult);
+        const bodyResult = await body(
+            payload,
+            conn_oauth_def,
+            serializedPayload,
+            computationResult,
+        );
 
-        const baseUrl = conn_oauth_def.configuration.init.baseUrl;
-        const path = conn_oauth_def.configuration.init.path;
+        const baseUrl = conn_oauth_def.initEndpointInfo.baseUrl;
+        const path = conn_oauth_def.initEndpointInfo.path;
         const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
         const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
         const urlObj = new URL(normalizedPath, normalizedBase);
@@ -238,7 +271,7 @@ const buildRequest = async (
             headers: headersResult,
         };
 
-        const contentType = conn_oauth_def.configuration.init.content;
+        const contentType = conn_oauth_def.initEndpointInfo.content;
         if (bodyResult !== undefined) {
             if (contentType === ContentType.Json) {
                 requestInit.body = JSON.stringify(bodyResult);
@@ -289,7 +322,7 @@ const executeOAuthRequest = async (
         }
         const jsonResponse: unknown = await response.json();
 
-        const responseScript = conn_oauth_def.compute.init.response;
+        const responseScript = conn_oauth_def.callbackInitCompute;
         const decodedResponse = await compute(jsonResponse, responseScript); // Changed from responseScript[0]
 
         if (
@@ -303,7 +336,48 @@ const executeOAuthRequest = async (
             throw new Error('Invalid OAuthResponse format');
         }
 
-        return decodedResponse as OAuthResponse;
+        const transformedResponse: OAuthResponse = {
+            access_token: decodedResponse.accessToken,
+            expires_in: decodedResponse.expiresIn,
+            refresh_token: decodedResponse.accessToken,
+            token_type: 'bearer',
+        };
+
+        if (
+            decodedResponse &&
+            'refreshToken' in decodedResponse &&
+            typeof decodedResponse.refreshToken === 'string'
+        ) {
+            transformedResponse.refresh_token = decodedResponse.refreshToken;
+        }
+
+        if (
+            decodedResponse &&
+            'tokenType' in decodedResponse &&
+            typeof decodedResponse.tokenType === 'string'
+        ) {
+            transformedResponse.token_type = decodedResponse.tokenType;
+        }
+
+        if (
+            decodedResponse &&
+            'meta' in decodedResponse &&
+            typeof decodedResponse.meta === 'object'
+        ) {
+            transformedResponse.metadata =
+                decodedResponse.meta as unknown as Record<string, unknown>;
+        }
+
+        if (
+            decodedResponse &&
+            'metadata' in decodedResponse &&
+            typeof decodedResponse.metadata === 'object'
+        ) {
+            transformedResponse.metadata =
+                decodedResponse.metadata as unknown as Record<string, unknown>;
+        }
+
+        return transformedResponse;
     } catch (error) {
         console.error('Error in executeOAuthRequest:', error);
         throw new Error(
@@ -315,16 +389,18 @@ const executeOAuthRequest = async (
 };
 
 type OAuthRequest = {
-    connectionOAuthDefinition: ConnectionOAuthDefinition;
-    payload: {
-        clientId: string;
-        clientSecret: string;
-        metadata: Record<string, unknown>;
-    };
-    secret: {
-        clientId: string;
-        clientSecret: string;
-    };
+    grant_type: string;
+    code: string;
+    code_verifier: string;
+    redirect_uri: string;
+    connection_oauth_payload: string;
+    payload: string;
+};
+
+type Payload = {
+    clientId: string;
+    clientSecret: string;
+    metadata: Record<string, unknown>;
 };
 
 type NestedOAuthRequest = {
@@ -334,14 +410,19 @@ type NestedOAuthRequest = {
 export const init = async ({
     body,
 }: NestedOAuthRequest): Promise<OAuthResponse> => {
+    const connectionOAuthDefinition: ConnectionOAuthDefinition = JSON.parse(
+        body.connection_oauth_payload,
+    );
+    const payload: Payload = JSON.parse(body.payload);
+
     const oauthPayload = {
-        clientId: body.secret.clientId,
-        clientSecret: body.secret.clientSecret,
-        metadata: body.payload.metadata,
+        clientId: payload.clientId,
+        clientSecret: payload.clientSecret,
+        metadata: payload.metadata,
+        grant_type: body.grant_type,
+        code: body.code,
+        code_verifier: body.code_verifier,
     };
 
-    return await executeOAuthRequest(
-        body.connectionOAuthDefinition,
-        oauthPayload,
-    );
+    return await executeOAuthRequest(connectionOAuthDefinition, oauthPayload);
 };

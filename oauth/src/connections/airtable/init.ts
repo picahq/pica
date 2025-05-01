@@ -28,7 +28,7 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             client_id: body.clientId,
             client_secret: body.clientSecret,
             redirect_uri: body.metadata?.redirectUri,
-            code_verifier: process.env.AIRTABLE_CODE_VERIFIER,
+            code_verifier: body.code_verifier,
         };
 
         const authorizationToken = await base64UrlEncode(
