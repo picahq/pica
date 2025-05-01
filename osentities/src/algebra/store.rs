@@ -27,10 +27,7 @@ impl<T: Serialize + DeserializeOwned + Unpin + Sync + Send + 'static> MongoStore
     }
 
     pub async fn get_one(&self, filter: Document) -> Result<Option<T>, PicaError> {
-        Ok(self
-            .collection
-            .find_one(filter)
-            .await?)
+        Ok(self.collection.find_one(filter).await?)
     }
 
     pub async fn get_one_by_id(&self, id: &str) -> Result<Option<T>, PicaError> {

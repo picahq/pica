@@ -155,7 +155,8 @@ pub type ConnectionModelDefinitionDestinationCache =
 pub struct ConnectionModelDefinitionCacheIdKeyInner {
     pub id: String,
 }
-pub type ConnectionModelDefinitionCacheIdKey = GenericCache<ConnectionModelDefinitionCacheIdKeyInner, ConnectionModelDefinition>;
+pub type ConnectionModelDefinitionCacheIdKey =
+    GenericCache<ConnectionModelDefinitionCacheIdKeyInner, ConnectionModelDefinition>;
 pub type ConnectionDefinitionCache = GenericCache<Id, ConnectionDefinition>;
 
 #[derive(Clone, Hash, Eq, Debug, PartialEq)]

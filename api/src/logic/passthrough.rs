@@ -24,8 +24,8 @@ use osentities::{
 };
 use rand::distributions::{Alphanumeric, DistString};
 use serde_json::json;
-use std::{collections::HashMap, sync::Arc};
 use std::time::Duration;
+use std::{collections::HashMap, sync::Arc};
 use tracing::{error, info};
 use unified::domain::UnifiedMetadataBuilder;
 
@@ -166,11 +166,16 @@ pub async fn passthrough_request(
             })
             .build();
 
-        let cache_key = id_str.clone().unwrap_or_else(|| format!(
-                "{}::{}",
-                connection_platform,
-                Alphanumeric.sample_string(&mut rand::thread_rng(), 16)
-            )).to_string();
+        let cache_key = id_str
+            .clone()
+            .unwrap_or_else(|| {
+                format!(
+                    "{}::{}",
+                    connection_platform,
+                    Alphanumeric.sample_string(&mut rand::thread_rng(), 16)
+                )
+            })
+            .to_string();
 
         let query = if let Some(id) = id_str {
             doc! {
@@ -266,7 +271,6 @@ pub async fn passthrough_request(
             }
         };
     });
-
 
     tokio::spawn(async move {
         let metric = Metric::passthrough(connection);
