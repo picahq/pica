@@ -6,11 +6,7 @@ use crate::{
     helper::{match_route, template_route},
 };
 use bson::doc;
-use cache::local::{
-    ConnectionCache, ConnectionModelDefinitionCacheIdKey,
-    ConnectionModelDefinitionDestinationCache, ConnectionModelSchemaCache, LocalCacheExt,
-    SecretCache,
-};
+use cache::local::{ConnectionCache, ConnectionModelDefinitionCacheIdKey, ConnectionModelDefinitionCacheIdKeyInner, ConnectionModelDefinitionDestinationCache, ConnectionModelSchemaCache, LocalCacheExt, SecretCache};
 use chrono::Utc;
 use futures::{
     future::{join_all, OptionFuture},
@@ -134,7 +130,9 @@ impl UnifiedDestination {
                 Some(id) => {
                     let connection_model_definition = cmd_cache_id_key
                         .get_or_insert_with_filter(
-                            &Id::from_str(id)?,
+                            &ConnectionModelDefinitionCacheIdKeyInner {
+                                id: id.to_string(),
+                            },
                             self.connection_model_definitions_store.clone(),
                             doc! {"_id": id.to_string()},
                             None,
@@ -144,6 +142,7 @@ impl UnifiedDestination {
                     Ok(Some(connection_model_definition))
                 }
                 None => {
+                    tracing::error!("No id provided for passthrough action. Destination: {:?}", destination);
                     let connection_model_definitions = self
                         .connection_model_definitions_store
                         .get_many(

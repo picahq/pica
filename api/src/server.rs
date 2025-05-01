@@ -16,6 +16,7 @@ use cache::local::{
     ConnectionDefinitionCache, ConnectionHeaderCache, ConnectionModelDefinitionCacheIdKey,
     ConnectionModelDefinitionCacheStringKey, ConnectionOAuthDefinitionCache, EventAccessCache,
 };
+use mongodb::options::ClientOptions;
 use mongodb::{options::UpdateOptions, Client, Database};
 use osentities::{
     algebra::{DefaultTemplate, MongoStore},
@@ -100,6 +101,8 @@ impl Server {
 
         let http_client = reqwest::ClientBuilder::new()
             .timeout(Duration::from_secs(config.http_client_timeout_secs))
+            .connect_timeout(Duration::from_secs(30))
+            .pool_idle_timeout(Duration::from_secs(30))
             .build()?;
         let model_config = MongoStore::new(&db, &Store::ConnectionModelDefinitions).await?;
         let oauth_config = MongoStore::new(&db, &Store::ConnectionOAuthDefinitions).await?;

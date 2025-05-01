@@ -7,6 +7,7 @@ use mongodb::options::CountOptions;
 use mongodb::{Collection, Database};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use std::time::Duration;
 
 #[derive(Debug, Clone)]
 pub struct MongoStore<T: Serialize + DeserializeOwned + Unpin + Sync + Send + Sync> {
@@ -26,7 +27,10 @@ impl<T: Serialize + DeserializeOwned + Unpin + Sync + Send + 'static> MongoStore
     }
 
     pub async fn get_one(&self, filter: Document) -> Result<Option<T>, PicaError> {
-        Ok(self.collection.find_one(filter).await?)
+        Ok(self
+            .collection
+            .find_one(filter)
+            .await?)
     }
 
     pub async fn get_one_by_id(&self, id: &str) -> Result<Option<T>, PicaError> {

@@ -11,6 +11,7 @@ use osentities::{
 use reqwest::{Client, Response, Url};
 use serde_json::Value;
 use std::collections::HashMap;
+use std::error::Error;
 
 #[derive(Debug, Clone, Builder)]
 pub struct CallerClient<'a> {
@@ -157,6 +158,7 @@ impl<'a> CallerClient<'a> {
         };
 
         let res = request_builder.send().await.map_err(|e| {
+            tracing::error!("Failed to send request: {}", e.source().unwrap_or(&e));
             InternalError::io_err(
                 &format!("Failed to send request: {}", e),
                 Some("reqwest::Error"),
