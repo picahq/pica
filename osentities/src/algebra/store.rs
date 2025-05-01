@@ -7,7 +7,6 @@ use mongodb::options::CountOptions;
 use mongodb::{Collection, Database};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use std::time::Duration;
 
 #[derive(Debug, Clone)]
 pub struct MongoStore<T: Serialize + DeserializeOwned + Unpin + Sync + Send + Sync> {

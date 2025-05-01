@@ -16,7 +16,6 @@ use cache::local::{
     ConnectionDefinitionCache, ConnectionHeaderCache, ConnectionModelDefinitionCacheIdKey,
     ConnectionModelDefinitionCacheStringKey, ConnectionOAuthDefinitionCache, EventAccessCache,
 };
-use mongodb::options::ClientOptions;
 use mongodb::{options::UpdateOptions, Client, Database};
 use osentities::{
     algebra::{DefaultTemplate, MongoStore},

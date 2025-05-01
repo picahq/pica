@@ -274,7 +274,7 @@ pub async fn create_connection(
             error!("Error creating secret for connection: {:?}", e);
         })?;
 
-    let environment = access.environment.clone();
+    let environment = access.environment;
     let ownership = access.ownership.clone();
 
     let conn = Connection {
