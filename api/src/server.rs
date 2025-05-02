@@ -12,6 +12,7 @@ use crate::{
 };
 use anyhow::{anyhow, Context, Result};
 use axum::Router;
+use bson::doc;
 use cache::local::{
     ConnectionDefinitionCache, ConnectionHeaderCache, ConnectionModelDefinitionCacheIdKey,
     ConnectionModelDefinitionCacheStringKey, ConnectionOAuthDefinitionCache, EventAccessCache,
@@ -31,8 +32,10 @@ use osentities::{
     task::Task,
     user::UserClient,
     Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
+    MAX_BUFFER_SIZE,
 };
 use std::{sync::Arc, time::Duration};
+use tokio::sync::Semaphore;
 use tokio::{net::TcpListener, sync::mpsc::Sender, time::timeout, try_join};
 use tracing::{error, info, trace, warn};
 use unified::unified::{UnifiedCacheTTLs, UnifiedDestination};
@@ -222,106 +225,21 @@ impl Server {
 
         // Create Event buffer in separate thread and batch saves
         let events = db.collection::<Event>(&Store::Events.to_string());
-        let (event_tx, mut receiver) =
+        let (event_tx, receiver) =
             tokio::sync::mpsc::channel::<Event>(config.event_save_buffer_size);
-        tokio::spawn(async move {
-            let mut buffer = Vec::with_capacity(config.event_save_buffer_size);
-            loop {
-                let res = timeout(
-                    Duration::from_secs(config.event_save_timeout_secs),
-                    receiver.recv(),
-                )
-                .await;
-                let is_timeout = if let Ok(Some(event)) = res {
-                    buffer.push(event);
-                    false
-                } else if let Ok(None) = res {
-                    break;
-                } else {
-                    trace!("Event receiver timed out waiting for new event");
-                    true
-                };
-                // Save when buffer is full or timeout elapsed
-                if buffer.len() == config.event_save_buffer_size
-                    || (is_timeout && !buffer.is_empty())
-                {
-                    trace!("Saving {} events", buffer.len());
-                    let to_save = std::mem::replace(
-                        &mut buffer,
-                        Vec::with_capacity(config.event_save_buffer_size),
-                    );
-                    let events = events.clone();
-                    tokio::spawn(async move {
-                        if let Err(e) = events.insert_many(to_save).await {
-                            error!("Could not save buffer of events: {e}");
-                        }
-                    });
-                }
-            }
-        });
 
-        // Update metrics in separate thread
-        let template = DefaultTemplate::default();
+        start_event_collector(db.clone(), config.clone(), event_tx.clone(), receiver);
 
-        let metrics = db.collection::<Metric>(&Store::Metrics.to_string());
-        let (metric_tx, mut receiver) =
+        let (metric_tx, receiver) =
             tokio::sync::mpsc::channel::<Metric>(config.metric_save_channel_size);
-        let metric_system_id = config.metric_system_id.clone();
-        let cloned_tracker_client = tracker_client.clone();
-        tokio::spawn(async move {
-            let options = UpdateOptions::builder().upsert(true).build();
-            let mut event_buffer = vec![];
 
-            loop {
-                let res = timeout(
-                    Duration::from_secs(config.event_save_timeout_secs),
-                    receiver.recv(),
-                )
-                .await;
-                if let Ok(Some(metric)) = res {
-                    let doc = metric.update_doc();
-                    let client = metrics
-                        .update_one(
-                            bson::doc! {
-                                "clientId": &metric.ownership().client_id,
-                            },
-                            doc.clone(),
-                        )
-                        .with_options(options.clone());
-                    let system = metrics
-                        .update_one(
-                            bson::doc! {
-                                "clientId": metric_system_id.as_str(),
-                            },
-                            doc,
-                        )
-                        .with_options(options.clone());
-                    if let Err(e) = try_join!(client, system) {
-                        error!("Could not upsert metric: {e}");
-                    } else {
-                        trace!("Metric upserted successfully");
-                    }
-
-                    if metric.is_passthrough() {
-                        continue;
-                    }
-                    event_buffer.push(metric);
-                } else if let Ok(None) = res {
-                    break;
-                } else {
-                    trace!("Event receiver timed out waiting for new event");
-                    if let Err(e) = cloned_tracker_client
-                        .track_many_metrics(&event_buffer)
-                        .await
-                    {
-                        warn!("Could not track metrics: {e}");
-                    } else {
-                        trace!("Tracked {} metrics", event_buffer.len());
-                    }
-                    event_buffer.clear();
-                }
-            }
-        });
+        start_metric_collector(
+            db.clone(),
+            config.clone(),
+            tracker_client.clone(),
+            metric_tx.clone(),
+            receiver,
+        );
 
         let app_caches = AppCaches {
             connection_definitions_cache,
@@ -345,7 +263,7 @@ impl Server {
                 openapi_data,
                 secrets_client,
                 tracker_client,
-                template,
+                template: DefaultTemplate::default(),
             }),
         })
     }
@@ -363,4 +281,170 @@ impl Server {
             .await
             .map_err(|e| anyhow!("Server error: {}", e))
     }
+}
+
+pub fn start_metric_collector(
+    db: mongodb::Database,
+    config: ConnectionsConfig,
+    tracker_client: Arc<dyn Track<TrackedMetric>>,
+    metric_tx: Sender<Metric>,
+    mut receiver: tokio::sync::mpsc::Receiver<Metric>,
+) -> Sender<Metric> {
+    let metrics = db.collection::<Metric>(&Store::Metrics.to_string());
+    let metric_system_id = config.metric_system_id.clone();
+    let cloned_tracker_client = tracker_client.clone();
+
+    tokio::spawn(async move {
+        let options = UpdateOptions::builder().upsert(true).build();
+        let mut event_buffer = Vec::new();
+
+        loop {
+            let res = timeout(
+                Duration::from_secs(config.event_save_timeout_secs),
+                receiver.recv(),
+            )
+            .await;
+
+            if let Ok(Some(metric)) = res {
+                let doc = metric.update_doc();
+                let client = metrics
+                    .update_one(
+                        doc! { "clientId": &metric.ownership().client_id },
+                        doc.clone(),
+                    )
+                    .with_options(options.clone());
+                let system = metrics
+                    .update_one(doc! { "clientId": metric_system_id.as_str() }, doc)
+                    .with_options(options.clone());
+
+                if let Err(e) = try_join!(client, system) {
+                    error!("Could not upsert metric: {e}");
+                } else {
+                    trace!("Metric upserted successfully");
+                }
+
+                if metric.is_passthrough() {
+                    continue;
+                }
+
+                event_buffer.push(metric);
+
+                if event_buffer.len() >= MAX_BUFFER_SIZE {
+                    flush_buffer(&cloned_tracker_client, &mut event_buffer).await;
+                }
+            } else if let Ok(None) = res {
+                break;
+            } else {
+                trace!("Event receiver timed out waiting for new event");
+                flush_buffer(&cloned_tracker_client, &mut event_buffer).await;
+            }
+        }
+
+        flush_buffer(&cloned_tracker_client, &mut event_buffer).await;
+    });
+
+    metric_tx
+}
+
+async fn flush_buffer(
+    tracker_client: &Arc<dyn Track<TrackedMetric>>,
+    event_buffer: &mut Vec<Metric>,
+) {
+    if event_buffer.is_empty() {
+        return;
+    }
+
+    match tracker_client.track_many_metrics(event_buffer).await {
+        Ok(_) => {
+            trace!("Tracked {} metrics", event_buffer.len());
+        }
+        Err(e) => {
+            warn!("Could not track metrics: {e}");
+        }
+    }
+    event_buffer.clear();
+}
+
+const NUM_FLUSH_WORKERS: usize = 4;
+
+pub fn start_event_collector(
+    db: mongodb::Database,
+    config: ConnectionsConfig,
+    event_tx: Sender<Event>,
+    mut receiver: tokio::sync::mpsc::Receiver<Event>,
+) -> tokio::sync::mpsc::Sender<Event> {
+    let events = db.collection::<Event>(&Store::Events.to_string());
+
+    let (flush_tx, mut flush_rx) = tokio::sync::mpsc::channel::<Vec<Event>>(NUM_FLUSH_WORKERS * 2);
+
+    // Semaphore to limit concurrency
+    let sem = Arc::new(Semaphore::new(NUM_FLUSH_WORKERS));
+    let events_clone = events.clone();
+    let sem_clone = sem.clone();
+
+    tokio::spawn(async move {
+        while let Some(batch) = flush_rx.recv().await {
+            let permit = match sem_clone.clone().acquire_owned().await {
+                Ok(p) => p,
+                Err(_) => {
+                    error!("Semaphore closed unexpectedly");
+                    break;
+                }
+            };
+
+            let events = events_clone.clone();
+            tokio::spawn(async move {
+                trace!("Inserting {} events", batch.len());
+                if let Err(e) = events.insert_many(batch).await {
+                    error!("Failed to insert events: {e}");
+                }
+                drop(permit); // release the permit
+            });
+        }
+    });
+
+    tokio::spawn({
+        let flush_sender = flush_tx.clone();
+        async move {
+            let mut buffer = Vec::with_capacity(config.event_save_buffer_size);
+
+            loop {
+                let res = timeout(
+                    Duration::from_secs(config.event_save_timeout_secs),
+                    receiver.recv(),
+                )
+                .await;
+
+                let is_timeout = if let Ok(Some(event)) = res {
+                    buffer.push(event);
+                    false
+                } else if let Ok(None) = res {
+                    break;
+                } else {
+                    trace!("Event receiver timed out");
+                    true
+                };
+
+                if buffer.len() == config.event_save_buffer_size
+                    || (is_timeout && !buffer.is_empty())
+                {
+                    trace!("Flushing {} events", buffer.len());
+                    let to_send = std::mem::take(&mut buffer);
+                    if let Err(e) = flush_sender.send(to_send).await {
+                        error!("Failed to send buffer: {e}");
+                        break;
+                    }
+                }
+            }
+
+            if !buffer.is_empty() {
+                trace!("Final flush of {} events", buffer.len());
+                if let Err(e) = flush_sender.send(buffer).await {
+                    error!("Failed to send final buffer: {e}");
+                }
+            }
+        }
+    });
+
+    event_tx
 }
