@@ -179,6 +179,7 @@ dependencies = [
  "mockito",
  "mongodb",
  "num_cpus",
+ "once_cell",
  "openapiv3",
  "osentities 1.0.0",
  "posthog-rs",

@@ -4,10 +4,7 @@ use crate::{
         ConnectionsConfig, K8sMode, Metric,
     },
     helper::{K8sDriver, K8sDriverImpl, K8sDriverLogger},
-    logic::{
-        connection_oauth_definition::FrontendOauthConnectionDefinition, knowledge::Knowledge,
-        openapi::OpenAPIData,
-    },
+    logic::{connection_oauth_definition::FrontendOauthConnectionDefinition, knowledge::Knowledge},
     router,
 };
 use anyhow::{anyhow, Context, Result};
@@ -34,6 +31,9 @@ use osentities::{
     Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
     MAX_BUFFER_SIZE, NUM_FLUSH_WORKERS,
 };
+use std::future::Future;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::Instant;
 use std::{sync::Arc, time::Duration};
 use tokio::sync::Semaphore;
 use tokio::{net::TcpListener, sync::mpsc::Sender, time::timeout, try_join};
@@ -85,7 +85,6 @@ pub struct AppState {
     pub http_client: reqwest::Client,
     pub k8s_client: Arc<dyn K8sDriver>,
     pub metric_tx: Sender<Metric>,
-    pub openapi_data: OpenAPIData,
     pub secrets_client: Arc<dyn SecretExt>,
     pub tracker_client: Arc<dyn Track<TrackedMetric>>,
     pub template: DefaultTemplate,
@@ -212,12 +211,6 @@ impl Server {
             config.connection_model_definition_cache_ttl_secs,
         );
 
-        let openapi_data = OpenAPIData::default();
-        openapi_data.spawn_openapi_generation(
-            app_stores.common_model.clone(),
-            app_stores.common_enum.clone(),
-        );
-
         let k8s_client: Arc<dyn K8sDriver> = match config.k8s_mode {
             K8sMode::Real => Arc::new(K8sDriverImpl::new().await?),
             K8sMode::Logger => Arc::new(K8sDriverLogger),
@@ -251,16 +244,15 @@ impl Server {
             state: Arc::new(AppState {
                 app_stores,
                 app_caches,
-                config,
                 event_tx,
                 extractor_caller,
                 http_client,
                 k8s_client,
                 metric_tx,
-                openapi_data,
                 secrets_client,
                 tracker_client,
                 template: DefaultTemplate::default(),
+                config,
             }),
         })
     }
@@ -335,7 +327,7 @@ pub fn start_metric_collector(
                             }
                         }
                         None => {
-                            // Channel closed, break loop and flush remaining buffer
+                            // Channel closed, break loop and flush the remaining buffer
                             break;
                         }
                     }
@@ -373,41 +365,96 @@ pub fn start_event_collector(
     config: ConnectionsConfig,
     event_tx: Sender<Event>,
     mut receiver: tokio::sync::mpsc::Receiver<Event>,
-) -> tokio::sync::mpsc::Sender<Event> {
+) -> Sender<Event> {
     let events = db.collection::<Event>(&Store::Events.to_string());
 
-    let (flush_tx, mut flush_rx) = tokio::sync::mpsc::channel::<Vec<Event>>(NUM_FLUSH_WORKERS * 2);
+    let buffer_size = config.event_save_buffer_size * NUM_FLUSH_WORKERS * 2;
+    let (flush_tx, mut flush_rx) = tokio::sync::mpsc::channel::<Vec<Event>>(buffer_size);
 
-    // Semaphore to limit concurrency
-    let sem = Arc::new(Semaphore::new(NUM_FLUSH_WORKERS));
+    let worker_semaphore = Arc::new(Semaphore::new(NUM_FLUSH_WORKERS));
+
+    let events_processed = Arc::new(AtomicUsize::new(0));
+    let events_failed = Arc::new(AtomicUsize::new(0));
+
     let events_clone = events.clone();
-    let sem_clone = sem.clone();
+    let worker_sem_clone = worker_semaphore.clone();
+    let processed_counter = events_processed.clone();
+    let failed_counter = events_failed.clone();
 
     tokio::spawn(async move {
         while let Some(batch) = flush_rx.recv().await {
-            let permit = match sem_clone.clone().acquire_owned().await {
-                Ok(p) => p,
-                Err(_) => {
+            let batch_size = batch.len();
+            trace!("Processing batch of {} events", batch_size);
+
+            let permit = match timeout(
+                Duration::from_secs(5),
+                worker_sem_clone.clone().acquire_owned(),
+            )
+            .await
+            {
+                Ok(Ok(p)) => p,
+                Ok(Err(_)) => {
                     error!("Semaphore closed unexpectedly");
                     break;
+                }
+                Err(_) => {
+                    error!("Timed out waiting for worker availability, system may be overloaded");
+                    // Implement exponential backoff or circuit breaking here if needed
+                    continue;
                 }
             };
 
             let events = events_clone.clone();
+            let processed = processed_counter.clone();
+            let failed = failed_counter.clone();
+
             tokio::spawn(async move {
-                trace!("Inserting {} events", batch.len());
-                if let Err(e) = events.insert_many(batch).await {
-                    error!("Failed to insert events: {e}");
+                let start = Instant::now();
+                trace!("Inserting {} events", batch_size);
+
+                let result = retry_with_backoff(3, Duration::from_millis(50), || async {
+                    events.insert_many(batch.clone()).await
+                })
+                .await;
+
+                match result {
+                    Ok(_) => {
+                        let elapsed = start.elapsed();
+                        processed.fetch_add(batch_size, Ordering::Relaxed);
+                        if elapsed > Duration::from_millis(500) {
+                            warn!(
+                                "Slow event insertion: {} events took {:?}",
+                                batch_size, elapsed
+                            );
+                        }
+                        trace!(
+                            "Successfully inserted {} events in {:?}",
+                            batch_size,
+                            elapsed
+                        );
+                    }
+                    Err(e) => {
+                        failed.fetch_add(batch_size, Ordering::Relaxed);
+                        error!("Failed to insert events after retries: {e}");
+                        // Consider logging to a dead letter queue here
+                    }
                 }
-                drop(permit); // release the permit
+
+                drop(permit); // Explicitly release the permit
             });
         }
     });
 
     tokio::spawn({
         let flush_sender = flush_tx.clone();
+        let processed_counter = events_processed.clone();
+
         async move {
             let mut buffer = Vec::with_capacity(config.event_save_buffer_size);
+            let mut consecutive_timeouts = 0;
+
+            let stats_interval = Duration::from_secs(60);
+            let mut last_stats_report = Instant::now();
 
             loop {
                 let res = timeout(
@@ -418,34 +465,108 @@ pub fn start_event_collector(
 
                 let is_timeout = if let Ok(Some(event)) = res {
                     buffer.push(event);
+                    consecutive_timeouts = 0;
                     false
                 } else if let Ok(None) = res {
+                    info!("Event channel closed, shutting down collector");
                     break;
                 } else {
                     trace!("Event receiver timed out");
+                    consecutive_timeouts += 1;
                     true
                 };
 
-                if buffer.len() == config.event_save_buffer_size
+                if last_stats_report.elapsed() >= stats_interval {
+                    let processed = processed_counter.load(Ordering::Relaxed);
+                    info!(
+                        "Event collector stats: processed {} events in the last minute",
+                        processed
+                    );
+                    processed_counter.store(0, Ordering::Relaxed);
+                    last_stats_report = Instant::now();
+                }
+
+                if buffer.len() >= config.event_save_buffer_size
                     || (is_timeout && !buffer.is_empty())
                 {
                     trace!("Flushing {} events", buffer.len());
-                    let to_send = std::mem::take(&mut buffer);
-                    if let Err(e) = flush_sender.send(to_send).await {
-                        error!("Failed to send buffer: {e}");
-                        break;
+                    let to_send = std::mem::replace(
+                        &mut buffer,
+                        Vec::with_capacity(config.event_save_buffer_size),
+                    );
+
+                    match timeout(Duration::from_secs(5), flush_sender.send(to_send.clone())).await
+                    {
+                        Ok(Ok(_)) => {
+                            // Sent successfully
+                        }
+                        Ok(Err(e)) => {
+                            error!("Failed to send buffer: {e}");
+
+                            // Try to recover the events - either by merging back or handling specially
+                            if !to_send.is_empty() {
+                                warn!(
+                                    "Attempting to rescue {} events after send failure",
+                                    to_send.len()
+                                );
+                            }
+                            break;
+                        }
+                        Err(_) => {
+                            error!("Timed out trying to send event batch - workers may be blocked");
+                            // Implement a circuit breaker pattern here if needed
+                            break;
+                        }
                     }
+                }
+
+                if consecutive_timeouts > 10 && buffer.is_empty() {
+                    info!("No events received for extended period, considering idle shutdown");
                 }
             }
 
             if !buffer.is_empty() {
-                trace!("Final flush of {} events", buffer.len());
+                info!("Final flush of {} events before shutdown", buffer.len());
                 if let Err(e) = flush_sender.send(buffer).await {
-                    error!("Failed to send final buffer: {e}");
+                    error!("Failed to send final buffer during shutdown: {e}");
                 }
             }
         }
     });
 
     event_tx
+}
+
+async fn retry_with_backoff<F, Fut, T, E>(
+    max_retries: u32,
+    initial_backoff: Duration,
+    operation: F,
+) -> Result<T, E>
+where
+    F: Fn() -> Fut,
+    Fut: Future<Output = Result<T, E>>,
+    E: std::fmt::Display,
+{
+    let mut retries = 0;
+    let mut backoff = initial_backoff;
+
+    loop {
+        match operation().await {
+            Ok(value) => return Ok(value),
+            Err(err) => {
+                retries += 1;
+                if retries >= max_retries {
+                    return Err(err);
+                }
+
+                warn!(
+                    "Operation failed (attempt {}/{}): {}. Retrying in {:?}",
+                    retries, max_retries, err, backoff
+                );
+
+                tokio::time::sleep(backoff).await;
+                backoff *= 2; // Exponential backoff
+            }
+        }
+    }
 }
