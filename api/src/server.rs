@@ -32,8 +32,7 @@ use osentities::{
     task::Task,
     user::UserClient,
     Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
-    MAX_BUFFER_SIZE,
-    NUM_FLUSH_WORKERS,
+    MAX_BUFFER_SIZE, NUM_FLUSH_WORKERS,
 };
 use std::{sync::Arc, time::Duration};
 use tokio::sync::Semaphore;
@@ -362,7 +361,6 @@ async fn flush_buffer(
     }
     event_buffer.clear();
 }
-
 
 pub fn start_event_collector(
     db: mongodb::Database,

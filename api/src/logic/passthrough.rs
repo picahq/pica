@@ -56,10 +56,7 @@ pub async fn passthrough_request(
     };
 
     let Some(connection_secret_header) = headers.get(&state.config.headers.auth_header) else {
-        return Err(ApplicationError::bad_request(
-            "Auth header not found",
-            None,
-        ));
+        return Err(ApplicationError::bad_request("Auth header not found", None));
     };
 
     let host = headers
@@ -72,7 +69,7 @@ pub async fn passthrough_request(
         &state.app_stores,
         &state.app_caches.connections_cache,
     )
-        .await?;
+    .await?;
 
     let id_str = headers
         .get(QUERY_BY_ID_PASSTHROUGH)
@@ -142,10 +139,7 @@ pub async fn passthrough_request(
         .app_caches
         .connection_model_definition_string_key
         .clone();
-    let connection_secret_str = connection_secret_header
-        .to_str()
-        .map(|a| a.to_owned())
-        .ok();
+    let connection_secret_str = connection_secret_header.to_str().map(|a| a.to_owned()).ok();
     let uri_path = uri.path().to_string();
     let id_str_clone = id_str.clone();
     let request_headers = forwarded_headers.clone();
@@ -225,9 +219,7 @@ pub async fn passthrough_request(
                     event_access_pass_c.as_bytes().try_into().ok();
 
                 if let Some(password) = password {
-                    if let Ok(access_key) =
-                        AccessKey::parse(&encrypted_access_key, &password)
-                    {
+                    if let Ok(access_key) = AccessKey::parse(&encrypted_access_key, &password) {
                         let event_name = format!(
                             "{}::{}::{}::{}",
                             connection_platform,
@@ -245,7 +237,7 @@ pub async fn passthrough_request(
                         let body = serde_json::to_string(&json!({
                             META: metadata,
                         }))
-                            .unwrap_or_default();
+                        .unwrap_or_default();
 
                         let event = Event::new(
                             &access_key,
