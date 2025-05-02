@@ -129,6 +129,6 @@ pub const EXCLUDE: &AsciiSet = &NON_ALPHANUMERIC
     .remove(b'_')
     .remove(b'~');
 
-pub const MAX_BUFFER_SIZE: usize = 1000;
+pub const MAX_BUFFER_SIZE: usize = 500;
 
 pub const NUM_FLUSH_WORKERS: usize = 4;
