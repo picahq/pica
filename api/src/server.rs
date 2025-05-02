@@ -281,7 +281,7 @@ impl Server {
 }
 
 pub fn start_metric_collector(
-    db: mongodb::Database,
+    db: Database,
     config: ConnectionsConfig,
     tracker_client: Arc<dyn Track<TrackedMetric>>,
     metric_tx: Sender<Metric>,
@@ -295,45 +295,51 @@ pub fn start_metric_collector(
         let options = UpdateOptions::builder().upsert(true).build();
         let mut event_buffer = Vec::new();
 
+        let mut flush_interval =
+            tokio::time::interval(Duration::from_secs(config.event_save_timeout_secs));
+
         loop {
-            let res = timeout(
-                Duration::from_secs(config.event_save_timeout_secs),
-                receiver.recv(),
-            )
-            .await;
+            tokio::select! {
+                biased;
 
-            if let Ok(Some(metric)) = res {
-                let doc = metric.update_doc();
-                let client = metrics
-                    .update_one(
-                        doc! { "clientId": &metric.ownership().client_id },
-                        doc.clone(),
-                    )
-                    .with_options(options.clone());
-                let system = metrics
-                    .update_one(doc! { "clientId": metric_system_id.as_str() }, doc)
-                    .with_options(options.clone());
-
-                if let Err(e) = try_join!(client, system) {
-                    error!("Could not upsert metric: {e}");
-                } else {
-                    trace!("Metric upserted successfully");
-                }
-
-                if metric.is_passthrough() {
-                    continue;
-                }
-
-                event_buffer.push(metric);
-
-                if event_buffer.len() >= MAX_BUFFER_SIZE {
+                // Prioritize flushing over receiving if both are ready
+                _ = flush_interval.tick() => {
                     flush_buffer(&cloned_tracker_client, &mut event_buffer).await;
                 }
-            } else if let Ok(None) = res {
-                break;
-            } else {
-                trace!("Event receiver timed out waiting for new event");
-                flush_buffer(&cloned_tracker_client, &mut event_buffer).await;
+
+                recv_result = receiver.recv() => {
+                    match recv_result {
+                        Some(metric) => {
+                            let doc = metric.update_doc();
+                            let client = metrics
+                                .update_one(
+                                    doc! { "clientId": &metric.ownership().client_id },
+                                    doc.clone(),
+                                )
+                                .with_options(options.clone());
+                            let system = metrics
+                                .update_one(doc! { "clientId": metric_system_id.as_str() }, doc)
+                                .with_options(options.clone());
+
+                            if let Err(e) = try_join!(client, system) {
+                                error!("Could not upsert metric: {e}");
+                            } else {
+                                trace!("Metric upserted successfully");
+                            }
+
+                            if !metric.is_passthrough() {
+                                event_buffer.push(metric);
+                                if event_buffer.len() >= MAX_BUFFER_SIZE {
+                                    flush_buffer(&cloned_tracker_client, &mut event_buffer).await;
+                                }
+                            }
+                        }
+                        None => {
+                            // Channel closed, break loop and flush remaining buffer
+                            break;
+                        }
+                    }
+                }
             }
         }
 
@@ -363,7 +369,7 @@ async fn flush_buffer(
 }
 
 pub fn start_event_collector(
-    db: mongodb::Database,
+    db: Database,
     config: ConnectionsConfig,
     event_tx: Sender<Event>,
     mut receiver: tokio::sync::mpsc::Receiver<Event>,
