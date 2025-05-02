@@ -225,15 +225,12 @@ impl Server {
         };
 
         // Create Event buffer in separate thread and batch saves
-        let events = db.collection::<Event>(&Store::Events.to_string());
         let (event_tx, receiver) =
             tokio::sync::mpsc::channel::<Event>(config.event_save_buffer_size);
-
         start_event_collector(db.clone(), config.clone(), event_tx.clone(), receiver);
 
         let (metric_tx, receiver) =
             tokio::sync::mpsc::channel::<Metric>(config.metric_save_channel_size);
-
         start_metric_collector(
             db.clone(),
             config.clone(),

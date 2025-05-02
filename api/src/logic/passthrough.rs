@@ -165,18 +165,6 @@ pub async fn passthrough_request(
             })
             .build();
 
-<<<<<<< Updated upstream
-        let cache_key = id_str
-            .clone()
-            .unwrap_or_else(|| {
-                format!(
-                    "{}::{}",
-                    connection_platform,
-                    Alphanumeric.sample_string(&mut rand::thread_rng(), 16)
-                )
-            })
-            .to_string();
-=======
         let cache_key = format!(
             "{}",
             id_str_clone.unwrap_or_else(|| format!(
@@ -185,7 +173,6 @@ pub async fn passthrough_request(
                 Alphanumeric.sample_string(&mut rand::thread_rng(), 16)
             ))
         );
->>>>>>> Stashed changes
 
         let query = if let Some(id) = id_str {
             doc! {
@@ -281,12 +268,10 @@ pub async fn passthrough_request(
         }
     });
 
-    tokio::spawn(async move {
-        let metric = Metric::passthrough(connection);
-        if let Err(e) = state.metric_tx.send(metric).await {
-            error!("Could not send metric to receiver: {e}");
-        }
-    });
+    let metric = Metric::passthrough(connection);
+    if let Err(e) = state.metric_tx.send(metric).await {
+        error!("Could not send metric to receiver: {e}");
+    }
 
     let bytes = model_execution_result.bytes().await.map_err(|e| {
         error!(
