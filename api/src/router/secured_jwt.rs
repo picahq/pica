@@ -2,7 +2,7 @@ use crate::{
     logic::{
         common_enum, common_model, connection_definition,
         connection_model_definition::{self},
-        connection_model_schema, connection_oauth_definition, event_callback, openapi, platform,
+        connection_model_schema, connection_oauth_definition, event_callback, platform,
         platform_page, secrets,
     },
     middleware::jwt_auth::{self, JwtState},
@@ -10,7 +10,7 @@ use crate::{
 };
 use axum::{
     middleware::{from_fn, from_fn_with_state},
-    routing::{get, post},
+    routing::get,
     Router,
 };
 use osentities::telemetry::log_request_middleware;
@@ -40,8 +40,7 @@ pub async fn get_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
         .nest("/event-callbacks", event_callback::get_router())
         .nest("/platform-pages", platform_page::get_router())
         .nest("/platforms", platform::get_router())
-        .route("/admin/connection/:id", get(secrets::get_admin_secret))
-        .route("/openapi", post(openapi::refresh_openapi));
+        .route("/admin/connection/:id", get(secrets::get_admin_secret));
 
     routes
         .layer(from_fn_with_state(
