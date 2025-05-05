@@ -54,7 +54,7 @@ use tracing_subscriber::{filter::LevelFilter, EnvFilter};
 use uuid::Uuid;
 
 // CONSTANTS
-pub const PUBLIC_PATHS: &[&str] = &["connection-definitions"];
+pub const PUBLIC_PATHS: &[&str] = &["connection-definitions", "openapi"];
 
 // STATICS
 pub static TRACING: OnceLock<()> = OnceLock::new();

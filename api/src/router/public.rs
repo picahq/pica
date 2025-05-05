@@ -5,7 +5,7 @@ use crate::{
         connection_definition::{self, GetPublicConnectionDetailsRequest},
         connection_model_schema, connection_oauth_definition,
         event_access::create_event_access_for_new_user,
-        read, schema_generator, tracker,
+        openapi, read, schema_generator, tracker,
     },
     middleware::jwt_auth::{self, JwtState},
     server::AppState,
@@ -70,6 +70,7 @@ pub fn get_router(state: &Arc<AppState>) -> Router<Arc<AppState>> {
             )),
         )
         .route("/generate-id/:prefix", get(helper::generate_id))
+        .route("/openapi", get(openapi::get_openapi))
         .layer(from_fn(log_request_middleware))
         .layer(TraceLayer::new_for_http())
 }
