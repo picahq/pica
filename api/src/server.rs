@@ -4,12 +4,14 @@ use crate::{
         ConnectionsConfig, K8sMode, Metric,
     },
     helper::{K8sDriver, K8sDriverImpl, K8sDriverLogger},
-    logic::{connection_oauth_definition::FrontendOauthConnectionDefinition, knowledge::Knowledge},
+    logic::{
+        connection_oauth_definition::FrontendOauthConnectionDefinition, knowledge::Knowledge,
+        openapi::OpenAPIData,
+    },
     router,
 };
 use anyhow::{anyhow, Context, Result};
 use axum::Router;
-use bson::doc;
 use cache::local::{
     ConnectionDefinitionCache, ConnectionHeaderCache, ConnectionModelDefinitionCacheIdKey,
     ConnectionModelDefinitionCacheStringKey, ConnectionOAuthDefinitionCache, EventAccessCache,
@@ -29,13 +31,8 @@ use osentities::{
     task::Task,
     user::UserClient,
     Connection, Event, GoogleKms, IOSKms, PlatformData, PublicConnection, SecretExt, Store,
-    MAX_BUFFER_SIZE, NUM_FLUSH_WORKERS,
 };
-use std::future::Future;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::time::Instant;
 use std::{sync::Arc, time::Duration};
-use tokio::sync::Semaphore;
 use tokio::{net::TcpListener, sync::mpsc::Sender, time::timeout, try_join};
 use tracing::{error, info, trace, warn};
 use unified::unified::{UnifiedCacheTTLs, UnifiedDestination};
@@ -85,6 +82,7 @@ pub struct AppState {
     pub http_client: reqwest::Client,
     pub k8s_client: Arc<dyn K8sDriver>,
     pub metric_tx: Sender<Metric>,
+    pub openapi_data: OpenAPIData,
     pub secrets_client: Arc<dyn SecretExt>,
     pub tracker_client: Arc<dyn Track<TrackedMetric>>,
     pub template: DefaultTemplate,
@@ -211,25 +209,119 @@ impl Server {
             config.connection_model_definition_cache_ttl_secs,
         );
 
+        let openapi_data = OpenAPIData::default();
+        openapi_data.spawn_openapi_generation(
+            app_stores.common_model.clone(),
+            app_stores.common_enum.clone(),
+        );
+
         let k8s_client: Arc<dyn K8sDriver> = match config.k8s_mode {
             K8sMode::Real => Arc::new(K8sDriverImpl::new().await?),
             K8sMode::Logger => Arc::new(K8sDriverLogger),
         };
 
         // Create Event buffer in separate thread and batch saves
-        let (event_tx, receiver) =
+        let events = db.collection::<Event>(&Store::Events.to_string());
+        let (event_tx, mut receiver) =
             tokio::sync::mpsc::channel::<Event>(config.event_save_buffer_size);
-        start_event_collector(db.clone(), config.clone(), event_tx.clone(), receiver);
+        tokio::spawn(async move {
+            let mut buffer = Vec::with_capacity(config.event_save_buffer_size);
+            loop {
+                let res = timeout(
+                    Duration::from_secs(config.event_save_timeout_secs),
+                    receiver.recv(),
+                )
+                .await;
+                let is_timeout = if let Ok(Some(event)) = res {
+                    buffer.push(event);
+                    false
+                } else if let Ok(None) = res {
+                    break;
+                } else {
+                    trace!("Event receiver timed out waiting for new event");
+                    true
+                };
+                // Save when buffer is full or timeout elapsed
+                if buffer.len() == config.event_save_buffer_size
+                    || (is_timeout && !buffer.is_empty())
+                {
+                    trace!("Saving {} events", buffer.len());
+                    let to_save = std::mem::replace(
+                        &mut buffer,
+                        Vec::with_capacity(config.event_save_buffer_size),
+                    );
+                    let events = events.clone();
+                    tokio::spawn(async move {
+                        if let Err(e) = events.insert_many(to_save).await {
+                            error!("Could not save buffer of events: {e}");
+                        }
+                    });
+                }
+            }
+        });
 
-        let (metric_tx, receiver) =
+        // Update metrics in separate thread
+        let template = DefaultTemplate::default();
+
+        let metrics = db.collection::<Metric>(&Store::Metrics.to_string());
+        let (metric_tx, mut receiver) =
             tokio::sync::mpsc::channel::<Metric>(config.metric_save_channel_size);
-        start_metric_collector(
-            db.clone(),
-            config.clone(),
-            tracker_client.clone(),
-            metric_tx.clone(),
-            receiver,
-        );
+        let metric_system_id = config.metric_system_id.clone();
+        let cloned_tracker_client = tracker_client.clone();
+        tokio::spawn(async move {
+            let options = UpdateOptions::builder().upsert(true).build();
+            let mut event_buffer = vec![];
+
+            loop {
+                let res = timeout(
+                    Duration::from_secs(config.event_save_timeout_secs),
+                    receiver.recv(),
+                )
+                .await;
+                if let Ok(Some(metric)) = res {
+                    let doc = metric.update_doc();
+                    let client = metrics
+                        .update_one(
+                            bson::doc! {
+                                "clientId": &metric.ownership().client_id,
+                            },
+                            doc.clone(),
+                        )
+                        .with_options(options.clone());
+                    let system = metrics
+                        .update_one(
+                            bson::doc! {
+                                "clientId": metric_system_id.as_str(),
+                            },
+                            doc,
+                        )
+                        .with_options(options.clone());
+                    if let Err(e) = try_join!(client, system) {
+                        error!("Could not upsert metric: {e}");
+                    } else {
+                        trace!("Metric upserted successfully");
+                    }
+
+                    if metric.is_passthrough() {
+                        continue;
+                    }
+                    event_buffer.push(metric);
+                } else if let Ok(None) = res {
+                    break;
+                } else {
+                    trace!("Event receiver timed out waiting for new event");
+                    if let Err(e) = cloned_tracker_client
+                        .track_many_metrics(&event_buffer)
+                        .await
+                    {
+                        warn!("Could not track metrics: {e}");
+                    } else {
+                        trace!("Tracked {} metrics", event_buffer.len());
+                    }
+                    event_buffer.clear();
+                }
+            }
+        });
 
         let app_caches = AppCaches {
             connection_definitions_cache,
@@ -244,15 +336,16 @@ impl Server {
             state: Arc::new(AppState {
                 app_stores,
                 app_caches,
+                config,
                 event_tx,
                 extractor_caller,
                 http_client,
                 k8s_client,
                 metric_tx,
+                openapi_data,
                 secrets_client,
                 tracker_client,
-                template: DefaultTemplate::default(),
-                config,
+                template,
             }),
         })
     }
@@ -269,304 +362,5 @@ impl Server {
         axum::serve(tcp_listener, app.into_make_service())
             .await
             .map_err(|e| anyhow!("Server error: {}", e))
-    }
-}
-
-pub fn start_metric_collector(
-    db: Database,
-    config: ConnectionsConfig,
-    tracker_client: Arc<dyn Track<TrackedMetric>>,
-    metric_tx: Sender<Metric>,
-    mut receiver: tokio::sync::mpsc::Receiver<Metric>,
-) -> Sender<Metric> {
-    let metrics = db.collection::<Metric>(&Store::Metrics.to_string());
-    let metric_system_id = config.metric_system_id.clone();
-    let cloned_tracker_client = tracker_client.clone();
-
-    tokio::spawn(async move {
-        let options = UpdateOptions::builder().upsert(true).build();
-        let mut event_buffer = Vec::new();
-
-        let mut flush_interval =
-            tokio::time::interval(Duration::from_secs(config.event_save_timeout_secs));
-
-        loop {
-            tokio::select! {
-                biased;
-
-                // Prioritize flushing over receiving if both are ready
-                _ = flush_interval.tick() => {
-                    flush_buffer(&cloned_tracker_client, &mut event_buffer).await;
-                }
-
-                recv_result = receiver.recv() => {
-                    match recv_result {
-                        Some(metric) => {
-                            let doc = metric.update_doc();
-                            let client = metrics
-                                .update_one(
-                                    doc! { "clientId": &metric.ownership().client_id },
-                                    doc.clone(),
-                                )
-                                .with_options(options.clone());
-                            let system = metrics
-                                .update_one(doc! { "clientId": metric_system_id.as_str() }, doc)
-                                .with_options(options.clone());
-
-                            if let Err(e) = try_join!(client, system) {
-                                error!("Could not upsert metric: {e}");
-                            } else {
-                                trace!("Metric upserted successfully");
-                            }
-
-                            if !metric.is_passthrough() {
-                                event_buffer.push(metric);
-                                if event_buffer.len() >= MAX_BUFFER_SIZE {
-                                    flush_buffer(&cloned_tracker_client, &mut event_buffer).await;
-                                }
-                            }
-                        }
-                        None => {
-                            // Channel closed, break loop and flush the remaining buffer
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        flush_buffer(&cloned_tracker_client, &mut event_buffer).await;
-    });
-
-    metric_tx
-}
-
-async fn flush_buffer(
-    tracker_client: &Arc<dyn Track<TrackedMetric>>,
-    event_buffer: &mut Vec<Metric>,
-) {
-    if event_buffer.is_empty() {
-        return;
-    }
-
-    match tracker_client.track_many_metrics(event_buffer).await {
-        Ok(_) => {
-            trace!("Tracked {} metrics", event_buffer.len());
-        }
-        Err(e) => {
-            warn!("Could not track metrics: {e}");
-        }
-    }
-    event_buffer.clear();
-}
-
-pub fn start_event_collector(
-    db: Database,
-    config: ConnectionsConfig,
-    event_tx: Sender<Event>,
-    mut receiver: tokio::sync::mpsc::Receiver<Event>,
-) -> Sender<Event> {
-    let events = db.collection::<Event>(&Store::Events.to_string());
-
-    let buffer_size = config.event_save_buffer_size * NUM_FLUSH_WORKERS * 2;
-    let (flush_tx, mut flush_rx) = tokio::sync::mpsc::channel::<Vec<Event>>(buffer_size);
-
-    let worker_semaphore = Arc::new(Semaphore::new(NUM_FLUSH_WORKERS));
-
-    let events_processed = Arc::new(AtomicUsize::new(0));
-    let events_failed = Arc::new(AtomicUsize::new(0));
-
-    let events_clone = events.clone();
-    let worker_sem_clone = worker_semaphore.clone();
-    let processed_counter = events_processed.clone();
-    let failed_counter = events_failed.clone();
-
-    tokio::spawn(async move {
-        while let Some(batch) = flush_rx.recv().await {
-            let batch_size = batch.len();
-            trace!("Processing batch of {} events", batch_size);
-
-            let permit = match timeout(
-                Duration::from_secs(5),
-                worker_sem_clone.clone().acquire_owned(),
-            )
-            .await
-            {
-                Ok(Ok(p)) => p,
-                Ok(Err(_)) => {
-                    error!("Semaphore closed unexpectedly");
-                    break;
-                }
-                Err(_) => {
-                    error!("Timed out waiting for worker availability, system may be overloaded");
-                    // Implement exponential backoff or circuit breaking here if needed
-                    continue;
-                }
-            };
-
-            let events = events_clone.clone();
-            let processed = processed_counter.clone();
-            let failed = failed_counter.clone();
-
-            tokio::spawn(async move {
-                let start = Instant::now();
-                trace!("Inserting {} events", batch_size);
-
-                let result = retry_with_backoff(3, Duration::from_millis(50), || async {
-                    events.insert_many(batch.clone()).await
-                })
-                .await;
-
-                match result {
-                    Ok(_) => {
-                        let elapsed = start.elapsed();
-                        processed.fetch_add(batch_size, Ordering::Relaxed);
-                        if elapsed > Duration::from_millis(500) {
-                            warn!(
-                                "Slow event insertion: {} events took {:?}",
-                                batch_size, elapsed
-                            );
-                        }
-                        trace!(
-                            "Successfully inserted {} events in {:?}",
-                            batch_size,
-                            elapsed
-                        );
-                    }
-                    Err(e) => {
-                        failed.fetch_add(batch_size, Ordering::Relaxed);
-                        error!("Failed to insert events after retries: {e}");
-                        // Consider logging to a dead letter queue here
-                    }
-                }
-
-                drop(permit); // Explicitly release the permit
-            });
-        }
-    });
-
-    tokio::spawn({
-        let flush_sender = flush_tx.clone();
-        let processed_counter = events_processed.clone();
-
-        async move {
-            let mut buffer = Vec::with_capacity(config.event_save_buffer_size);
-            let mut consecutive_timeouts = 0;
-
-            let stats_interval = Duration::from_secs(60);
-            let mut last_stats_report = Instant::now();
-
-            loop {
-                let res = timeout(
-                    Duration::from_secs(config.event_save_timeout_secs),
-                    receiver.recv(),
-                )
-                .await;
-
-                let is_timeout = if let Ok(Some(event)) = res {
-                    buffer.push(event);
-                    consecutive_timeouts = 0;
-                    false
-                } else if let Ok(None) = res {
-                    info!("Event channel closed, shutting down collector");
-                    break;
-                } else {
-                    trace!("Event receiver timed out");
-                    consecutive_timeouts += 1;
-                    true
-                };
-
-                if last_stats_report.elapsed() >= stats_interval {
-                    let processed = processed_counter.load(Ordering::Relaxed);
-                    info!(
-                        "Event collector stats: processed {} events in the last minute",
-                        processed
-                    );
-                    processed_counter.store(0, Ordering::Relaxed);
-                    last_stats_report = Instant::now();
-                }
-
-                if buffer.len() >= config.event_save_buffer_size
-                    || (is_timeout && !buffer.is_empty())
-                {
-                    trace!("Flushing {} events", buffer.len());
-                    let to_send = std::mem::replace(
-                        &mut buffer,
-                        Vec::with_capacity(config.event_save_buffer_size),
-                    );
-
-                    match timeout(Duration::from_secs(5), flush_sender.send(to_send.clone())).await
-                    {
-                        Ok(Ok(_)) => {
-                            // Sent successfully
-                        }
-                        Ok(Err(e)) => {
-                            error!("Failed to send buffer: {e}");
-
-                            // Try to recover the events - either by merging back or handling specially
-                            if !to_send.is_empty() {
-                                warn!(
-                                    "Attempting to rescue {} events after send failure",
-                                    to_send.len()
-                                );
-                            }
-                            break;
-                        }
-                        Err(_) => {
-                            error!("Timed out trying to send event batch - workers may be blocked");
-                            // Implement a circuit breaker pattern here if needed
-                            break;
-                        }
-                    }
-                }
-
-                if consecutive_timeouts > 10 && buffer.is_empty() {
-                    info!("No events received for extended period, considering idle shutdown");
-                }
-            }
-
-            if !buffer.is_empty() {
-                info!("Final flush of {} events before shutdown", buffer.len());
-                if let Err(e) = flush_sender.send(buffer).await {
-                    error!("Failed to send final buffer during shutdown: {e}");
-                }
-            }
-        }
-    });
-
-    event_tx
-}
-
-async fn retry_with_backoff<F, Fut, T, E>(
-    max_retries: u32,
-    initial_backoff: Duration,
-    operation: F,
-) -> Result<T, E>
-where
-    F: Fn() -> Fut,
-    Fut: Future<Output = Result<T, E>>,
-    E: std::fmt::Display,
-{
-    let mut retries = 0;
-    let mut backoff = initial_backoff;
-
-    loop {
-        match operation().await {
-            Ok(value) => return Ok(value),
-            Err(err) => {
-                retries += 1;
-                if retries >= max_retries {
-                    return Err(err);
-                }
-
-                warn!(
-                    "Operation failed (attempt {}/{}): {}. Retrying in {:?}",
-                    retries, max_retries, err, backoff
-                );
-
-                tokio::time::sleep(backoff).await;
-                backoff *= 2; // Exponential backoff
-            }
-        }
     }
 }

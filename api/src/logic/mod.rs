@@ -34,6 +34,7 @@ pub mod events;
 pub mod knowledge;
 pub mod metrics;
 pub mod oauth;
+pub mod openapi;
 pub mod passthrough;
 pub mod platform;
 pub mod platform_page;
