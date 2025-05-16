@@ -32,7 +32,7 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
 
         return {
             accessToken,
-            refreshToken: '',
+            refreshToken: accessToken,
             expiresIn: 2147483647,
             tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
             meta: {},
