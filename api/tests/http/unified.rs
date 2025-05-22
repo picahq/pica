@@ -449,7 +449,7 @@ async fn test_unified_metrics() {
 
     let res = server
         .send_request::<(), MetricResponse>(
-            format!("v1/metrics/{}", connection.ownership.client_id).as_str(),
+            format!("v1/metrics/{}", connection.ownership.id).as_str(),
             Method::GET,
             Some(&server.live_key),
             None,
@@ -468,11 +468,7 @@ async fn test_unified_metrics() {
 
     let res = server
         .send_request::<(), MetricResponse>(
-            format!(
-                "v1/metrics/{}?day={daily_key}",
-                connection.ownership.client_id
-            )
-            .as_str(),
+            format!("v1/metrics/{}?day={daily_key}", connection.ownership.id).as_str(),
             Method::GET,
             Some(&server.live_key),
             None,
@@ -486,7 +482,7 @@ async fn test_unified_metrics() {
         .send_request::<(), MetricResponse>(
             format!(
                 "v1/metrics/{}?month={monthly_key}&apiType=unified",
-                connection.ownership.client_id
+                connection.ownership.id
             )
             .as_str(),
             Method::GET,

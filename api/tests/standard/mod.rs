@@ -201,7 +201,7 @@ fn test_json_connection() {
         error: None,
         ownership: Ownership {
             id: "owner-id".to_string().into(),
-            client_id: "client-id".to_string(),
+            client_id: Some("client-id".to_string()),
             organization_id: Some("organization-id".to_string()),
             project_id: Some("project-id".to_string()),
             user_id: Some("user-id".to_string()),
