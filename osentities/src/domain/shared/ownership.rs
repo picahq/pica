@@ -9,7 +9,7 @@ pub struct Ownership {
     #[serde(rename = "buildableId")]
     #[cfg_attr(feature = "dummy", dummy(expr = "String::new().into()"))]
     pub id: Arc<str>,
-    pub client_id: String,
+    pub client_id: Option<String>,
     pub organization_id: Option<String>,
     pub project_id: Option<String>,
     pub user_id: Option<String>,
@@ -47,7 +47,7 @@ impl Ownership {
     pub fn new(id: String) -> Ownership {
         Self {
             id: id.clone().into(),
-            client_id: id.clone(),
+            client_id: Some(id.clone()),
             ..Default::default()
         }
     }

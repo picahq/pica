@@ -115,7 +115,7 @@ impl Event {
         let buildable_id = access_key_data.id.to_owned();
         let ownership = Ownership {
             id: buildable_id.clone().into(),
-            client_id: buildable_id.to_owned(),
+            client_id: Some(buildable_id.to_owned()),
             organization_id: Some(buildable_id.to_owned()),
             project_id: Some(buildable_id.to_owned()),
             user_id: Some(buildable_id),
