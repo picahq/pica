@@ -450,7 +450,10 @@ pub async fn get_available_connectors(
                 "ownership.buildableId": user_event_access.ownership.id.to_string(),
             })
             .await
-            .unwrap();
+            .map_err(|e| {
+                error!("Error reading from settings: {e}");
+                e
+            })?;
 
         if let Some(settings) = settings {
             // Get platforms that are active and match the user's environment
