@@ -27,15 +27,12 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             data: qs.stringify(requestBody),
         });
 
-        const {
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            token_type: tokenType,
-        } = response.data;
+        const { access_token: accessToken, token_type: tokenType } =
+            response.data;
 
         return {
             accessToken,
-            refreshToken,
+            refreshToken: accessToken,
             expiresIn: 2147483647,
             tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
             meta: {},
