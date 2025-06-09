@@ -14,6 +14,6 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
             meta,
         };
     } catch (error) {
-        throw new Error(`Error fetching refresh token for Zendesk: ${error}`);
+        throw new Error(`Error fetching access token for Todoist: ${error}`);
     }
 };
