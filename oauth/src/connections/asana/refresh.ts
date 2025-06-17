@@ -32,14 +32,13 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
 
         const {
             access_token: accessToken,
-            refresh_token: refreshToken,
             token_type: tokenType,
             expires_in: expiresIn,
         } = response.data;
 
         return {
             accessToken,
-            refreshToken,
+            refreshToken: refresh_token,
             expiresIn,
             tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
             meta,
