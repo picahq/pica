@@ -23,6 +23,8 @@ pub struct Knowledge {
     pub path: String,
     pub knowledge: Option<String>,
     pub base_url: String,
+    #[serde(with = "http_serde_ext_ios::method", alias = "action")]
+    pub method: http::Method,
     #[serde(flatten)]
     pub metadata: RecordMetadata,
 }
