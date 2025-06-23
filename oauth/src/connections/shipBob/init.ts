@@ -40,6 +40,21 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             expires_in: expiresIn,
         } = response.data;
 
+        const baseUrl =
+            environment === 'test'
+                ? 'https://sandbox-api.shipbob.com/2.0/'
+                : 'https://api.shipbob.com/2.0/';
+
+        const channelResponse = await axios({
+            url: `${baseUrl}channel`,
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Accept: 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+
         return {
             accessToken,
             refreshToken,
@@ -47,6 +62,8 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             tokenType: tokenType === 'bearer' ? 'Bearer' : tokenType,
             meta: {
                 environment,
+                baseUrl,
+                channelId: channelResponse.data[0].id,
             },
         };
     } catch (error) {
