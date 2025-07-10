@@ -26,7 +26,7 @@ export const refresh = async ({ body }: DataObject): Promise<OAuthResponse> => {
             },
         } = response;
 
-        // Update refresh token if a new token is allocated
+        // Update the refresh token if a new token is allocated
         if (response.data.refresh_token) {
             refreshToken = response.data.refresh_token;
         }
