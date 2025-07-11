@@ -40,6 +40,16 @@ export const init = async ({ body }: DataObject): Promise<OAuthResponse> => {
             organization_uid: organizationUid,
         } = response.data;
 
+        await axios({
+            url: 'https://api.contentstack.io/v3/stacks/settings',
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+                api_key: CONTENTSTACK_CONTENT_MANAGEMENT_STACK_API_KEY,
+            },
+        });
+
         return {
             accessToken,
             refreshToken,
